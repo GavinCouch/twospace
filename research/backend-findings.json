@@ -1,0 +1,36 @@
+{
+  "project": "TwoSpace",
+  "recordedBy": "Coding assistant",
+  "notes": "These are actual defects found while implementing and testing the application. They were not deliberately introduced. The fixes and tests were performed by the coding assistant; the developer can review and reproduce them before discussing them in an interview.",
+  "findings": [
+    {
+      "id": "partial-plan-defaults",
+      "title": "A checklist update discarded the other partner's items",
+      "foundBy": "An integration test using two separately authenticated accounts",
+      "symptom": "Alex added Check flour and Jamie added Find the pan. Only Find the pan remained.",
+      "cause": "The PATCH schema was derived from the create schema with partial(). In Zod 4, defaults inside optional properties still applied. An omitted checklist became an empty array, and omitted notes and link fields could also be cleared.",
+      "fix": "Remove creation defaults from the update schema. Apply checklist add, toggle, and remove actions to the stored list inside the database transaction.",
+      "regressionTest": "tests/server/api.test.ts: retains both partners' checklist additions",
+      "relatedFiles": ["src/server/plans.ts", "tests/server/api.test.ts"],
+      "verification": "The initial suite passed 8 of 9 tests; the checklist regression passed after the fix.",
+      "learningExercise": "Reproduce the failure by restoring the create defaults in a throwaway branch, run the checklist test, and explain why a partial form schema is not automatically a safe PATCH schema."
+    },
+    {
+      "id": "demo-activity-id-collision",
+      "title": "Opening a second demo failed on a saved activity ID",
+      "foundBy": "An integration test that opens two independent demo spaces and attempts to switch between their profiles",
+      "symptom": "The second demo failed with UNIQUE constraint failed: resources.id.",
+      "cause": "Curated activities have stable IDs shared by the activity library. The database used a globally unique resource ID, although each space needs its own saved state for the same activity.",
+      "fix": "Use the composite primary key (space_id, id) for resources and migrate existing rows without losing data. Resource reads and writes remain scoped to the authenticated space.",
+      "regressionTest": "tests/server/api.test.ts: switches only between the two profiles in the current demo",
+      "relatedFiles": ["src/server/database.ts", "src/server/seed.ts", "tests/server/api.test.ts"],
+      "verification": "The expanded suite initially passed 11 of 12 tests; all 12 passed after the key change.",
+      "learningExercise": "Explain the difference between a globally unique entity ID and a library item's identity within a space. Walk through why a different visitor's demo must never share saved activity state."
+    }
+  ],
+  "lastVerification": {
+    "commands": ["npx vitest run tests/server/api.test.ts", "npx tsc --noEmit"],
+    "result": "12 backend integration tests passed; TypeScript passed.",
+    "scope": "Real local Better Auth sessions, SQLite transactions, Sharp photo processing, private attachment access, hidden answers, game revisions, drawing turns, invitation races, plan agreement, and separate demo spaces. External OAuth providers, email delivery, and cloud persistence were not configured or tested at this point."
+  }
+}
