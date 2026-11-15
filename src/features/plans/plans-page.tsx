@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Plus, CalendarDays } from "lucide-react";
 import { useSpace } from "@/components/space-provider";
@@ -38,7 +38,6 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
       <header className="page-title">
         <div>
           <h1>Plans</h1>
-          <p>Something to look forward to, wherever you are.</p>
         </div>
         <button
           className="button"
@@ -157,12 +156,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
         </aside>
       </div>
       {form && (
-        <div className="plan-form-overlay">
-          <div
-            className="plan-form-container panel"
-            role="region"
-            aria-label={editing ? "Edit plan" : "New plan"}
-          >
+        <PlanDialog title={editing ? "Edit plan" : "New plan"} onClose={close}>
             <PlanForm
               key={`${editing?.id || "new"}-${params.get("title") || ""}-${suggestedTime || ""}`}
               members={space.members}
@@ -177,15 +171,30 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
               }
               onClose={close}
             />
-          </div>
-          <button
-            type="button"
-            className="plan-overlay-close"
-            onClick={close}
-            aria-label="Close plan form"
-          />
-        </div>
+        </PlanDialog>
       )}
     </div>
   );
+}
+
+function PlanDialog({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = dialog.current;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    element?.showModal();
+    return () => {
+      element?.close();
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, []);
+  return <dialog ref={dialog} className="plan-form-container panel" aria-label={title}
+    onCancel={event => { event.preventDefault(); onClose(); }}
+    onClick={event => {
+      if (event.target !== event.currentTarget) return;
+      const bounds = event.currentTarget.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) onClose();
+    }}>
+    {children}
+  </dialog>;
 }
