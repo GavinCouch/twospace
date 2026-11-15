@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom/vitest";
@@ -45,12 +51,18 @@ describe("dedicated account pages", () => {
       }),
     );
     const user = mount("sign-up");
-    await user.type(await screen.findByLabelText("Your name"), "Alex");
+    await user.type(await screen.findByLabelText("First name"), "Alex");
+    await user.type(screen.getByLabelText("Last name"), "Rivera");
+    fireEvent.change(screen.getByLabelText("Birthday"), {
+      target: { value: "2000-02-29" },
+    });
     await user.type(screen.getByLabelText("Email"), "alex@example.test");
     await user.type(screen.getByLabelText("Password"), "long-test-password");
-    await user.click(
-      screen.getByRole("button", { name: /^Create account$/ }),
+    await user.type(
+      screen.getByLabelText("Confirm password"),
+      "long-test-password",
     );
+    await user.click(screen.getByRole("button", { name: /^Create account$/ }));
     expect(
       await screen.findByRole("heading", { name: "Check your email" }),
     ).toBeInTheDocument();
@@ -81,11 +93,11 @@ describe("dedicated account pages", () => {
     vi.stubGlobal("fetch", fetchMock);
     const user = mount("sign-in");
     await user.type(await screen.findByLabelText("Email"), "alex@example.test");
-    expect(screen.queryByLabelText("Your name")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("First name")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Birthday")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Confirm password")).not.toBeInTheDocument();
     await user.type(screen.getByLabelText("Password"), "long-test-password");
-    await user.click(
-      screen.getByRole("button", { name: /^Sign in$/ }),
-    );
+    await user.click(screen.getByRole("button", { name: /^Sign in$/ }));
     await waitFor(() =>
       expect(navigation.replace).toHaveBeenCalledWith("/journal"),
     );
@@ -110,9 +122,7 @@ describe("dedicated account pages", () => {
     const user = mount("sign-in");
     await user.type(await screen.findByLabelText("Email"), "alex@example.test");
     await user.type(screen.getByLabelText("Password"), "long-test-password");
-    await user.click(
-      screen.getByRole("button", { name: /^Sign in$/ }),
-    );
+    await user.click(screen.getByRole("button", { name: /^Sign in$/ }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Invalid email or password.",
     );

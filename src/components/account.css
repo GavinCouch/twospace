@@ -57,6 +57,78 @@
   border-radius: 9px;
   font-size: 0.86rem;
 }
+.welcome-form .field select {
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 9px;
+  font-size: 0.86rem;
+  color: var(--ink);
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.auth-name-fields,
+.auth-profile-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+.auth-name-fields > .field,
+.auth-profile-fields > .field {
+  min-width: 0;
+}
+.auth-optional {
+  font-weight: 400;
+  color: var(--muted);
+}
+.auth-password-strength {
+  margin-top: -8px;
+  color: var(--muted);
+  font-size: 0.71rem;
+  line-height: 1.6;
+}
+.auth-password-strength p {
+  margin: 0;
+}
+.auth-strength-bars {
+  display: flex;
+  gap: 5px;
+  margin: 10px 0 7px;
+}
+.auth-strength-bars > span {
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--line);
+}
+.auth-strength-bars > span[data-filled="true"] {
+  background: #c98692;
+}
+.auth-strength-bars[data-score="2"] > span[data-filled="true"] {
+  background: #c7ab80;
+}
+.auth-strength-bars[data-score="3"] > span[data-filled="true"],
+.auth-strength-bars[data-score="4"] > span[data-filled="true"] {
+  background: #a8c2b3;
+}
+.auth-password-strength .auth-password-advice {
+  margin-top: 4px;
+}
+.welcome-form .field .auth-password-match {
+  color: #a8c2b3;
+}
 .auth-toggle {
   display: flex;
   margin: 12px auto 6px;
@@ -164,7 +236,8 @@
   .pairing-page {
     margin: 15px auto;
   }
-  .welcome-form .field input {
+  .welcome-form .field input,
+  .welcome-form .field select {
     font-size: 16px;
   }
 }
@@ -198,6 +271,9 @@
   max-width: 440px;
   margin: 70px auto;
 }
+.welcome-layout-signup {
+  max-width: 580px;
+}
 .welcome-form {
   padding: 32px;
 }
@@ -218,6 +294,12 @@
 }
 .welcome header > a {
   text-decoration: none;
+}
+@media (max-width: 480px) {
+  .auth-name-fields,
+  .auth-profile-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 @media (max-width: 380px) {
   .welcome header {

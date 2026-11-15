@@ -213,6 +213,56 @@ describe.skipIf(!enabled)(
         ).entries,
       ).toHaveLength(0);
     });
+    it("stores optional signup details as nullable values in the private auth schema", async () => {
+      const fields = await admin.query(
+        `SELECT column_name, is_nullable, data_type FROM information_schema.columns
+         WHERE table_schema='twospace' AND table_name='user'
+         AND column_name IN ('firstName', 'lastName', 'gender', 'birthday')`,
+      );
+      expect(fields.rows).toHaveLength(4);
+      for (const field of fields.rows) {
+        expect(field.is_nullable).toBe("YES");
+        expect(field.data_type).toBe("text");
+      }
+      const created = await authModule.auth.api.signUpEmail({
+        body: {
+          email: "signup-details@example.test",
+          name: "Alex Rivera",
+          firstName: " Alex ",
+          lastName: "Rivera",
+          gender: "prefer-not-to-say",
+          birthday: "2000-02-29",
+          password: randomBytes(30).toString("base64url"),
+        },
+      });
+      expect(created.token).toBeNull();
+      expect(
+        (
+          await admin.query(
+            'SELECT "firstName", "lastName", "gender", "birthday" FROM twospace."user" WHERE id=$1',
+            [created.user.id],
+          )
+        ).rows[0],
+      ).toEqual({
+        firstName: "Alex",
+        lastName: "Rivera",
+        gender: "prefer-not-to-say",
+        birthday: "2000-02-29",
+      });
+      expect(
+        (
+          await admin.query(
+            'SELECT "firstName", "lastName", "gender", "birthday" FROM twospace."user" WHERE id=$1',
+            [alex.id],
+          )
+        ).rows[0],
+      ).toEqual({
+        firstName: null,
+        lastName: null,
+        gender: null,
+        birthday: null,
+      });
+    });
     it("accepts only one concurrent move at a board revision", async () => {
       const game = await activities.createGame(
         request(alex.cookie, { kind: "four" }),

@@ -29,17 +29,16 @@ function HomeBrand() {
   );
 }
 
-function PreviewPerson({
-  name,
-  ivory = false,
-}: {
-  name: string;
-  ivory?: boolean;
-}) {
+const previewProfiles = {
+  Theo: "/artwork/home/theo.webp",
+  Maya: "/artwork/home/maya.webp",
+} as const;
+
+function PreviewPerson({ name }: { name: keyof typeof previewProfiles }) {
   return (
     <span className="home-preview-person">
       <Image
-        src={`/artwork/avatar-${ivory ? "ivory" : "rose"}.png`}
+        src={previewProfiles[name]}
         width={28}
         height={28}
         sizes="28px"
@@ -70,7 +69,7 @@ function JournalPreview() {
           <div className="home-preview-space">
             <div>
               <span>Your shared space</span>
-              <h2>Alex &amp; Jamie</h2>
+              <h2>Theo &amp; Maya</h2>
             </div>
             <div className="home-preview-times">
               <span>
@@ -83,7 +82,7 @@ function JournalPreview() {
           </div>
           <div className="home-preview-feed">
             <div className="home-preview-note">
-              <PreviewPerson name="Jamie" />
+              <PreviewPerson name="Maya" />
               <h3>For when you wake up</h3>
               <p>
                 Tell me how the interview goes. I’m making the same coffee as
@@ -105,7 +104,7 @@ function JournalPreview() {
                 alt="Illustration of two rooms, one in daylight and one at night"
               />
               <div>
-                <PreviewPerson name="Alex" ivory />
+                <PreviewPerson name="Theo" />
                 <p>Our two sides of the day.</p>
               </div>
             </div>
@@ -114,7 +113,7 @@ function JournalPreview() {
             <SectionArt name="plans" size={29} />
             <span>
               <strong>Coffee and a call</strong>
-              <small>Sunday · 9 am for Alex, 3 pm for Jamie</small>
+              <small>Sunday · 9 am for Theo, 3 pm for Maya</small>
             </span>
             <ArrowUpRight size={16} aria-hidden="true" />
           </div>
@@ -243,7 +242,7 @@ export default function HomePage() {
               </p>
             </div>
             <div className="home-voice">
-              <PreviewPerson name="Alex" ivory />
+              <PreviewPerson name="Theo" />
               <span className="home-voice-caption">
                 A voice note for your evening
               </span>
@@ -334,7 +333,7 @@ export default function HomePage() {
             <figure className="home-game-preview">
               <div className="home-game-heading">
                 <span>Four in a row</span>
-                <span>Alex’s turn</span>
+                <span>Theo’s turn</span>
               </div>
               <FourPreview />
               <figcaption>Product preview · example game</figcaption>
@@ -409,12 +408,12 @@ export default function HomePage() {
             </div>
             <div className="home-plan-times">
               <div>
-                <PreviewPerson name="Alex" ivory />
+                <PreviewPerson name="Theo" />
                 <strong>9:00 am</strong>
                 <span>Sunday · Chicago</span>
               </div>
               <div>
-                <PreviewPerson name="Jamie" />
+                <PreviewPerson name="Maya" />
                 <strong>3:00 pm</strong>
                 <span>Sunday · London</span>
               </div>

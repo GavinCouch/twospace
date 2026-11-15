@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom/vitest";
@@ -15,13 +21,13 @@ const config: AuthConfig = {
 };
 const unauthorized = () =>
   Response.json({ message: "Sign in first." }, { status: 401 });
-function renderGate() {
+function renderGate(mode: "sign-in" | "sign-up" = "sign-in") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   });
   render(
     <QueryClientProvider client={client}>
-      <AccountGate>
+      <AccountGate signInMode={mode}>
         <p>Your journal</p>
       </AccountGate>
     </QueryClientProvider>,
@@ -31,6 +37,13 @@ function renderGate() {
 async function enterCredentials(user: ReturnType<typeof userEvent.setup>) {
   await user.type(await screen.findByLabelText("Email"), "alex@example.com");
   await user.type(screen.getByLabelText("Password"), "a-long-password");
+}
+async function enterProfile(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(await screen.findByLabelText("First name"), "Alex");
+  await user.type(screen.getByLabelText("Last name"), "Rivera");
+  fireEvent.change(screen.getByLabelText("Birthday"), {
+    target: { value: "2000-02-29" },
+  });
 }
 afterEach(() => {
   cleanup();
@@ -54,6 +67,7 @@ describe("account sign-in integration", () => {
       "Loading sign-in options",
     );
     expect(screen.queryByLabelText("Email")).not.toBeInTheDocument();
+    expect(screen.queryByText("or", { exact: true })).not.toBeInTheDocument();
     resolveConfig(
       Response.json({
         ...config,
@@ -104,7 +118,7 @@ describe("account sign-in integration", () => {
   });
 
   it("confirms successful signup when verification leaves the account signed out", async () => {
-    const fetchMock = vi.fn(async (path: string) => {
+    const fetchMock = vi.fn(async (path: string, _init?: RequestInit) => {
       if (path === "/api/auth/config") return Response.json(config);
       if (path === "/api/auth/sign-up/email")
         return Response.json({ user: { id: "alex" }, token: null });
@@ -118,8 +132,12 @@ describe("account sign-in integration", () => {
     expect(
       screen.getByText("You’ll need to verify your email."),
     ).toBeInTheDocument();
-    await user.type(screen.getByLabelText("Your name"), "Alex");
+    await enterProfile(user);
     await enterCredentials(user);
+    await user.type(
+      screen.getByLabelText("Confirm password"),
+      "a-long-password",
+    );
     await user.click(screen.getByRole("button", { name: "Create account" }));
     expect(await screen.findByRole("status")).toHaveTextContent(
       "Check your email to finish signing up.",
@@ -133,6 +151,17 @@ describe("account sign-in integration", () => {
       ([path]) => path === "/api/auth/sign-up/email",
     );
     expect(signup).toBeDefined();
+    expect(JSON.parse(String(signup?.[1]?.body))).toEqual({
+      name: "Alex Rivera",
+      firstName: "Alex",
+      lastName: "Rivera",
+      birthday: "2000-02-29",
+      email: "alex@example.com",
+      password: "a-long-password",
+    });
+    expect(
+      fetchMock.mock.calls.every(([path]) => path.startsWith("/api/")),
+    ).toBe(true);
     await user.click(screen.getByRole("button", { name: "Back to sign in" }));
     expect(screen.getByLabelText("Password")).toHaveValue("");
     expect(screen.getByLabelText("Email")).toHaveValue("alex@example.com");
@@ -167,8 +196,12 @@ describe("account sign-in integration", () => {
     expect(
       screen.queryByText("You’ll need to verify your email."),
     ).not.toBeInTheDocument();
-    await user.type(screen.getByLabelText("Your name"), "Alex");
+    await enterProfile(user);
     await enterCredentials(user);
+    await user.type(
+      screen.getByLabelText("Confirm password"),
+      "a-long-password",
+    );
     await user.click(screen.getByRole("button", { name: "Create account" }));
     expect(
       await screen.findByRole("heading", { name: "Hi, Alex." }),
@@ -176,6 +209,90 @@ describe("account sign-in integration", () => {
     expect(
       screen.queryByText("Check your email to finish signing up."),
     ).not.toBeInTheDocument();
+  });
+
+  it("places an or divider between Google and the email form only when both are available", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (path: string) =>
+        path === "/api/auth/config"
+          ? Response.json({ ...config, google: true })
+          : unauthorized(),
+      ),
+    );
+    renderGate();
+    const google = await screen.findByRole("button", {
+      name: "Continue with Google",
+    });
+    const divider = screen.getByText("or", { exact: true });
+    const email = screen.getByLabelText("Email");
+    expect(
+      google.compareDocumentPosition(divider) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      divider.compareDocumentPosition(email) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it("blocks mismatched passwords, then clears live feedback when they match and sends optional gender", async () => {
+    const fetchMock = vi.fn(async (path: string, _init?: RequestInit) => {
+      if (path === "/api/auth/config") return Response.json(config);
+      if (path === "/api/auth/sign-up/email")
+        return Response.json({ token: null });
+      return unauthorized();
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { user } = renderGate("sign-up");
+    await enterProfile(user);
+    await enterCredentials(user);
+    await user.selectOptions(screen.getByLabelText(/Gender/), "non-binary");
+    await user.type(
+      screen.getByLabelText("Confirm password"),
+      "a-long-passworx",
+    );
+    expect(screen.getByText("Passwords don’t match.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Confirm password")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    expect(
+      fetchMock.mock.calls.some(([path]) => path === "/api/auth/sign-up/email"),
+    ).toBe(false);
+    await user.clear(screen.getByLabelText("Password"));
+    await user.type(screen.getByLabelText("Password"), "a-long-passworx");
+    expect(
+      screen.queryByText("Passwords don’t match."),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Passwords match.")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    await screen.findByRole("heading", { name: "Check your email" });
+    const signup = fetchMock.mock.calls.find(
+      ([path]) => path === "/api/auth/sign-up/email",
+    );
+    const payload = JSON.parse(String(signup?.[1]?.body));
+    expect(payload.gender).toBe("non-binary");
+    expect(payload.confirmPassword).toBeUndefined();
+    expect(payload.birthday).toBe("2000-02-29");
+  });
+
+  it("requires both names and a birthday without requiring gender", async () => {
+    const fetchMock = vi.fn(async (path: string) =>
+      path === "/api/auth/config" ? Response.json(config) : unauthorized(),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const { user } = renderGate("sign-up");
+    await screen.findByLabelText("First name");
+    await user.click(screen.getByRole("button", { name: "Create account" }));
+    expect(
+      await screen.findByText("Enter your first name."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Enter your last name.")).toBeInTheDocument();
+    expect(screen.getByText("Enter your birthday.")).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(([path]) => path === "/api/auth/sign-up/email"),
+    ).toBe(false);
   });
 
   it.each([
