@@ -47,20 +47,10 @@
   align-items: center;
   min-width: 0;
 }
-.music-avatar {
-  flex: 0 0 36px;
-  width: 36px;
-  height: 36px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 0.8rem;
-}
 .music-author h3 {
   font-size: 0.88rem;
   margin: 0 0 5px;
+  overflow-wrap: anywhere;
 }
 .music-author p {
   font-size: 0.69rem;
@@ -546,9 +536,6 @@
   .music-card-heading {
     padding: 19px 15px 16px;
     gap: 4px;
-  }
-  .music-avatar {
-    display: none;
   }
   .music-player {
     padding-inline: 2px;

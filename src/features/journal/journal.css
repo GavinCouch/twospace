@@ -123,23 +123,6 @@
   align-items: center;
   margin-bottom: 18px;
 }
-.journal-avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  color: white;
-  background: var(--j-blue);
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-  font-size: 0.65rem;
-  font-weight: 650;
-}
-.journal-avatar.partner {
-  color: #6d3424;
-  background: #f2c7ac;
-}
 .journal-byline {
   display: flex;
   flex-direction: column;
@@ -597,17 +580,6 @@
 }
 .journal-entry-heading {
   margin-bottom: 18px;
-}
-.journal-avatar {
-  width: 34px;
-  height: 34px;
-  background: #574451;
-  color: #f4d5df;
-  font-size: 0.76rem;
-}
-.journal-avatar.partner {
-  background: #3c414f;
-  color: #d6dced;
 }
 .journal-byline {
   font-size: 0.86rem;
