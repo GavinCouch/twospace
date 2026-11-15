@@ -1,0 +1,34 @@
+{
+  "recordedAt": "2026-11-15",
+  "music": {
+    "path": "public/artwork/music.png",
+    "purpose": "Music navigation artwork for TwoSpace",
+    "tool": "image_gen.imagegen",
+    "mode": "built-in generation",
+    "transparentBackground": true,
+    "prompt": "Use case: stylized-concept. Asset type: a compact Music navigation icon for TwoSpace, a dark couples app. Primary request: one simple pair of over-ear headphones, front view, isolated on a fully transparent background. Style: softly rounded handmade paper-and-clay illustration, very shallow three-dimensional relief, matte fine paper grain, no glossy plastic. Color palette: warm ivory headband and muted dusty rose ear cushions, charcoal inside each earpad. The headphones silhouette should be wide, balanced, easily recognizable at 30px, with thick substantial shapes and no fragile thin wires. Match a set of warm ivory and dusty rose softly rounded journal-book and calendar icons. Composition: single centered object, square canvas, headphones occupy about 86 percent of width and height, no extra objects or ground plane. Soft even light, very subtle shading within the object, no cast shadow outside it. Constraints: genuine alpha transparency; no background, tile, border, text, letters, symbols, music notes, logo, watermark, or Spotify branding. Avoid realistic product photography, complex detail, dramatic lighting, sharp metallic surfaces, and a shiny toy look.",
+    "referencesInspected": [
+      "public/artwork/journal.png",
+      "public/artwork/plans.png"
+    ],
+    "referenceUse": "Visual style reference only; no images supplied as edit targets.",
+    "originalOutput": "/Users/gavincouch/.codex/generated_images/01a1e070-fc80-7700-b9a9-392b728dda6a/exec-05cecbe4-3982-400c-af5f-1a5d746ee192.png",
+    "processing": "Sharp resize to 384×384 with PNG compression level 9; original alpha preserved. No background removal or recoloring.",
+    "width": 384,
+    "height": 384,
+    "bytes": 165208,
+    "hasAlpha": true,
+    "verification": "Inspected the generated icon over a dark background; subject and transparent edges match the existing section artwork."
+  },
+  "spotify": {
+    "path": "public/spotify-logo.svg",
+    "sourcePage": "https://developer.spotify.com/documentation/design",
+    "sourceUrl": "https://developer.spotify.com/images/guidelines/design/2024-spotify-full-logo.zip",
+    "archiveEntry": "Full_Logo_White_RGB.svg",
+    "tool": "Direct HTTPS download and ZIP extraction",
+    "mode": "Official brand asset, unmodified",
+    "bytes": 4519,
+    "viewBox": "0 0 823.46 225.25",
+    "usage": "White full Spotify logo for metadata attribution on dark surfaces. Keep original proportions, at least 70px wide, with clear space."
+  }
+}
