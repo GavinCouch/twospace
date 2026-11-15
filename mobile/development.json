@@ -3,7 +3,7 @@
   "framework": "Expo SDK 58 / React Native / TypeScript",
   "identifier": "dev.twospace.app",
   "scheme": "twospace",
-  "api": "https://twospace-cptv.onrender.com",
+  "api": "https://twospace.online",
   "setup": [
     "cd mobile && npm ci",
     "npm run typecheck && npm test",

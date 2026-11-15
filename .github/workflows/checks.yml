@@ -40,7 +40,7 @@ jobs:
       - run: npm test
       - run: npm run export:ios
         env:
-          EXPO_PUBLIC_API_URL: https://twospace-cptv.onrender.com
+          EXPO_PUBLIC_API_URL: https://twospace.online
   postgres:
     runs-on: ubuntu-latest
     timeout-minutes: 10
