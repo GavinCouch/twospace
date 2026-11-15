@@ -45,17 +45,17 @@
   align-items: center;
   gap: 4px;
   font-size: 0.7rem;
-  background: #f6ecdc;
+  background: #3b3023;
   padding: 5px 8px;
   border-radius: 5px;
-  color: #795b24;
+  color: #e2c392;
 }
 .plan-status.accepted {
-  background: #eaf2ef;
+  background: var(--accent-soft);
   color: var(--accent);
 }
 .plan-status.done {
-  background: #edf0f2;
+  background: var(--raised);
   color: var(--muted);
 }
 .plan-card h2 {

@@ -15,6 +15,8 @@
   --card: var(--surface);
   --primary: var(--accent);
   --on-accent: #30212a;
+  --primary-ink: var(--on-accent);
+  --danger-ink: #30201e;
   color-scheme: dark;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--ink);

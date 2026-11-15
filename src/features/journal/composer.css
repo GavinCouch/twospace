@@ -146,3 +146,12 @@
     padding: 10px 8px;
   }
 }
+@media (max-width: 460px) {
+  .journal-kind-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .journal-kind-picker label {
+    min-height: 48px;
+  }
+}
