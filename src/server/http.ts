@@ -104,17 +104,16 @@ export async function spaceTransaction<T>(
 ): Promise<T> {
   return transaction(async () => {
     const members = await rows<{ user_id: string }>(
-      "SELECT user_id FROM memberships WHERE space_id=? ORDER BY user_id",
+      "SELECT user_id FROM memberships WHERE space_id=?",
       ctx.spaceId,
     );
-    if (!members.some((member) => member.user_id === ctx.account.id))
+    const currentIds = new Set(members.map((member) => member.user_id));
+    const expectedIds = new Set(ctx.members.map((member) => member.id));
+    if (!currentIds.has(ctx.account.id))
       throw new HttpError(403, "You no longer belong to this space.");
     if (
-      members.map((member) => member.user_id).join(",") !==
-      ctx.members
-        .map((member) => member.id)
-        .sort()
-        .join(",")
+      currentIds.size !== expectedIds.size ||
+      [...expectedIds].some((memberId) => !currentIds.has(memberId))
     )
       throw new HttpError(
         409,
