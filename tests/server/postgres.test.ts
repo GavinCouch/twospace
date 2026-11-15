@@ -2,8 +2,22 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { randomBytes } from "node:crypto";
 import { Pool } from "pg";
 import { createTestIdentity } from "./fixtures/accounts";
+import { localDateInZone } from "@/shared/time";
 const { queueEmail } = vi.hoisted(() => ({ queueEmail: vi.fn() }));
 vi.mock("@/server/email", () => ({ queueEmail }));
+vi.mock("@/server/spotify", () => ({
+  getSpotifyTrack: async (id: string) => ({
+    id,
+    title: "Cloud test song",
+    artists: ["Test artist"],
+    album: "Test album",
+    imageUrl: null,
+    durationMs: 180000,
+    url: `https://open.spotify.com/track/${id}`,
+  }),
+  spotifySearchAvailable: () => true,
+  limitSpotifyRequests: () => {},
+}));
 
 const connectionString = process.env.TWOSPACE_TEST_POSTGRES_URL;
 const enabled = Boolean(connectionString);
@@ -15,6 +29,7 @@ let entries: typeof import("@/server/entries");
 let activities: typeof import("@/server/activities");
 let plans: typeof import("@/server/plans");
 let snapshots: typeof import("@/server/snapshot");
+let music: typeof import("@/server/music");
 type Identity = { id: string; cookie: string };
 let alex: Identity, jamie: Identity, outsider: Identity;
 const previous: Record<string, string | undefined> = {};
@@ -87,13 +102,15 @@ describe.skipIf(!enabled)(
         authModule.ready(),
         authModule.ready(),
       ]);
-      [spaces, entries, activities, plans, snapshots] = await Promise.all([
-        import("@/server/spaces"),
-        import("@/server/entries"),
-        import("@/server/activities"),
-        import("@/server/plans"),
-        import("@/server/snapshot"),
-      ]);
+      [spaces, entries, activities, plans, snapshots, music] =
+        await Promise.all([
+          import("@/server/spaces"),
+          import("@/server/entries"),
+          import("@/server/activities"),
+          import("@/server/plans"),
+          import("@/server/snapshot"),
+          import("@/server/music"),
+        ]);
       alex = await identity("Alex");
       jamie = await identity("Jamie");
       outsider = await identity("Casey");
@@ -198,6 +215,74 @@ describe.skipIf(!enabled)(
           ) as PromiseRejectedResult
         ).reason,
       ).toMatchObject({ status: 409, code: "STALE_REVISION" });
+    });
+    it("serializes daily song picks and keeps deleted revisions from removing a replacement", async () => {
+      const input = {
+        trackId: "0Lr4kGOYn9l83EjuK6cZFQ",
+        note: "A private song note",
+        day: localDateInZone(new Date().toISOString(), "America/Chicago"),
+        revision: 0,
+      };
+      const results = await Promise.allSettled([
+        music.saveTodaySong(request(alex.cookie, input, "PUT")),
+        music.saveTodaySong(
+          request(alex.cookie, { ...input, note: "A concurrent note" }, "PUT"),
+        ),
+      ]);
+      expect(
+        results.filter((result) => result.status === "fulfilled"),
+      ).toHaveLength(1);
+      expect(
+        results.find((result) => result.status === "rejected"),
+      ).toMatchObject({ reason: { status: 409, code: "MUSIC_CONFLICT" } });
+      const first = (
+        await music.getMusic(request(alex.cookie, undefined, "GET"))
+      ).songs[0];
+      expect(
+        (await music.getMusic(request(jamie.cookie, undefined, "GET"))).songs,
+      ).toEqual([first]);
+      expect(
+        (await music.getMusic(request(outsider.cookie, undefined, "GET")))
+          .songs,
+      ).toEqual([]);
+      await expect(
+        music.deleteSong(
+          request(jamie.cookie, { revision: first.revision }, "DELETE"),
+          first.id,
+        ),
+      ).rejects.toMatchObject({ status: 403 });
+      await music.deleteSong(
+        request(alex.cookie, { revision: first.revision }, "DELETE"),
+        first.id,
+      );
+      expect(
+        (await music.getMusic(request(alex.cookie, undefined, "GET"))).songs,
+      ).toEqual([]);
+      const snapshot = await snapshots.getSnapshot(
+        request(alex.cookie, undefined, "GET"),
+      );
+      const tombstone = await storage.resource<Record<string, unknown>>(
+        snapshot.space.id,
+        "song",
+        first.id,
+      );
+      expect(tombstone).toEqual({
+        id: first.id,
+        authorId: alex.id,
+        day: first.day,
+        revision: 2,
+        deleted: true,
+      });
+      const replacement = await music.saveTodaySong(
+        request(alex.cookie, input, "PUT"),
+      );
+      expect(replacement.revision).toBe(3);
+      await expect(
+        music.deleteSong(
+          request(alex.cookie, { revision: first.revision }, "DELETE"),
+          first.id,
+        ),
+      ).rejects.toMatchObject({ status: 409 });
     });
     it("keeps simultaneous checklist additions and resets agreement after a changed plan", async () => {
       const plan = await plans.createPlan(

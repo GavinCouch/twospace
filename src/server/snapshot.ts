@@ -11,6 +11,7 @@ import { context, type Context } from "./http";
 import { resources, row } from "./database";
 import { visibleEntry } from "./entries";
 import { allIdeas, visibleGame, visibleQuestion } from "./activities";
+import { listMusicSongs } from "./music";
 export async function snapshot(ctx: Context): Promise<SpaceSnapshot> {
   const space = (await row<{
     id: string;
@@ -49,7 +50,12 @@ export async function exportSnapshot(request: Request) {
   const data = await getSnapshot(request);
   return new Response(
     JSON.stringify(
-      { format: "twospace-1", exportedAt: new Date().toISOString(), ...data },
+      {
+        format: "twospace-1",
+        exportedAt: new Date().toISOString(),
+        ...data,
+        songs: await listMusicSongs(data.space.id),
+      },
       null,
       2,
     ),
