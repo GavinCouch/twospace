@@ -8,6 +8,7 @@ import { EntryCard } from "./entry-card";
 import { EntryComposer } from "./entry-composer";
 import { JournalSidebar } from "./journal-sidebar";
 import { filterEntries } from "./journal-utils";
+import { useEntryArrivals } from "./use-entry-arrivals";
 import "./journal.css";
 
 export default function JournalPage() {
@@ -17,6 +18,7 @@ export default function JournalPage() {
   const [pinned, setPinned] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [composing, setComposing] = useState(false);
+  const arrivingEntries = useEntryArrivals(data?.entries, `${data?.space.id}:${data?.me.id}`);
   const collections = useMemo(
     () =>
       [
@@ -160,6 +162,7 @@ export default function JournalPage() {
                   me={data.me}
                   collections={collections}
                   featured
+                  arriving={arrivingEntries.has(featured.id)}
                 />
               </div>
               {leadNotes.length > 0 && (
@@ -171,6 +174,7 @@ export default function JournalPage() {
                       members={data.members}
                       me={data.me}
                       collections={collections}
+                      arriving={arrivingEntries.has(entry.id)}
                     />
                   ))}
                 </div>
@@ -220,6 +224,7 @@ export default function JournalPage() {
                   members={data.members}
                   me={data.me}
                   collections={collections}
+                  arriving={arrivingEntries.has(entry.id)}
                 />
               ))}
             </div>
@@ -237,6 +242,7 @@ export default function JournalPage() {
                     members={data.members}
                     me={data.me}
                     collections={collections}
+                    arriving={arrivingEntries.has(entry.id)}
                   />
                 ))}
               </div>
