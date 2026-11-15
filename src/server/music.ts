@@ -6,6 +6,7 @@ import {
   now,
   resource,
   resources,
+  row,
   updateResource,
 } from "./database";
 import {
@@ -57,8 +58,8 @@ export async function getMusic(request: Request): Promise<MusicSnapshot> {
 export async function saveTodaySong(request: Request): Promise<DailySong> {
   const ctx = await pairedContext(request);
   const input = await json(request, pickFields);
-  function checkDay() {
-    if (input.day !== localDateInZone(now(), ctx.me.timeZone))
+  function checkDay(timeZone = ctx.me.timeZone) {
+    if (input.day !== localDateInZone(now(), timeZone))
       throw new HttpError(
         409,
         "A new day has started. Refresh before choosing today’s song.",
@@ -84,7 +85,13 @@ export async function saveTodaySong(request: Request): Promise<DailySong> {
       : await getSpotifyTrack(input.trackId);
 
   return spaceTransaction(ctx, async () => {
-    checkDay();
+    const profile = found(
+      await row<{ time_zone: string }>(
+        "SELECT time_zone FROM profiles WHERE user_id=?",
+        ctx.account.id,
+      ),
+    );
+    checkDay(profile.time_zone);
     const stored = await resource<StoredSong>(ctx.spaceId, "song", songId);
     const existing = stored && isSong(stored) ? stored : undefined;
     if (
@@ -101,7 +108,7 @@ export async function saveTodaySong(request: Request): Promise<DailySong> {
       id: songId,
       authorId: ctx.account.id,
       day: input.day,
-      timeZone: ctx.me.timeZone,
+      timeZone: profile.time_zone,
       track,
       note: input.note,
       createdAt: existing?.createdAt ?? savedAt,

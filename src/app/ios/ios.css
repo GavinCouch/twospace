@@ -16,7 +16,7 @@
 }
 .ios-intro {
   max-width: 620px;
-  margin: 76px auto 64px;
+  margin: 64px auto 56px;
   text-align: center;
 }
 .ios-app-mark {
@@ -34,6 +34,10 @@
   font-size: 0.78rem;
   color: var(--accent);
   margin-bottom: 15px;
+  padding: 7px 12px;
+  border: 1px solid #49343e;
+  border-radius: 999px;
+  background: #2d2229;
 }
 .ios-intro h1 {
   font-size: clamp(2rem, 5vw, 3.35rem);
@@ -52,9 +56,15 @@
 .ios-features {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 36px;
-  padding: 36px 0;
+  gap: 20px;
+  padding: 28px 0;
   border-top: 1px solid var(--line);
+}
+.ios-features article {
+  padding: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
 }
 .ios-features h2 {
   margin: 18px 0 10px;
@@ -130,12 +140,13 @@
   }
   .ios-features {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 14px;
   }
   .ios-features article {
     display: grid;
     grid-template-columns: 60px 1fr;
     column-gap: 20px;
+    padding: 20px;
   }
   .ios-features .section-art {
     grid-row: 1 / 3;

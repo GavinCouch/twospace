@@ -8,7 +8,7 @@
   color: var(--j-ink);
 }
 .journal-page {
-  max-width: 900px;
+  max-width: 940px;
   margin: 0 auto;
 }
 .journal-page-heading {
@@ -19,7 +19,7 @@
   margin-bottom: 26px;
 }
 .journal-page-heading h1 {
-  font-size: 1.6rem;
+  font-size: 2.1rem;
   font-weight: 650;
   letter-spacing: -0.04em;
   line-height: 1.2;
@@ -130,15 +130,17 @@
 }
 .journal-day {
   display: grid;
-  grid-template-columns: 132px minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 28px;
   border-bottom: 1px solid var(--line);
 }
 .journal-day-heading {
   align-self: start;
   display: grid;
   gap: 7px;
-  margin: 29px 0 0;
+  margin: 30px 0 0;
+  position: sticky;
+  top: calc(var(--app-header-height) + 24px);
   font-size: 0.8rem;
   font-weight: 550;
   letter-spacing: 0;
@@ -155,8 +157,8 @@
 .journal-entry {
   position: relative;
   min-width: 0;
-  padding: 26px 0 22px;
-  scroll-margin-top: 24px;
+  padding: 30px 0 26px;
+  scroll-margin-top: calc(var(--app-header-height) + 24px);
 }
 .journal-entry + .journal-entry {
   border-top: 1px solid var(--line);
@@ -197,7 +199,7 @@
 }
 .journal-entry-body {
   font-size: 0.95rem;
-  line-height: 1.8;
+  line-height: 1.75;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   margin: 10px 0;
@@ -335,7 +337,7 @@
   color: var(--muted);
 }
 .journal-later-entries {
-  margin-left: 156px;
+  margin-left: 140px;
 }
 .journal-empty,
 .journal-loading {
@@ -499,6 +501,7 @@
     display: block;
   }
   .journal-day-heading {
+    position: static;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -530,7 +533,7 @@
     max-width: none;
   }
   .journal-page-heading h1 {
-    font-size: 1.45rem;
+    font-size: 1.85rem;
   }
   .journal-page-heading .button {
     font-size: 0.8rem;

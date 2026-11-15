@@ -299,12 +299,14 @@ export async function updateProfile(request: Request) {
     availableFrom: "available_from",
     availableTo: "available_to",
   } as const;
-  for (const [key, value] of Object.entries(update))
-    if (value !== undefined)
-      await execute(
-        `UPDATE profiles SET ${columns[key as keyof typeof columns]}=? WHERE user_id=?`,
-        value,
-        current.id,
-      );
+  const changes = Object.entries(update).filter(
+    ([, value]) => value !== undefined,
+  );
+  if (changes.length)
+    await execute(
+      `UPDATE profiles SET ${changes.map(([key]) => `${columns[key as keyof typeof columns]}=?`).join(",")} WHERE user_id=?`,
+      ...changes.map(([, value]) => value!),
+      current.id,
+    );
   return { ok: true };
 }

@@ -68,7 +68,7 @@ function JournalPreview() {
         <div className="home-preview-content">
           <div className="home-preview-space">
             <div>
-              <span>Your shared space</span>
+              <span>Sunday, November 22</span>
               <h2>Theo &amp; Maya</h2>
             </div>
             <div className="home-preview-times">
@@ -83,11 +83,8 @@ function JournalPreview() {
           <div className="home-preview-feed">
             <div className="home-preview-note">
               <PreviewPerson name="Maya" />
-              <h3>For when you wake up</h3>
-              <p>
-                Tell me how the interview goes. I’m making the same coffee as
-                you.
-              </p>
+              <h3>Good luck today</h3>
+              <p>Call me after the interview? I want to hear how it went.</p>
               <div className="home-preview-reaction">
                 <Heart size={13} fill="currentColor" aria-hidden="true" />
                 <span>Heart sent</span>
@@ -105,7 +102,7 @@ function JournalPreview() {
               />
               <div>
                 <PreviewPerson name="Theo" />
-                <p>Our two sides of the day.</p>
+                <p>My morning, your afternoon.</p>
               </div>
             </div>
           </div>
@@ -119,7 +116,7 @@ function JournalPreview() {
           </div>
         </div>
       </div>
-      <figcaption>Product preview · example content</figcaption>
+      <figcaption>Example journal · fictional profiles</figcaption>
     </figure>
   );
 }
@@ -177,13 +174,13 @@ export default function HomePage() {
         <section className="home-hero" aria-labelledby="home-heading">
           <div className="home-hero-copy">
             <h1 id="home-heading">
-              A shared space
+              A shared journal
               <br />
-              for the two of you.
+              for long-distance couples.
             </h1>
             <p>
-              Notes, photos, daily songs, and things to do together. Made for
-              couples sharing their lives from different places.
+              Share notes, photos, and daily songs. Play a game or plan a call,
+              with both your time zones in view.
             </p>
             <div className="home-hero-actions">
               <Link className="button" href="/sign-up">
@@ -191,13 +188,13 @@ export default function HomePage() {
                 <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
               <a className="home-explore" href="#inside">
-                Take a look
+                See what’s inside
                 <ArrowDown size={16} aria-hidden="true" />
               </a>
             </div>
             <div className="home-privacy-note">
               <LockKeyhole size={14} aria-hidden="true" />
-              <span>Shared with the person you invite.</span>
+              <span>Invite your partner with a private code.</span>
             </div>
           </div>
           <JournalPreview />
@@ -213,19 +210,15 @@ export default function HomePage() {
               <SectionArt name="journal" size={32} />
               Journal
             </span>
-            <h2 id="home-journal-title">
-              Notes, photos,
-              <br />
-              and voice messages.
-            </h2>
+            <h2 id="home-journal-title">Notes, photos &amp; voice</h2>
             <p>
-              Leave a note, send a photo, or record a voice message. Keep them
-              together, with replies from your partner.
+              Add something from your day. Your partner can reply, send a heart,
+              or save it to a collection.
             </p>
             <ul className="home-detail-list">
-              <li>Letters that open later</li>
-              <li>Photo pairs from both your days</li>
-              <li>Saved memories and drawings</li>
+              <li>Schedule a letter for a specific date</li>
+              <li>Answer a photo prompt together</li>
+              <li>Keep photos and recordings in one place</li>
             </ul>
           </div>
           <figure className="home-journal-details">
@@ -234,18 +227,12 @@ export default function HomePage() {
                 <LockKeyhole size={15} aria-hidden="true" />A note for later
               </span>
               <SectionArt name="journal" size={94} />
-              <strong>Open on your birthday.</strong>
-              <p>
-                Your partner can read it
-                <br />
-                at the time you choose.
-              </p>
+              <strong>For your birthday</strong>
+              <p>Opens December 8 at 9:00 am.</p>
             </div>
             <div className="home-voice">
               <PreviewPerson name="Theo" />
-              <span className="home-voice-caption">
-                A voice note for your evening
-              </span>
+              <span className="home-voice-caption">On my way home</span>
               <div className="home-voice-wave" aria-hidden="true">
                 <Mic size={18} />
                 {[9, 19, 13, 26, 33, 17, 23, 12, 29, 36, 22, 14, 24, 16, 9].map(
@@ -256,7 +243,9 @@ export default function HomePage() {
                 <span>0:28</span>
               </div>
             </div>
-            <figcaption>Product preview · example content</figcaption>
+            <figcaption className="sr-only">
+              Example letter and voice note
+            </figcaption>
           </figure>
         </section>
 
@@ -270,7 +259,7 @@ export default function HomePage() {
             </div>
             <div className="home-song-note">
               <span>Today’s song</span>
-              <h3>A pick from your partner.</h3>
+              <h3>Maya’s pick</h3>
               <p>
                 “For your walk home. Tell me what you think of the last verse.”
               </p>
@@ -287,23 +276,17 @@ export default function HomePage() {
                 </span>
               </div>
             </div>
-            <figcaption>Product preview · example note</figcaption>
+            <figcaption className="sr-only">Example song note</figcaption>
           </figure>
           <div className="home-feature-copy">
             <span className="home-section-label">
               <SectionArt name="music" size={32} />
               Music
             </span>
-            <h2 id="home-music-title">
-              One song each.
-              <br />A note to go with it.
-            </h2>
+            <h2 id="home-music-title">Your daily song</h2>
             <p>
-              Pick a Spotify song for the day and say why you chose it. Listen
-              from the embedded player or open it in Spotify.
-            </p>
-            <p className="home-secondary-copy">
-              Your past picks and notes stay in your space.
+              Choose a Spotify track, add a note, and listen in the embedded
+              player or on Spotify. Past picks stay in your space.
             </p>
           </div>
         </section>
@@ -318,16 +301,9 @@ export default function HomePage() {
                 <SectionArt name="activities" size={32} />
                 Activities
               </span>
-              <h2 id="home-activities-title">
-                Games, questions,
-                <br />
-                and drawings.
-              </h2>
+              <h2 id="home-activities-title">Games for two</h2>
             </div>
-            <p>
-              Take a turn now or come back later. You don’t have to be free at
-              the same time.
-            </p>
+            <p>Play at the same time or take your turn when you’re free.</p>
           </div>
           <div className="home-activities-body">
             <figure className="home-game-preview">
@@ -336,7 +312,9 @@ export default function HomePage() {
                 <span>Theo’s turn</span>
               </div>
               <FourPreview />
-              <figcaption>Product preview · example game</figcaption>
+              <figcaption className="sr-only">
+                Example four-in-a-row game
+              </figcaption>
             </figure>
             <div className="home-activity-list">
               <div>
@@ -352,17 +330,18 @@ export default function HomePage() {
               <div>
                 <SectionArt name="activities" size={56} />
                 <div>
-                  <h3>Take your turn</h3>
-                  <p>Play four in a row or trade clues in a word game.</p>
+                  <h3>Choose a game</h3>
+                  <p>
+                    Four-in-a-row, tic-tac-toe, rock/paper/scissors, or Three
+                    clues.
+                  </p>
                 </div>
               </div>
               <div>
                 <SectionArt name="drawing" size={56} />
                 <div>
                   <h3>Add to a drawing</h3>
-                  <p>
-                    Take turns adding to the same canvas and save what you make.
-                  </p>
+                  <p>Trade drawing turns on a shared canvas.</p>
                 </div>
               </div>
             </div>
@@ -378,18 +357,13 @@ export default function HomePage() {
               <SectionArt name="plans" size={32} />
               Plans
             </span>
-            <h2 id="home-plans-title">
-              Find a time
-              <br />
-              that works for both.
-            </h2>
+            <h2 id="home-plans-title">Plans in both time zones</h2>
             <p>
-              Suggest a call or an activity, compare your usual free hours, and
-              confirm a time in both time zones.
+              Compare your free hours, suggest a time, and keep a shared
+              checklist for the plan.
             </p>
             <p className="home-secondary-copy">
-              Plan online time together, or an in-person visit when that’s an
-              option.
+              Plan a call, an online activity, or a visit when that’s an option.
             </p>
           </div>
           <figure className="home-plan-preview">
@@ -424,7 +398,7 @@ export default function HomePage() {
               </span>
               Pick a coffee to try
             </div>
-            <figcaption>Product preview · example plan</figcaption>
+            <figcaption className="sr-only">Example call plan</figcaption>
           </figure>
         </section>
 
@@ -434,7 +408,7 @@ export default function HomePage() {
           aria-labelledby="home-start-title"
         >
           <div className="home-start-heading">
-            <h2 id="home-start-title">Start with an invitation.</h2>
+            <h2 id="home-start-title">Set up your space</h2>
             <Link className="button" href="/sign-up">
               Create your space
               <ArrowRight size={17} aria-hidden="true" />
@@ -444,12 +418,14 @@ export default function HomePage() {
             <li>
               <span>01</span>
               <h3>Create your account</h3>
-              <p>Give your shared space a name.</p>
+              <p>Name your space, or join one your partner has made.</p>
             </li>
             <li>
               <span>02</span>
               <h3>Invite your partner</h3>
-              <p>Send them an invitation to join you.</p>
+              <p>
+                Share your invitation code. Features open when you both join.
+              </p>
             </li>
             <li>
               <span>03</span>

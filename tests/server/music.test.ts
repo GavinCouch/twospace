@@ -262,6 +262,43 @@ describe("daily music", () => {
     expect(await music.listMusicSongs(spaceId)).toEqual([]);
   });
 
+  it("rechecks a changed profile time zone after fetching track metadata", async () => {
+    const midday = new Date();
+    midday.setUTCHours(12, 0, 0, 0);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(midday);
+    await spaces.updateProfile(request(alex.cookie, { timeZone: "UTC" }));
+    const day = midday.toISOString().slice(0, 10);
+    spotify.track.mockImplementation(async () => {
+      await spaces.updateProfile(
+        request(alex.cookie, { timeZone: "Pacific/Kiritimati" }),
+      );
+      return verifiedTrack();
+    });
+    await expect(
+      music.saveTodaySong(request(alex.cookie, input({ day }))),
+    ).rejects.toMatchObject({ status: 409, code: "MUSIC_DAY_CHANGED" });
+    expect(await music.listMusicSongs(spaceId)).toEqual([]);
+  });
+
+  it("stores the current profile time zone when a pending pick still belongs to today", async () => {
+    const midday = new Date();
+    midday.setUTCHours(12, 0, 0, 0);
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(midday);
+    await spaces.updateProfile(request(alex.cookie, { timeZone: "UTC" }));
+    const day = midday.toISOString().slice(0, 10);
+    spotify.track.mockImplementation(async () => {
+      await spaces.updateProfile(
+        request(alex.cookie, { timeZone: "Europe/Paris" }),
+      );
+      return verifiedTrack();
+    });
+    await expect(
+      music.saveTodaySong(request(alex.cookie, input({ day }))),
+    ).resolves.toMatchObject({ day, timeZone: "Europe/Paris" });
+  });
+
   it("does not let a partner remove a pick or a stale request delete a replacement", async () => {
     const first = await music.saveTodaySong(request(alex.cookie, input()));
     await expect(

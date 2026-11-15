@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAction } from "@/components/space-provider";
 import { dateTimeInZone, formatInZone, localToInstant } from "@/shared/time";
 import type { Person, Plan } from "@/shared/types";
@@ -31,6 +31,7 @@ export function PlanForm({
   suggestedDuration = 30,
   suggestedTime,
   onClose,
+  onSavingChange,
 }: {
   members: Person[];
   me: Person;
@@ -39,9 +40,13 @@ export function PlanForm({
   suggestedDuration?: number;
   suggestedTime?: string;
   onClose: () => void;
+  onSavingChange?: (saving: boolean) => void;
 }) {
   const action = useAction();
+  const submitting = useRef(false);
+  const [saving, setSaving] = useState(false);
   const [timeError, setTimeError] = useState("");
+  const busy = saving || action.pending;
   const form = useForm<Fields>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -68,6 +73,10 @@ export function PlanForm({
     /* A partial datetime remains editable. */
   }
   async function submit(values: Fields) {
+    if (submitting.current) return;
+    submitting.current = true;
+    setSaving(true);
+    onSavingChange?.(true);
     setTimeError("");
     try {
       const startsAt = localToInstant(values.localTime, values.timeZone);
@@ -91,106 +100,147 @@ export function PlanForm({
           ? cause.message
           : "Check the plan and try again.",
       );
+    } finally {
+      submitting.current = false;
+      setSaving(false);
+      onSavingChange?.(false);
     }
   }
   return (
-    <form className="stack plan-form" onSubmit={form.handleSubmit(submit)}>
-      <div className="row spread">
-        <h2>{initial ? "Suggest a change" : "Suggest a plan"}</h2>
-        <button className="quiet" type="button" onClick={onClose}>
-          Cancel
-        </button>
-      </div>
-      <label className="field">
-        What would you like to do?
-        <input
-          placeholder="Cook the same recipe"
-          {...form.register("title")}
-          autoFocus
-        />
-        {form.formState.errors.title && (
-          <small className="danger">
-            {form.formState.errors.title.message}
-          </small>
-        )}
-      </label>
-      <div className="plan-form-pair">
+    <form
+      className="plan-form"
+      onSubmit={(event) => {
+        if (submitting.current || action.pending) {
+          event.preventDefault();
+          return;
+        }
+        void form.handleSubmit(submit)(event);
+      }}
+      aria-busy={busy}
+    >
+      <fieldset className="stack plan-form-fields" disabled={busy}>
+        <div className="row spread">
+          <h2>{initial ? "Suggest a change" : "Suggest a plan"}</h2>
+          <button className="quiet" type="button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
         <label className="field">
-          Type
-          <select {...form.register("kind")}>
-            <option value="date">Remote activity</option>
-            <option value="call">Call</option>
-            <option value="visit">In person</option>
-          </select>
-        </label>
-        <label className="field">
-          Minutes
+          What would you like to do?
           <input
-            type="number"
-            min={5}
-            max={1440}
-            {...form.register("duration", { valueAsNumber: true })}
+            placeholder="Cook the same recipe"
+            maxLength={160}
+            {...form.register("title")}
+            data-initial-focus
           />
-          {form.formState.errors.duration && (
-            <small className="danger">Choose 5–1,440 minutes.</small>
+          {form.formState.errors.title && (
+            <small className="danger">
+              {form.formState.errors.title.message}
+            </small>
           )}
         </label>
-      </div>
-      <div className="plan-form-pair">
-        <label className="field">
-          Date and time
-          <input type="datetime-local" {...form.register("localTime")} />
-        </label>
-        <label className="field">
-          Time zone
-          <select {...form.register("timeZone")}>
-            {[...new Set([me.timeZone, ...members.map((p) => p.timeZone)])].map(
-              (zone) => (
-                <option key={zone}>{zone}</option>
-              ),
+        <div className="plan-form-pair">
+          <label className="field">
+            Type
+            <select {...form.register("kind")}>
+              <option value="date">Remote activity</option>
+              <option value="call">Call</option>
+              <option value="visit">In person</option>
+            </select>
+          </label>
+          <label className="field">
+            Minutes
+            <input
+              type="number"
+              min={5}
+              max={1440}
+              {...form.register("duration", { valueAsNumber: true })}
+            />
+            {form.formState.errors.duration && (
+              <small className="danger">Choose 5–1,440 minutes.</small>
             )}
-          </select>
-        </label>
-      </div>
-      {preview && (
-        <div className="time-preview" aria-live="polite">
-          {members.map((person) => (
-            <div key={person.id}>
-              <strong>{person.name}</strong>
-              <span>{formatInZone(preview!, person.timeZone)}</span>
-            </div>
-          ))}
+          </label>
         </div>
-      )}
-      <label className="field">
-        Call or activity link <span className="muted small">Optional</span>
-        <input type="url" placeholder="https://" {...form.register("link")} />
-        {form.formState.errors.link && (
-          <small className="danger">{form.formState.errors.link.message}</small>
+        <div className="plan-form-pair">
+          <label className="field">
+            Date and time
+            <input
+              type="datetime-local"
+              aria-invalid={Boolean(form.formState.errors.localTime)}
+              aria-describedby={
+                form.formState.errors.localTime ? "plan-time-error" : undefined
+              }
+              {...form.register("localTime")}
+            />
+            {form.formState.errors.localTime && (
+              <small className="danger" id="plan-time-error">
+                {form.formState.errors.localTime.message}
+              </small>
+            )}
+          </label>
+          <label className="field">
+            Time zone
+            <select {...form.register("timeZone")}>
+              {[
+                ...new Set([
+                  initial?.timeZone || me.timeZone,
+                  me.timeZone,
+                  ...members.map((p) => p.timeZone),
+                ]),
+              ].map((zone) => (
+                <option key={zone}>{zone}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+        {preview && (
+          <div className="time-preview" aria-live="polite">
+            {members.map((person) => (
+              <div key={person.id}>
+                <strong>{person.name}</strong>
+                <span>{formatInZone(preview!, person.timeZone)}</span>
+              </div>
+            ))}
+          </div>
         )}
-      </label>
-      <label className="field">
-        Details <span className="muted small">Optional</span>
-        <textarea
-          placeholder="Anything to bring, make, or decide beforehand"
-          {...form.register("notes")}
-        />
-      </label>
-      {(timeError || action.error) && (
-        <p className="form-error" role="alert">
-          {timeError || action.error}
+        <label className="field">
+          Call or activity link <span className="muted small">Optional</span>
+          <input
+            type="url"
+            placeholder="https://"
+            maxLength={2000}
+            {...form.register("link")}
+          />
+          {form.formState.errors.link && (
+            <small className="danger">
+              {form.formState.errors.link.message}
+            </small>
+          )}
+        </label>
+        <label className="field">
+          Details <span className="muted small">Optional</span>
+          <textarea
+            placeholder="Anything to bring, make, or decide beforehand"
+            maxLength={4000}
+            {...form.register("notes")}
+          />
+        </label>
+        {(timeError || action.error) && (
+          <p className="form-error" role="alert">
+            {timeError || action.error}
+          </p>
+        )}
+        <button className="button" disabled={busy}>
+          {busy
+            ? "Saving…"
+            : initial
+              ? "Send the suggestion"
+              : "Suggest this time"}
+        </button>
+        <p className="muted small">
+          Your partner can accept or suggest a different time.
         </p>
-      )}
-      <button className="button" disabled={action.pending}>
-        {action.pending
-          ? "Saving…"
-          : initial
-            ? "Send the suggestion"
-            : "Suggest this time"}
-      </button>
-      <p className="muted small">
-        Your partner can accept or suggest a different time.
-      </p>
+      </fieldset>
     </form>
   );
 }

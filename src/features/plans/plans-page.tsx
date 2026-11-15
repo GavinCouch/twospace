@@ -22,6 +22,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
   const [suggestedTime, setSuggestedTime] = useState<string | undefined>();
   const [filter, setFilter] = useState("upcoming");
   const [availability, setAvailability] = useState(false);
+  const [saving, setSaving] = useState(false);
   const plans = [...space.plans]
     .filter((plan) =>
       filter === "done" ? plan.status === "done" : plan.status !== "done",
@@ -66,7 +67,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
               aria-selected={filter === "done"}
               onClick={() => setFilter("done")}
             >
-              Past activities
+              Completed
             </button>
           </div>
           {plans.length ? (
@@ -93,11 +94,11 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
               <p>
                 {filter === "done"
                   ? "Mark a plan done when you’ve finished."
-                  : "Suggest a call, an activity, or an optional in-person plan."}
+                  : "Plan a call, an activity, or a visit."}
               </p>
               {filter === "upcoming" && (
                 <button className="secondary" onClick={() => setForm(true)}>
-                  Suggest something
+                  Suggest a plan
                 </button>
               )}
             </div>
@@ -105,7 +106,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
         </section>
         <aside className="plans-side">
           <section className="panel">
-            <h2>Both of your clocks</h2>
+            <h2>Free time</h2>
             <p className="muted small">
               Compare your usual free hours before picking a time.
             </p>
@@ -157,7 +158,11 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
         </aside>
       </div>
       {form && (
-        <PlanDialog title={editing ? "Edit plan" : "New plan"} onClose={close}>
+        <PlanDialog
+          title={editing ? "Edit plan" : "New plan"}
+          saving={saving}
+          onClose={close}
+        >
           <PlanForm
             key={`${editing?.id || "new"}-${params.get("title") || ""}-${suggestedTime || ""}`}
             members={space.members}
@@ -171,6 +176,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
                 : 30
             }
             onClose={close}
+            onSavingChange={setSaving}
           />
         </PlanDialog>
       )}
@@ -180,10 +186,12 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
 
 function PlanDialog({
   title,
+  saving,
   onClose,
   children,
 }: {
   title: string;
+  saving: boolean;
   onClose: () => void;
   children: ReactNode;
 }) {
@@ -195,6 +203,7 @@ function PlanDialog({
         ? document.activeElement
         : null;
     element?.showModal();
+    element?.querySelector<HTMLElement>("[data-initial-focus]")?.focus();
     return () => {
       element?.close();
       if (previousFocus?.isConnected) previousFocus.focus();
@@ -207,10 +216,10 @@ function PlanDialog({
       aria-label={title}
       onCancel={(event) => {
         event.preventDefault();
-        onClose();
+        if (!saving) onClose();
       }}
       onClick={(event) => {
-        if (event.target !== event.currentTarget) return;
+        if (saving || event.target !== event.currentTarget) return;
         const bounds = event.currentTarget.getBoundingClientRect();
         if (
           event.clientX < bounds.left ||
