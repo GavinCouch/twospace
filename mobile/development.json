@@ -1,0 +1,92 @@
+{
+  "status": "Development companion; not submitted to the App Store or TestFlight",
+  "framework": "Expo SDK 58 / React Native / TypeScript",
+  "identifier": "dev.twospace.app",
+  "scheme": "twospace",
+  "api": "https://twospace-cptv.onrender.com",
+  "setup": [
+    "cd mobile && npm ci",
+    "npm run typecheck && npm test",
+    "npx expo prebuild --platform ios",
+    "npm run ios"
+  ],
+  "simulator": "Local simulator builds do not need an Apple Developer membership. Distribution and physical-device signing require developer-owned provisioning.",
+  "configuration": "EXPO_PUBLIC_API_URL can use an HTTPS server origin. Development builds also accept localhost, 127.0.0.1 or Android's 10.0.2.2 over HTTP. Never put a server secret in EXPO_PUBLIC variables.",
+  "auth": "Better Auth Expo manages the session cookie in iOS Keychain using this-device-only protection. General API calls send that cookie only to the configured API. Native Google uses the system authentication browser and twospace://auth/callback; Expo Go is not a supported sign-in environment.",
+  "implemented": [
+    "Google and email sign-in",
+    "Verified email signup and password-reset requests",
+    "Create or join a space; share invitation codes",
+    "Notes, photos, replies, reactions and pins",
+    "Questions with answers hidden until both reply",
+    "Four in a row with server revision checks",
+    "Saved activity ideas",
+    "Plans, partner-local times and checklist updates",
+    "Profile settings, leave space and sign out"
+  ],
+  "websiteOnly": [
+    "Voice recording",
+    "Drawing relay",
+    "Word clues",
+    "Photo-pair prompts",
+    "Advanced journal editing and scheduling"
+  ],
+  "data": "Cloud data is fetched on launch and every four seconds while active. Text drafts and API snapshots stay in memory. Selected photos use system-managed temporary files; generated JPEG upload files are removed after reading. Requests expose connection errors and do not pretend unsent changes were saved.",
+  "artwork": "Section emblems were generated for TwoSpace. The native icon is an opaque, resized derivative of the existing generated TwoSpace brand image.",
+  "findings": [
+    {
+      "issue": "Signup confirmation vanished when the account query reset",
+      "fix": "Keep the verification message visible until the user signs in; reset the account gate only when a session exists",
+      "foundBy": "Assistant review"
+    },
+    {
+      "issue": "Failed private photos could not retry with an unchanged media ID",
+      "fix": "Add an explicit retry that remounts the authenticated image request",
+      "foundBy": "Assistant review"
+    },
+    {
+      "issue": "Text typed while saving could be cleared without being submitted",
+      "fix": "Lock the affected draft fields and close controls during their mutation",
+      "foundBy": "Assistant review"
+    },
+    {
+      "issue": "Nested board accessibility hid occupied cells from VoiceOver",
+      "fix": "Describe each column's six cells in its accessibility value",
+      "foundBy": "Assistant review"
+    },
+    {
+      "issue": "Expo fingerprint included a vulnerable minimatch version",
+      "fix": "Scope a minimatch11.0.1 override to fingerprint; npm audit reports zero vulnerabilities",
+      "foundBy": "Assistant audit"
+    },
+    {
+      "issue": "iPhone HEIC originals were sent to a JPEG/WebP server decoder",
+      "fix": "Encode selected photos as JPEG on-device before upload, enforce the original pixel and byte limits plus the converted byte limit, and remove temporary conversion files",
+      "foundBy": "Assistant review"
+    }
+  ],
+  "references": [
+    "https://docs.expo.dev/versions/latest/",
+    "https://better-auth.com/docs/integrations/expo",
+    "https://docs.expo.dev/versions/latest/sdk/securestore/",
+    "https://docs.expo.dev/versions/latest/sdk/imagepicker/",
+    "https://reactnative.dev/docs/accessibility",
+    "https://docs.expo.dev/versions/latest/sdk/imagemanipulator/",
+    "https://docs.expo.dev/versions/latest/sdk/filesystem/"
+  ],
+  "verification": {
+    "typecheck": "Passed",
+    "transportTests": 7,
+    "expoDependencyCheck": "Passed",
+    "npmAuditVulnerabilities": 0,
+    "iosBundle": "Exported production Hermes bundle successfully",
+    "nativeBuild": "Xcode27.1 unsigned arm64 iOS simulator build succeeded, including the native photo-conversion modules",
+    "interactiveSimulatorReview": "Not completed: DeviceHub could not be controlled through the available UI automation",
+    "googleSignInOnDevice": "Not verified",
+    "appStoreSubmission": "Not submitted",
+    "photoPipelineTests": 3,
+    "totalTests": 10,
+    "photoConversionOnDevice": "Not verified; pipeline tests cover conversion ordering, limits and cleanup using an injected encoder"
+  },
+  "localBuildNote": "On this host, the synced Documents folder adds Finder metadata that can break framework signing during npm run ios. Build a checkout outside synced folders if this occurs. Local verification used Expo\u2019s supported EXPO_CUSTOM_BUILD_ROOT=/tmp/TwoSpaceExpoJSI and generated JSI products outside the synced folder. No workaround scripts, generated native files, broad metadata removal or security-setting changes are committed."
+}
