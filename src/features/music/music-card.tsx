@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAction } from "@/components/space-provider";
 import { SectionArt } from "@/components/section-art";
+import { PersonAvatar } from "@/components/person-avatar";
 import {
   spotifyEmbedUrl,
   type DailySong,
@@ -87,9 +88,12 @@ export function SongCard({
     >
       <header className="music-card-heading">
         <div className="music-author">
-          <span className="music-avatar" aria-hidden="true">
-            {name.slice(0, 1)}
-          </span>
+          <PersonAvatar
+            person={person}
+            seed={song.authorId}
+            size={36}
+            className="music-avatar"
+          />
           <div>
             <h3>{mine ? "Your pick" : `${name}’s pick`}</h3>
             <p>

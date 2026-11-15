@@ -37,13 +37,6 @@
 .settings-avatar {
   width: 62px;
   height: 62px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  font-size: 1.5rem;
-  font-weight: 550;
-  border: 1px solid var(--line);
 }
 .settings-name-field {
   flex: 1;
@@ -261,7 +254,6 @@
   .settings-avatar {
     width: 50px;
     height: 50px;
-    font-size: 1.3rem;
   }
   .settings-time-zone > input {
     font-size: 16px;

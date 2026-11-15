@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Check } from "lucide-react";
 import { useAction } from "@/components/space-provider";
+import { PersonAvatar } from "@/components/person-avatar";
 import type { Person } from "@/shared/types";
 
 const validTimeZone = (value: string) => {
@@ -15,7 +16,7 @@ const validTimeZone = (value: string) => {
 const schema = z.object({
   name: z.string().trim().min(1, "Enter your name.").max(160, "Use no more than 160 characters."),
   timeZone: z.string().trim().min(1, "Choose a time zone.").max(100).refine(validTimeZone, "Choose a valid city time zone."),
-  color: z.string().regex(/^#[0-9a-f]{6}$/i, "Choose an avatar color."),
+  color: z.string().regex(/^#[0-9a-f]{6}$/i, "Choose an avatar accent."),
   availableFrom: z.number().int().min(0).max(23),
   availableTo: z.number().int().min(0).max(23),
 });
@@ -26,11 +27,6 @@ const palette = [
 ];
 const valuesFor = (person: Person): Values => ({ name: person.name, timeZone: person.timeZone, color: person.color, availableFrom: person.availableFrom, availableTo: person.availableTo });
 const hourLabel = (hour: number) => `${hour % 12 || 12}:00 ${hour < 12 ? "am" : "pm"}`;
-
-function foreground(color: string) {
-  const values = color.match(/[0-9a-f]{2}/gi)?.map(value => parseInt(value, 16)) || [0, 0, 0];
-  return values[0] * .299 + values[1] * .587 + values[2] * .114 > 155 ? "#25304a" : "#fff";
-}
 
 export function ProfileSettings({ person }: { person: Person }) {
   const action = useAction();
@@ -71,8 +67,8 @@ export function ProfileSettings({ person }: { person: Person }) {
     <div className="settings-section-heading"><h2 id="profile-settings-title">Your profile</h2></div>
     <form className="settings-form" noValidate onSubmit={form.handleSubmit(submit)} onChange={() => setSaved(false)}>
       <fieldset disabled={action.pending} className="settings-fieldset">
-        <div className="settings-profile-top"><span className="settings-avatar" style={{ backgroundColor: color, color: foreground(color) }} aria-label="Avatar preview">{name.trim().slice(0, 1).toUpperCase() || "?"}</span><div className="settings-name-field"><label className="field" htmlFor="settings-name">Name<input id="settings-name" autoComplete="given-name" {...form.register("name")} maxLength={160} aria-invalid={!!errors.name} aria-describedby={errors.name ? "settings-name-error" : undefined} /></label>{errors.name && <p id="settings-name-error" className="settings-field-error" role="alert">{errors.name.message}</p>}</div></div>
-        <fieldset className="settings-colors"><legend>Avatar color</legend>{colors.map(option => <label key={option.value} className="settings-color-option"><input type="radio" {...form.register("color")} value={option.value} /><span className="settings-color-swatch" style={{ backgroundColor: option.value }} /><span>{option.name}</span></label>)}</fieldset>
+        <div className="settings-profile-top"><PersonAvatar person={{ ...person, name, color }} size={62} className="settings-avatar" /><div className="settings-name-field"><label className="field" htmlFor="settings-name">Name<input id="settings-name" autoComplete="given-name" {...form.register("name")} maxLength={160} aria-invalid={!!errors.name} aria-describedby={errors.name ? "settings-name-error" : undefined} /></label>{errors.name && <p id="settings-name-error" className="settings-field-error" role="alert">{errors.name.message}</p>}</div></div>
+        <fieldset className="settings-colors"><legend>Avatar accent</legend>{colors.map(option => <label key={option.value} className="settings-color-option"><input type="radio" {...form.register("color")} value={option.value} /><span className="settings-color-swatch" style={{ backgroundColor: option.value }} /><span>{option.name}</span></label>)}</fieldset>
         <div className="settings-time-zone"><div className="settings-label-row"><label htmlFor="settings-time-zone">Time zone</label><button type="button" className="settings-text-button" onClick={useDeviceZone}>Use device time zone</button></div><input id="settings-time-zone" list="settings-time-zones" {...form.register("timeZone")} autoComplete="off" spellCheck={false} aria-invalid={!!errors.timeZone} aria-describedby={errors.timeZone ? "settings-time-zone-error" : "settings-time-zone-hint"} /><datalist id="settings-time-zones">{zones.map(zone => <option key={zone} value={zone} />)}</datalist><p id="settings-time-zone-hint" className="settings-hint">Used for your shared clock and plans. For example, America/Chicago.</p>{errors.timeZone && <p id="settings-time-zone-error" className="settings-field-error" role="alert">{errors.timeZone.message}</p>}{deviceError && <p className="settings-field-error" role="alert">{deviceError}</p>}</div>
         <fieldset className="settings-availability"><legend>Usual free hours</legend><div className="settings-hours"><label className="field" htmlFor="available-from">From<select id="available-from" {...form.register("availableFrom", { valueAsNumber: true })}>{Array.from({ length: 24 }, (_, hour) => <option key={hour} value={hour}>{hourLabel(hour)}</option>)}</select></label><label className="field" htmlFor="available-to">Until<select id="available-to" {...form.register("availableTo", { valueAsNumber: true })}>{Array.from({ length: 24 }, (_, hour) => <option key={hour} value={hour}>{hourLabel(hour)}</option>)}</select></label></div><p className="settings-hint" aria-live="polite">{from === to ? "Matching times means no usual free hours are highlighted." : to < from ? "Ends the following day. These hours use your selected time zone." : "These hours use your selected time zone."}</p></fieldset>
       </fieldset>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Clock3, ExternalLink, LockKeyhole, Pin } from "lucide-react";
 import type { Entry, Person } from "@/shared/types";
+import { PersonAvatar } from "@/components/person-avatar";
 import { formatInZone } from "@/shared/time";
 import { JournalDialog } from "./journal-dialog";
 import { EntryOptions } from "./entry-options";
@@ -11,7 +12,6 @@ import { SavedDrawing } from "./saved-drawing";
 import {
   entryDate,
   entryKindLabels,
-  initials,
   linkLabel,
   safeExternalUrl,
 } from "./journal-utils";
@@ -47,12 +47,7 @@ export function EntryCard({
       id={`entry-${entry.id}`}
     >
       <header className="journal-entry-heading">
-        <span
-          className={`journal-avatar${author?.id === members[0]?.id ? "" : " partner"}`}
-          aria-hidden="true"
-        >
-          {initials(author?.name || "Member")}
-        </span>
+        <PersonAvatar person={author} seed={entry.authorId} size={34} />
         <div className="journal-byline">
           <strong>{author?.name || "Member"}</strong>
           <span>
