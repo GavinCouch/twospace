@@ -1,0 +1,78 @@
+{
+  "reviewedAt": "2026-11-15",
+  "purpose": "Design inputs for TwoSpace, not evidence of outcomes for this app.",
+  "scope": "Remote relationships are complete relationships. Meeting in person and closing distance are optional, never assumed goals.",
+  "sources": [
+    {
+      "title": "Intimacy in Long-Distance Relationships over Video Chat",
+      "authors": "Carman Neustaedter and Saul Greenberg",
+      "year": 2012,
+      "venue": "CHI",
+      "url": "https://grouplab.cpsc.ucalgary.ca/grouplab/uploads/Publications/Publications/2012-IntimacyInLDR.CHI.pdf",
+      "method": "Semi-structured interviews with 14 people, ages 19–35; only two participants were partners of each other.",
+      "finding": "Participants shared ordinary activities and background companionship as well as conversation through video.",
+      "limits": "Existing video-chat users, mostly North American and technically comfortable; qualitative accounts, not an intervention trial.",
+      "designInference": "Support shared activities without requiring continuous conversation. Existing calling tools can complement the app."
+    },
+    {
+      "title": "Understanding Family Communication across Time Zones",
+      "authors": "Xiang Cao, Abigail Sellen, A. J. Bernheim Brush, David Kirk, Darren Edge and Xianghua Ding",
+      "year": 2010,
+      "venue": "CSCW",
+      "url": "https://caoxiang.net/papers/cscw2010_timezone.pdf",
+      "method": "Interviews with 14 people from 12 households communicating across differences of 3–12 hours.",
+      "finding": "People used overlapping free time and informal routines; travel and changes to schedules disrupted coordination.",
+      "limits": "Exploratory self-report study covering family relationships beyond couples; communication tools have changed.",
+      "designInference": "Display both local dates and times. Allow schedule exceptions and activities that can continue later."
+    },
+    {
+      "title": "Bedtime Window: A Field Study Connecting Bedrooms of Long-Distance Couples Using a Slow Photo-Stream and Shared Real-Time Inking",
+      "authors": "Jan Kučera, James Scott, Siân Lindley and Patrick Olivier",
+      "year": 2021,
+      "venue": "CHI",
+      "url": "https://www.microsoft.com/en-us/research/publication/bedtime-window-a-field-study-connecting-bedrooms-of-long-distance-couples-using-a-slow-photo-stream-and-shared-real-time-inking/",
+      "method": "Small field study of a situated photo-stream and drawing device; published abstract inspected.",
+      "finding": "The abstract reports perceived remote presence, privacy balance and collaborative use of shared inking.",
+      "limits": "Specialized hardware and a small sample. Findings do not establish outcomes for a browser-based drawing tool.",
+      "designInference": "Offer deliberate photo sharing and a shared drawing surface; do not activate cameras automatically."
+    },
+    {
+      "title": "Partnership through Play: Investigating How Long-Distance Couples Use Digital Games to Facilitate Intimacy",
+      "authors": "Nisha Devasia, Adrian Rodriguez, Logan Tuttle and Julie A. Kientz",
+      "year": 2025,
+      "venue": "DIS",
+      "url": "https://arxiv.org/html/2505.09509v1",
+      "method": "Diaries, interviews and a design activity with 13 couples who already played together at least weekly.",
+      "finding": "Couples differed in cooperative and competitive preferences and used game mechanics for affection and shared meaning.",
+      "limits": "Small self-selected gaming sample, mostly in their twenties and primarily American context; not representative of all couples.",
+      "designInference": "Include creative activities alongside competitive games. Let people save selected moments and take turns at their own pace."
+    },
+    {
+      "title": "Absence Makes the Communication Grow Fonder",
+      "authors": "L. Crystal Jiang and Jeffrey T. Hancock",
+      "year": 2013,
+      "venue": "Journal of Communication",
+      "url": "https://socialmedialab.sites.stanford.edu/sites/g/files/sbiybj22976/files/media/file/jiang-jc-absence.pdf",
+      "method": "One-week diary study of 63 heterosexual dating couples, including 30 long-distance couples.",
+      "finding": "Participants used multiple communication channels; disclosure and perceptions varied by medium and relationship context.",
+      "limits": "Mostly college students, short observation and self-report. The authors explicitly state the design cannot establish causal relationships over time.",
+      "designInference": "Make short mobile contributions convenient and offer optional prompts without prescribing communication frequency."
+    },
+    {
+      "title": "Privacy or Transparency? Negotiated Smartphone Access as a Signifier of Trust in Romantic Relationships",
+      "authors": "Periwinkle Doerfler, Kieron Ivy Turk, Chris Geeng, Damon McCoy, Jeffrey Ackerman and Molly Dragiewicz",
+      "year": 2024,
+      "venue": "Author manuscript",
+      "url": "https://arxiv.org/html/2407.04906v1",
+      "method": "Authors' survey of 531 respondents, supplemented by analysis of a 2,050-person Norton survey.",
+      "finding": "Preferences for partner device access varied; respondents emphasized consensual, negotiated boundaries.",
+      "limits": "The recruited sample was not representative. Long-distance and online-only respondents were excluded from partner-device-access questions; this is adjacent privacy evidence.",
+      "designInference": "Use separate accounts, explicit publication, private drafts and clear leave/delete controls. Avoid compulsory read receipts, location sharing and activity scores."
+    }
+  ],
+  "productBoundaries": [
+    "No claim that this app improves relationship health, reduces loneliness or prevents separation.",
+    "No relationship score, response deadline, compulsory streak or assumed reunion countdown.",
+    "Research-informed features remain design hypotheses to evaluate through usability testing."
+  ]
+}
