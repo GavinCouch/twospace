@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { expo } from "@better-auth/expo";
 import { getMigrations } from "better-auth/db/migration";
 import { randomBytes, createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -41,9 +42,16 @@ export const auth = betterAuth({
   baseURL: appOrigin,
   secret,
   database: authDatabase,
+  plugins: [expo()],
+  advanced: { disableCSRFCheck: false, disableOriginCheck: false },
   trustedOrigins: runtimeConfig.cloud
-    ? [appOrigin]
-    : [appOrigin, "http://localhost:3100", "http://127.0.0.1:3100"],
+    ? [appOrigin, "twospace://"]
+    : [
+        appOrigin,
+        "twospace://",
+        "http://localhost:3100",
+        "http://127.0.0.1:3100",
+      ],
   socialProviders: runtimeConfig.google
     ? {
         google: {
