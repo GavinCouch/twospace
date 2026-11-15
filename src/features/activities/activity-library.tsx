@@ -41,7 +41,7 @@ export function ActivityLibrary({ space, onOpen }: { space: SpaceSnapshot; onOpe
     return text.includes(search.trim().toLowerCase()) && (mode === "all" || idea.mode === mode) && (category === "all" || idea.category === category) && (!savedOnly || idea.savedBy.length > 0);
   }), [space.ideas, search, mode, category, savedOnly]);
   return <div className="activity-library">
-    <div className="activity-section-intro"><div><h2>A little time together</h2><p className="muted">All of these work from different places. Save an idea for another day, or try one now.</p></div><button className="secondary" onClick={() => setShowForm(!showForm)} aria-expanded={showForm}><Plus size={17} aria-hidden="true" />Add an idea</button></div>
+    <div className="activity-section-intro"><div><h2>Choose an activity</h2></div><button className="secondary" onClick={() => setShowForm(!showForm)} aria-expanded={showForm}><Plus size={17} aria-hidden="true" />Add an idea</button></div>
     {showForm && <IdeaForm onClose={() => setShowForm(false)} />}
     <div className="activity-filters">
       <label className="activity-search"><Search size={18} aria-hidden="true" /><span className="sr-only">Search activity ideas</span><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search ideas" /></label>

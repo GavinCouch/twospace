@@ -37,4 +37,16 @@ describe("four in a row", () => {
     expect(() => initialFour(["alex", "alex"])).toThrow("different");
     expect(() => initialFour(["alex"])).toThrow("different");
   });
+  it("ends a full board as a draw when the last piece does not make a line", () => {
+    const state = initialFour(players);
+    const a = ["alex", "alex", "sam", "sam", "alex", "alex", "sam"];
+    const b = a.map(player => player === "alex" ? "sam" : "alex");
+    state.board = [a, b, [...a], [...b], [...a], [...b]];
+    state.board[0][6] = null;
+    state.turn = "sam";
+    const result = playFour(state, "sam", 6, players);
+    expect(result.draw).toBe(true);
+    expect(result.winner).toBeNull();
+    expect(() => playFour(result, "sam", 0, players)).toThrow("finished");
+  });
 });
