@@ -8,6 +8,20 @@
       "change": "Updated Sharp to 0.35.5 before adding the upload pipeline.",
       "verification": "npm install completed with zero reported vulnerabilities.",
       "discussion": "Explain why a dependency range can prevent a security update, and how decoding untrusted image files changes the importance of the dependency."
+    },
+    {
+      "title": "Saved profile names reverted to cached values",
+      "foundBy": "Assistant testing the settings form",
+      "cause": "The form reset effect ran when isDirty changed after a save, while its props still held an older snapshot.",
+      "change": "Reset from upstream data only when actual server values change.",
+      "verification": "tests/auth/profile-settings.test.tsx checks saving without reverting the edited name."
+    },
+    {
+      "title": "The plan overlay did not contain keyboard focus",
+      "foundBy": "Assistant reviewing the plan form markup",
+      "cause": "A positioned region looked like a dialog but did not provide browser modal behavior.",
+      "change": "Use a native dialog, preserve Escape handling, and restore focus when it closes.",
+      "verification": "tests/plans/dialog.test.tsx plus browser verification at 390px: focus stayed inside the modal and Escape returned focus to New plan."
     }
   ]
 }
