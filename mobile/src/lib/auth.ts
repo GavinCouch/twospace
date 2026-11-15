@@ -4,6 +4,8 @@ import * as SecureStore from "expo-secure-store";
 import { API_URL } from "./config";
 const accessedKeys = new Set<string>();
 const storage = {
+  getItemAsync(key: string) { accessedKeys.add(key); return SecureStore.getItemAsync(key); },
+  setItemAsync(key: string, value: string) { accessedKeys.add(key); return SecureStore.setItemAsync(key, value, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY }); },
   getItem(key: string) { accessedKeys.add(key); return SecureStore.getItem(key); },
   setItem(key: string, value: string) { accessedKeys.add(key); SecureStore.setItem(key, value, { keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY }); },
 };
