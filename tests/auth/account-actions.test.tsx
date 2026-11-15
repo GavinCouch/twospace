@@ -65,7 +65,7 @@ describe("settings account actions", () => {
     );
     await user.click(screen.getByRole("button", { name: "Leave space" }));
     expect(request).not.toHaveBeenCalled();
-    expect(screen.getByText(/Your partner keeps access/)).toBeInTheDocument();
+    expect(screen.getByText(/Shared features will lock/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
     await user.click(
       screen.getByRole("button", { name: "Confirm leave space" }),
@@ -105,14 +105,33 @@ describe("settings account actions", () => {
     );
     expect(navigate).not.toHaveBeenCalled();
   });
-  it("labels the export as JSON data without promising media files", () => {
+  it("offers metadata and attachment downloads separately", () => {
     setup();
     expect(
       screen.getByRole("link", { name: "Download data (.json)" }),
     ).toHaveAttribute("href", "/api/export");
     expect(
-      screen.getByText(/Photo and audio files are not included/),
+      screen.getByRole("button", { name: "Download photos and audio" }),
     ).toBeInTheDocument();
+  });
+  it("lists authorized files without leaving the settings page", async () => {
+    request.mockResolvedValueOnce({
+      files: [
+        {
+          id: "photo-1",
+          name: "Sunday.webp",
+          url: "/api/export/media/photo-1",
+        },
+      ],
+    });
+    const { user } = setup();
+    await user.click(
+      screen.getByRole("button", { name: "Download photos and audio" }),
+    );
+    const link = await screen.findByRole("link", { name: "Sunday.webp" });
+    expect(link).toHaveAttribute("href", "/api/export/media/photo-1");
+    expect(link).toHaveAttribute("download", "Sunday.webp");
+    expect(request).toHaveBeenCalledWith("/api/export");
   });
   it("clears private drafts and query data while preserving unrelated browser storage", async () => {
     const client = new QueryClient();

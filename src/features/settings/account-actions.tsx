@@ -6,6 +6,7 @@ import { Download, LogOut } from "lucide-react";
 import { api } from "@/components/space-provider";
 import type { SpaceSnapshot } from "@/shared/types";
 import { clearPrivateClientState } from "./client-state";
+import { FileDownloads } from "./file-downloads";
 
 type Operation = "signout" | "leave";
 
@@ -60,13 +61,15 @@ export function AccountActions({
         </div>
         <div className="settings-data-content">
           <p>
-            Download the journal, plans and activity data currently available to
-            you. Photo and audio files are not included.
+            Download your journal, plans, and activity data as JSON. Save photos
+            and audio separately below, including when shared features are
+            locked.
           </p>
           <a className="secondary" href="/api/export" download="twospace.json">
             <Download size={17} aria-hidden="true" />
             Download data (.json)
           </a>
+          <FileDownloads key={space.space.id} spaceId={space.space.id} />
         </div>
       </section>
       <section
@@ -124,7 +127,7 @@ export function AccountActions({
               <p>
                 You will lose access to this space.{" "}
                 {space.members.length > 1
-                  ? "Your partner keeps access to the shared journal, plans and activities."
+                  ? "Shared features will lock. Your partner can still export the saved content from Settings."
                   : "This does not delete the space or its content."}{" "}
                 Your account stays open, and you can create or join a new space.
               </p>
