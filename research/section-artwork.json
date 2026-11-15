@@ -34,5 +34,5 @@
       "prompt": "Use case: logo-brand. Asset type: transparent navigation emblem for TwoSpace, a dark private couples app. ONE simple flat graphic, slightly softened corners, tiny tactile cut-paper texture. Limited warm ivory #f5e9dc and dusty rose #d18fa5. Bold thick shapes, clear at 32px, on charcoal backgrounds. Square composition, object fills 82% of image with even transparent padding. Genuinely transparent background. No letters, numbers, captions, shadows, glow, gradients, emoji style, glossy 3D, hearts, stars, sparkles, framing box or watermark. Restrained contemporary editorial identity. Subject: a single thick dusty rose artist pencil laid diagonally with warm ivory exposed wood tip, one simple charcoal nib. Bold simple silhouette. No other objects."
     }
   ],
-  "existingBrand": "public/brand/logo-dark.png is an earlier AI-generated TwoSpace mark, retained for brand consistency."
+  "existingBrand": "public/brand/logo-dark.png was regenerated on 2026-11-15 to remove the rose arch smudge. public/brand/app-icon.png supplies opaque app and browser icons. See public/brand/generation.json for the prompts."
 }
