@@ -10,66 +10,109 @@ import type { SpaceSnapshot } from "../../src/shared/types";
 
 const request = vi.hoisted(() => vi.fn());
 vi.mock("@/components/space-provider", () => ({ api: request }));
-const me = { id: "alex", name: "Alex", timeZone: "America/Chicago", color: "#293b80", availableFrom: 17, availableTo: 22 };
+const me = {
+  id: "alex",
+  name: "Alex",
+  timeZone: "America/Chicago",
+  color: "#293b80",
+  availableFrom: 17,
+  availableTo: 22,
+};
 const partner = { ...me, id: "sam", name: "Sam" };
-const space: SpaceSnapshot = { space: { id: "space", name: "Our space", createdAt: "2026-11-15T00:00:00Z", isDemo: false }, me, members: [me, partner], entries: [], photoPairs: [], questions: [], games: [], drawings: [], ideas: [], plans: [] };
-function setup(sample = false) {
+const space: SpaceSnapshot = {
+  space: {
+    id: "space",
+    name: "Our space",
+    createdAt: "2026-11-15T00:00:00Z",
+    isDemo: false,
+  },
+  me,
+  members: [me, partner],
+  entries: [],
+  photoPairs: [],
+  questions: [],
+  games: [],
+  drawings: [],
+  ideas: [],
+  plans: [],
+};
+function setup() {
   const client = new QueryClient();
   client.setQueryData(["space"], space);
   client.setQueryData(["account"], { id: "alex" });
   const navigate = vi.fn();
-  render(<QueryClientProvider client={client}><AccountActions space={{ ...space, space: { ...space.space, isDemo: sample } }} onNavigate={navigate} /></QueryClientProvider>);
+  render(
+    <QueryClientProvider client={client}>
+      <AccountActions space={space} onNavigate={navigate} />
+    </QueryClientProvider>,
+  );
   return { client, navigate, user: userEvent.setup() };
 }
-beforeEach(() => { request.mockReset(); request.mockResolvedValue({ ok: true }); sessionStorage.clear(); localStorage.clear(); });
+beforeEach(() => {
+  request.mockReset();
+  request.mockResolvedValue({ ok: true });
+  sessionStorage.clear();
+  localStorage.clear();
+});
 afterEach(cleanup);
 
 describe("settings account actions", () => {
   it("requires an explicit confirmation before leaving and returns to account loading", async () => {
     const { user, navigate, client } = setup();
-    sessionStorage.setItem("twospace:journal-draft:space:alex", "private draft");
+    sessionStorage.setItem(
+      "twospace:journal-draft:space:alex",
+      "private draft",
+    );
     await user.click(screen.getByRole("button", { name: "Leave space" }));
     expect(request).not.toHaveBeenCalled();
     expect(screen.getByText(/Your partner keeps access/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
-    await user.click(screen.getByRole("button", { name: "Confirm leave space" }));
-    expect(request).toHaveBeenCalledWith("/api/space/membership", { method: "DELETE" });
+    await user.click(
+      screen.getByRole("button", { name: "Confirm leave space" }),
+    );
+    expect(request).toHaveBeenCalledWith("/api/space/membership", {
+      method: "DELETE",
+    });
     expect(client.getQueryData(["account"])).toBeUndefined();
     expect(client.getQueryData(["space"])).toBeUndefined();
-    expect(sessionStorage.getItem("twospace:journal-draft:space:alex")).toBeNull();
+    expect(
+      sessionStorage.getItem("twospace:journal-draft:space:alex"),
+    ).toBeNull();
     expect(navigate).toHaveBeenCalledWith("/journal");
   });
   it("cancels leaving without making a request", async () => {
     const { user, navigate } = setup();
     await user.click(screen.getByRole("button", { name: "Leave space" }));
     await user.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(request).not.toHaveBeenCalled(); expect(navigate).not.toHaveBeenCalled();
+    expect(request).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Leave space" })).toHaveFocus();
   });
   it("keeps the current account and drafts if sign-out fails", async () => {
     request.mockRejectedValueOnce(new Error("Could not connect."));
     const { user, navigate, client } = setup();
-    sessionStorage.setItem("twospace:journal-draft:space:alex", "private draft");
+    sessionStorage.setItem(
+      "twospace:journal-draft:space:alex",
+      "private draft",
+    );
     await user.click(screen.getByRole("button", { name: "Sign out" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Could not connect");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not connect",
+    );
     expect(client.getQueryData(["account"])).toEqual({ id: "alex" });
-    expect(sessionStorage.getItem("twospace:journal-draft:space:alex")).toBe("private draft");
+    expect(sessionStorage.getItem("twospace:journal-draft:space:alex")).toBe(
+      "private draft",
+    );
     expect(navigate).not.toHaveBeenCalled();
-  });
-  it("starts a new sample only after confirmation and does not offer leave-space", async () => {
-    const { user, navigate, client } = setup(true);
-    expect(screen.queryByRole("button", { name: "Leave space" })).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "New sample space" }));
-    expect(request).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Start new sample" }));
-    expect(request).toHaveBeenCalledWith("/api/demo", { method: "POST", body: "{}" });
-    expect(client.getQueryData(["space"])).toBeUndefined();
-    expect(navigate).toHaveBeenCalledWith("/journal");
   });
   it("labels the export as JSON data without promising media files", () => {
     setup();
-    expect(screen.getByRole("link", { name: "Download data (.json)" })).toHaveAttribute("href", "/api/export");
-    expect(screen.getByText(/Photo and audio files are not included/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Download data (.json)" }),
+    ).toHaveAttribute("href", "/api/export");
+    expect(
+      screen.getByText(/Photo and audio files are not included/),
+    ).toBeInTheDocument();
   });
   it("clears private drafts and query data while preserving unrelated browser storage", async () => {
     const client = new QueryClient();

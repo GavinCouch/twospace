@@ -56,17 +56,12 @@ export async function account(request: Request): Promise<Account> {
   const membership = await row<{
     space_id: string;
   }>("SELECT space_id FROM memberships WHERE user_id=?", session.user.id);
-  if (
-    profile.is_demo &&
-    (!membership ||
-      !(await row(
-        "SELECT 1 FROM demo_rooms WHERE space_id=? AND expires_at>?",
-        membership.space_id,
-        new Date().toISOString(),
-      )))
-  ) {
-    throw new HttpError(401, "This sample space has expired. Open a new demo.");
-  }
+  if (profile.is_demo || session.user.email.endsWith("@demo.twospace.invalid"))
+    throw new HttpError(
+      401,
+      "Sample spaces are no longer available. Sign in with your own account.",
+      "SAMPLE_RETIRED",
+    );
   return {
     id: session.user.id,
     name: profile.name,

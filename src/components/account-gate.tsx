@@ -72,7 +72,6 @@ function SignIn() {
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [error, setError] = useState("");
   const [verificationEmail, setVerificationEmail] = useState("");
-  const [demoPending, setDemoPending] = useState(false);
   const config = useAuthConfig();
   const client = useQueryClient();
   const form = useForm<Credentials>({
@@ -104,23 +103,6 @@ function SignIn() {
       }
     } catch (cause) {
       setError(authErrorMessage(cause));
-    }
-  }
-  async function demo() {
-    setDemoPending(true);
-    setError("");
-    try {
-      await api("/api/demo", { method: "POST", body: "{}" });
-      client.removeQueries({ queryKey: ["space"] });
-      await client.invalidateQueries({ queryKey: ["account"] });
-    } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "The sample space couldn’t open.",
-      );
-    } finally {
-      setDemoPending(false);
     }
   }
   return (
@@ -173,9 +155,7 @@ function SignIn() {
                 </div>
               ) : (
                 <>
-                  <ProviderButtons
-                    disabled={form.formState.isSubmitting || demoPending}
-                  />
+                  <ProviderButtons disabled={form.formState.isSubmitting} />
                   {config.data.emailPassword === false ? (
                     <p className="muted">Email sign-in is not available yet.</p>
                   ) : (
@@ -237,7 +217,7 @@ function SignIn() {
                           )}
                         <button
                           className="button"
-                          disabled={form.formState.isSubmitting || demoPending}
+                          disabled={form.formState.isSubmitting}
                         >
                           {form.formState.isSubmitting
                             ? "Opening…"
@@ -249,7 +229,7 @@ function SignIn() {
                       </form>
                       <button
                         className="quiet auth-toggle"
-                        disabled={form.formState.isSubmitting || demoPending}
+                        disabled={form.formState.isSubmitting}
                         onClick={() => {
                           setMode(mode === "sign-in" ? "sign-up" : "sign-in");
                           setError("");
@@ -271,19 +251,6 @@ function SignIn() {
               {error}
             </p>
           )}
-          <div className="demo-entry">
-            <button
-              className="secondary"
-              disabled={demoPending || form.formState.isSubmitting}
-              onClick={demo}
-            >
-              {demoPending
-                ? "Preparing your sample space…"
-                : "Try a sample space"}
-              <ArrowRight size={16} />
-            </button>
-            <small>Private demo · no account needed</small>
-          </div>
         </section>
       </div>
     </main>

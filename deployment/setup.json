@@ -50,6 +50,16 @@
       "Unknown emails receive the same public reset response"
     ]
   },
-  "sampleSpaces": "Each visitor gets an isolated cloud-backed sample space when deployed. Profile switching is restricted to the two generated sample identities. Sample access expires after 24 hours.",
-  "verificationStatus": "The hosted app passed Google sign-in, two synthetic cloud identities sharing updates, and private file access checks on 2026-11-15. Brevo confirmed reset-email delivery. Real partner onboarding and a full email-password reset remain user-driven checks."
+  "verificationStatus": "The hosted app passed Google sign-in, two synthetic cloud identities sharing updates, and private file access checks on 2026-11-15. Brevo confirmed reset-email delivery. Real partner onboarding and a full email-password reset remain user-driven checks.",
+  "accounts": "Every shared space requires real signed-in accounts. Sample creation and profile switching are retired; historical sample records remain stored but cannot be accessed through legacy sample sessions.",
+  "nativeAuth": {
+    "integration": "Better Auth Expo server plugin 1.7.25, matching the web auth version.",
+    "scheme": "twospace://",
+    "callback": "twospace://auth/callback",
+    "origins": "Production trusts only BETTER_AUTH_URL and the twospace scheme. Browser origin and CSRF validation remain enabled. Expo Go exp:// URLs are not accepted in production; use an installed development or release build.",
+    "requests": "The native client stores its session using Expo SecureStore. REST requests send authClient.getCookie() in the Cookie header with credentials omitted. No API key or provider secret belongs in the app.",
+    "google": "The existing web OAuth callback remains BETTER_AUTH_URL + /api/auth/callback/google. The Expo plugin returns the completed session to the registered app scheme.",
+    "reference": "https://better-auth.com/docs/integrations/expo",
+    "verification": "Local server integration covers native sign-in, stored-cookie REST access, callback restrictions, cross-site rejection and proxy redirect restrictions. Real iOS OAuth return still needs a device/build check."
+  }
 }

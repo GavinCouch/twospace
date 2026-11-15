@@ -102,11 +102,7 @@ async function writeMedia(
         spaceId,
       ))!.count,
     );
-    const demo = await row<{ is_demo: number }>(
-      "SELECT is_demo FROM spaces WHERE id=?",
-      spaceId,
-    );
-    if (count >= (demo?.is_demo ? 30 : 500))
+    if (count >= 500)
       throw new HttpError(409, "This space has reached its file limit.");
     const mediaId = id(),
       filename = `${spaceId}/${mediaId}.${extension}`;
@@ -134,7 +130,7 @@ export async function uploadMedia(request: Request) {
   const count = (await row<{
     count: number;
   }>("SELECT count(*) count FROM media WHERE space_id=?", ctx.spaceId))!.count;
-  if (count >= (ctx.account.isDemo ? 30 : 500))
+  if (count >= 500)
     throw new HttpError(409, "This space has reached its file limit.");
   const buffer = await boundedBody(request);
   const mime = (request.headers.get("content-type") || "").split(";")[0].trim();

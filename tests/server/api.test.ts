@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createTestIdentity } from "./fixtures/accounts";
 import type { WordState } from "@/shared/types";
 
 const directory = mkdtempSync(join(tmpdir(), "twospace-api-"));
@@ -29,22 +30,11 @@ const request = (cookie: string, body?: unknown, method = "POST") =>
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
-async function signUp(name: string) {
-  const result = await authModule.auth.api.signUpEmail({
-    body: {
-      name,
-      email: `${name.toLowerCase()}@example.test`,
-      password: "test-passphrase-12345",
-    },
-    asResponse: true,
-  });
-  expect(result.status).toBe(200);
-  const user = await result.json();
-  const cookie = result.headers
-    .getSetCookie()
-    .map((value) => value.split(";")[0])
-    .join("; ");
-  return { id: user.user.id as string, cookie };
+function signUp(name: string) {
+  return createTestIdentity(
+    { auth: authModule.auth, execute: storage.execute },
+    name,
+  );
 }
 beforeAll(async () => {
   authModule = await import("@/server/auth");
@@ -435,36 +425,34 @@ describe("PostgreSQL statements", () => {
   });
 });
 
-describe("isolated sample spaces", () => {
-  it("switches only between the two profiles in the current demo", async () => {
-    const demo = await import("@/server/demo");
-    const first = await demo.createDemo(request("", {}));
-    const firstCookie = first.headers
-      .getSetCookie()
-      .map((value) => value.split(";")[0])
-      .join("; ");
-    const firstSpace = await snapshots.getSnapshot(
-      request(firstCookie, undefined, "GET"),
+describe("retired sample accounts", () => {
+  it("rejects an existing sample session without deleting its content", async () => {
+    const legacy = await signUp("Retired");
+    const space = await spaces.createSpace(
+      request(legacy.cookie, { name: "Old sample" }),
     );
-    const second = await demo.createDemo(request("", {}));
-    const secondUser = await second.json();
-    expect(firstSpace.space.id).not.toBe(secondUser.spaceId);
-    await expect(
-      demo.switchDemo(request(firstCookie, { userId: secondUser.id })),
-    ).rejects.toMatchObject({ status: 403 });
-    const partner = firstSpace.members.find(
-      (member) => member.id !== firstSpace.me.id,
-    )!;
-    const switched = await demo.switchDemo(
-      request(firstCookie, { userId: partner.id }),
+    const entry = await entries.createEntry(
+      request(legacy.cookie, { body: "Historical sample content" }),
     );
-    expect(await switched.json()).toMatchObject({
-      id: partner.id,
-      name: "Jamie",
-      isDemo: true,
-    });
+    await storage.execute(
+      "UPDATE profiles SET is_demo=1 WHERE user_id=?",
+      legacy.id,
+    );
+    await storage.execute("UPDATE spaces SET is_demo=1 WHERE id=?", space.id);
     await expect(
-      demo.switchDemo(request(alex.cookie, { userId: partner.id })),
-    ).rejects.toMatchObject({ status: 403 });
-  }, 20000);
+      snapshots.getSnapshot(request(legacy.cookie, undefined, "GET")),
+    ).rejects.toMatchObject({ status: 401, code: "SAMPLE_RETIRED" });
+    await expect(
+      entries.createEntry(request(legacy.cookie, { body: "New content" })),
+    ).rejects.toMatchObject({ status: 401, code: "SAMPLE_RETIRED" });
+    expect(
+      await storage.row("SELECT id FROM resources WHERE id=?", entry.id),
+    ).toEqual({ id: entry.id });
+    expect(
+      await storage.row(
+        "SELECT is_demo FROM profiles WHERE user_id=?",
+        legacy.id,
+      ),
+    ).toEqual({ is_demo: 1 });
+  });
 });
