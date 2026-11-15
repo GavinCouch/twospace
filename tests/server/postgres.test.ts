@@ -87,6 +87,8 @@ describe.skipIf(!enabled)(
         "GOOGLE_CLIENT_ID",
         "GOOGLE_CLIENT_SECRET",
         "RESEND_API_KEY",
+        "BREVO_API_KEY",
+        "EMAIL_PROVIDER",
         "EMAIL_FROM",
       ])
         setEnvironment(key, undefined);

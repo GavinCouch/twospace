@@ -68,4 +68,52 @@ describe("deployment configuration", () => {
       }),
     ).not.toThrow();
   });
+  it("enables cloud email features for a fully configured Brevo sender", () => {
+    const settings = {
+      ...cloud,
+      EMAIL_PROVIDER: "brevo",
+      BREVO_API_KEY: "test-key",
+      EMAIL_FROM: "TwoSpace <sender@example.test>",
+    };
+    expect(configuration(settings)).toMatchObject({
+      passwordReset: true,
+      emailPassword: true,
+      emailVerification: true,
+    });
+    expect(() => assertRuntimeConfiguration(settings)).not.toThrow();
+    expect(
+      configuration({
+        ...settings,
+        BREVO_API_KEY: undefined,
+        RESEND_API_KEY: "other-key",
+      }),
+    ).toMatchObject({ passwordReset: false, emailPassword: false });
+  });
+  it("rejects unsupported or incomplete email providers without exposing their settings", () => {
+    expect(() =>
+      assertRuntimeConfiguration({ ...cloud, EMAIL_PROVIDER: "smtp" }),
+    ).toThrow("EMAIL_PROVIDER must be resend or brevo.");
+    expect(() =>
+      assertRuntimeConfiguration({
+        ...cloud,
+        EMAIL_PROVIDER: "brevo",
+        EMAIL_FROM: "sender@example.test",
+      }),
+    ).toThrow("BREVO_API_KEY");
+    for (const from of [
+      "invalid-address",
+      "sender@example.test\nBcc: other@example.test",
+    ]) {
+      const settings = {
+        ...cloud,
+        EMAIL_PROVIDER: "brevo",
+        BREVO_API_KEY: "test-key",
+        EMAIL_FROM: from,
+      };
+      expect(configuration(settings).passwordReset).toBe(false);
+      expect(() => assertRuntimeConfiguration(settings)).toThrow(
+        "valid EMAIL_FROM",
+      );
+    }
+  });
 });

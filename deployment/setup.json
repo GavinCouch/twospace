@@ -5,7 +5,7 @@
     "buildCommand": "npm ci && npm run build",
     "startCommand": "npm run start",
     "healthCheckPath": "/api/health",
-    "domain": "Configure the user's chosen domain and HTTPS on the host, then set BETTER_AUTH_URL to exactly that origin.",
+    "domain": "Use the free HTTPS Render address or configure a custom domain. Set BETTER_AUTH_URL to exactly the chosen origin.",
     "persistence": "Production requires managed PostgreSQL and private cloud object storage. The local SQLite/files adapter is for development and tests only."
   },
   "database": {
@@ -28,8 +28,16 @@
     "verification": "Finish the provider consent-screen configuration and test a real account after deployment."
   },
   "email": {
-    "provider": "Resend",
-    "setup": "Verify a sender domain, create a restricted sending API key, and set RESEND_API_KEY and EMAIL_FROM in hosting secrets.",
+    "provider": "Brevo or Resend, selected with EMAIL_PROVIDER. Existing configurations default to Resend.",
+    "brevo": "For the free-address proof of concept, verify the sender address and complete Brevo's account requirements. Create an API key, then set EMAIL_PROVIDER=brevo, BREVO_API_KEY and EMAIL_FROM in hosting secrets. EMAIL_FROM accepts an address or TwoSpace <address>. This integration uses the HTTPS API, not SMTP ports.",
+    "brevoLimit": "Brevo temporarily replaces personal or unauthenticated sender addresses with a compliant address. Recipients may see that rewritten address. This is a temporary deliverability measure; Brevo recommends an authenticated custom domain for ongoing use. Account approval, plan limits, and recipient delivery still need a live check.",
+    "resend": "Verify a sender domain, create a restricted sending API key, and set EMAIL_PROVIDER=resend, RESEND_API_KEY and EMAIL_FROM in hosting secrets.",
+    "configuration": "Only the selected provider's key enables email features. Missing keys, unsupported providers, and invalid sender addresses are rejected. Configuration readiness does not prove that the provider has approved the sender or delivered an email.",
+    "externalDeliveryStatus": "Pending. Request formats and failure handling are covered by local tests; no live Brevo account, API key, sender approval, or recipient delivery has been verified.",
+    "references": [
+      "https://developers.brevo.com/reference/send-transac-email",
+      "https://help.brevo.com/hc/en-us/articles/14925263522578-Comply-with-Gmail-Yahoo-and-Microsoft-s-requirements-for-email-senders"
+    ],
     "behavior": "Cloud email accounts require email verification. Password resets use single-use Better Auth tokens and revoke existing sessions after a successful reset. Email features are unavailable until a delivery provider is configured.",
     "checks": [
       "Verification email reaches the recipient",
