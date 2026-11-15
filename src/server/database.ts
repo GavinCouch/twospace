@@ -28,8 +28,9 @@ db.exec(`
     expires_at TEXT NOT NULL, used INTEGER NOT NULL DEFAULT 0
   );
   CREATE TABLE IF NOT EXISTS resources (
-    id TEXT PRIMARY KEY, space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
-    kind TEXT NOT NULL, author_id TEXT NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL
+    id TEXT NOT NULL, space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL, author_id TEXT NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL,
+    PRIMARY KEY(space_id,id)
   );
   CREATE INDEX IF NOT EXISTS resources_space_kind ON resources(space_id,kind,created_at);
   CREATE TABLE IF NOT EXISTS media (
@@ -45,6 +46,24 @@ db.exec(`
     space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE
   );
 `);
+
+// Curated activity IDs repeat across spaces. Their persisted state belongs to a space.
+const resourceColumns = db.prepare('PRAGMA table_info(resources)').all() as { name: string; pk: number }[];
+if (resourceColumns.find(column => column.name === 'space_id')?.pk === 0) {
+  db.exec(`
+    BEGIN IMMEDIATE;
+    CREATE TABLE resources_scoped (
+      id TEXT NOT NULL, space_id TEXT NOT NULL REFERENCES spaces(id) ON DELETE CASCADE,
+      kind TEXT NOT NULL, author_id TEXT NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL,
+      PRIMARY KEY(space_id,id)
+    );
+    INSERT INTO resources_scoped SELECT * FROM resources;
+    DROP TABLE resources;
+    ALTER TABLE resources_scoped RENAME TO resources;
+    CREATE INDEX resources_space_kind ON resources(space_id,kind,created_at);
+    COMMIT;
+  `);
+}
 
 export const id = () => randomUUID();
 export const now = () => new Date().toISOString();
