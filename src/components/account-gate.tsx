@@ -1,6 +1,7 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
+import logo from "../../public/brand/logo-dark.png";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
@@ -72,7 +73,7 @@ export function Brand() {
   return (
     <span className="brand">
       <Image
-        src="/brand/logo-dark.png"
+        src={logo}
         width={44}
         height={44}
         sizes="44px"
