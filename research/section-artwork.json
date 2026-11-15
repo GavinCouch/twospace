@@ -1,0 +1,38 @@
+{
+  "tool": "Built-in image generation",
+  "generatedAt": "2026-11-15",
+  "style": "Ivory and dusty-rose cut-paper emblems on transparent backgrounds",
+  "assets": [
+    {
+      "name": "journal",
+      "path": "public/artwork/journal.png",
+      "prompt": "Use case: logo-brand. Asset type: transparent navigation emblem for TwoSpace, a dark private couples app. Create ONE very simple open journal mark, two broad ivory paper leaves with one muted dusty-rose bookmark, subtly softened corners. Straight-on flat graphic with tiny tactile paper texture, generous thick shapes clear at 32px. Limited colors warm ivory #f5e9dc and dusty rose #d18fa5, no black outlines. Centered, square framing, object fills about 82% of image with even transparent padding. Genuinely transparent background. No letters, numbers, captions, shadows, glow, gradients, emoji style, glossy 3D, hearts, stars, sparkles, framing box, or watermark. Restrained contemporary editorial identity, warm and legible on charcoal #131315."
+    },
+    {
+      "name": "activities",
+      "path": "public/artwork/activities.png",
+      "prompt": "Use case: logo-brand. Asset type: transparent navigation emblem for TwoSpace, a dark private couples app. ONE simple flat graphic, slightly softened corners, tiny tactile cut-paper texture. Limited warm ivory #f5e9dc and dusty rose #d18fa5. Bold thick shapes, clear at 32px, on charcoal backgrounds. Square composition, object fills 82% of image with even transparent padding. Genuinely transparent background. No letters, numbers, captions, shadows, glow, gradients, emoji style, glossy 3D, hearts, stars, sparkles, framing box or watermark. Restrained contemporary editorial identity. Subject: two overlapping rounded square game tiles, one ivory with four large charcoal circular pips and one dusty rose with one large ivory circular pip. Slightly opposed angles, clean geometry."
+    },
+    {
+      "name": "plans",
+      "path": "public/artwork/plans.png",
+      "prompt": "Use case: logo-brand. Asset type: transparent navigation emblem for TwoSpace, a dark private couples app. ONE simple flat graphic, slightly softened corners, tiny tactile cut-paper texture. Limited warm ivory #f5e9dc and dusty rose #d18fa5. Bold thick shapes, clear at 32px, on charcoal backgrounds. Square composition, object fills 82% of image with even transparent padding. Genuinely transparent background. No letters, numbers, captions, shadows, glow, gradients, emoji style, glossy 3D, hearts, stars, sparkles, framing box or watermark. Restrained contemporary editorial identity. Subject: a single upright ivory calendar with broad dusty rose top binding and two simple rounded tabs, an orderly two by three grid of large charcoal squares with one dusty rose square, no numerals."
+    },
+    {
+      "name": "settings",
+      "path": "public/artwork/settings.png",
+      "prompt": "Use case: logo-brand. Asset type: transparent navigation emblem for TwoSpace, a dark private couples app. ONE simple flat graphic, slightly softened corners, tiny tactile cut-paper texture. Limited warm ivory #f5e9dc and dusty rose #d18fa5. Bold thick shapes, clear at 32px, on charcoal backgrounds. Square composition, object fills 82% of image with even transparent padding. Genuinely transparent background. No letters, numbers, captions, shadows, glow, gradients, emoji style, glossy 3D, hearts, stars, sparkles, framing box or watermark. Restrained contemporary editorial identity. Subject: a single flat ivory six-tooth rounded cog with a large dusty rose circular center and charcoal inner hole. Very simple chunky silhouette. Centered upright."
+    },
+    {
+      "name": "questions",
+      "path": "public/artwork/questions.png",
+      "prompt": "Use case: logo-brand. Asset type: transparent navigation emblem for TwoSpace, a dark private couples app. ONE simple flat graphic, slightly softened corners, tiny tactile cut-paper texture. Limited warm ivory #f5e9dc and dusty rose #d18fa5. Bold thick shapes, clear at 32px, on charcoal backgrounds. Square composition, object fills 82% of image with even transparent padding. Genuinely transparent background. No letters, numbers, captions, shadows, glow, gradients, emoji style, glossy 3D, hearts, stars, sparkles, framing box or watermark. Restrained contemporary editorial identity. Subject: two overlapping broad speech bubbles, ivory front bubble and dusty rose rear bubble. One short tail each, generous negative space. No text or tiny dots."
+    },
+    {
+      "name": "drawing",
+      "path": "public/artwork/drawing.png",
+      "prompt": "Use case: logo-brand. Asset type: transparent navigation emblem for TwoSpace, a dark private couples app. ONE simple flat graphic, slightly softened corners, tiny tactile cut-paper texture. Limited warm ivory #f5e9dc and dusty rose #d18fa5. Bold thick shapes, clear at 32px, on charcoal backgrounds. Square composition, object fills 82% of image with even transparent padding. Genuinely transparent background. No letters, numbers, captions, shadows, glow, gradients, emoji style, glossy 3D, hearts, stars, sparkles, framing box or watermark. Restrained contemporary editorial identity. Subject: a single thick dusty rose artist pencil laid diagonally with warm ivory exposed wood tip, one simple charcoal nib. Bold simple silhouette. No other objects."
+    }
+  ],
+  "existingBrand": "public/brand/logo-dark.png is an earlier AI-generated TwoSpace mark, retained for brand consistency."
+}
