@@ -310,3 +310,170 @@
     transition: none;
   }
 }
+
+.primary-navigation,
+.mobile-navigation {
+  --nav-gap: 8px;
+  isolation: isolate;
+}
+.primary-navigation {
+  position: relative;
+}
+.primary-navigation::before,
+.mobile-navigation::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 12px;
+  background: var(--raised);
+}
+.primary-navigation::before {
+  inset-block: 0;
+  left: 0;
+  width: calc((100% - var(--nav-gap) * 2) / 3);
+  transform: translateX(calc(var(--active-index) * (100% + var(--nav-gap))));
+}
+.primary-navigation[data-active="false"]::before {
+  opacity: 0;
+}
+.primary-navigation .nav-link.active {
+  background: transparent;
+}
+.header-icon.active {
+  background: var(--raised);
+  color: var(--accent);
+}
+.nav-link {
+  position: relative;
+}
+.nav-pending {
+  position: absolute;
+  height: 2px;
+  width: 24px;
+  bottom: 3px;
+  left: calc(50% - 12px);
+  background: var(--accent);
+  border-radius: 2px;
+  opacity: 0;
+}
+.nav-pending.is-pending {
+  opacity: 1;
+}
+.mobile-navigation::before {
+  top: 9px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  left: 8px;
+  width: calc((100% - 16px) / 4);
+  transform: translateX(calc(var(--active-index) * 100%));
+  background: var(--accent-soft);
+}
+.partner-clock > .clock-dial {
+  position: relative;
+  display: block;
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #766b75;
+  border-radius: 50%;
+  background: var(--surface);
+}
+.clock-dial[data-period="day"] {
+  background: #2c272c;
+  border-color: #ad929a;
+}
+.clock-dial::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  top: calc(50% - 2px);
+  left: calc(50% - 2px);
+}
+.clock-hand {
+  position: absolute;
+  display: block;
+  left: calc(50% - 1px);
+  bottom: 50%;
+  width: 2px;
+  border-radius: 2px;
+  transform-origin: center bottom;
+  background: var(--ink);
+}
+.clock-hour {
+  height: 8px;
+  transform: rotate(var(--hour-angle));
+}
+.clock-minute {
+  height: 11px;
+  transform: rotate(var(--minute-angle));
+}
+.clock-second {
+  height: 12px;
+  width: 1px;
+  left: calc(50% - 0.5px);
+  background: var(--accent);
+  transform: rotate(var(--second-angle));
+}
+@media (min-width: 701px) {
+  .primary-navigation {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--nav-gap);
+  }
+}
+@media (min-width: 701px) and (max-width: 900px) {
+  .primary-navigation {
+    --nav-gap: 2px;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .nav-pending.is-pending {
+    animation: navigation-pending 900ms ease-in-out 120ms infinite alternate
+      both;
+  }
+  .primary-navigation::before,
+  .mobile-navigation::before {
+    transition:
+      transform 380ms var(--ease-out),
+      opacity 180ms ease;
+  }
+  .nav-link .section-art {
+    transition:
+      opacity 180ms ease,
+      transform 220ms var(--ease-out);
+  }
+  .nav-link.active .section-art {
+    animation: nav-settle 400ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .nav-link:hover .section-art {
+      transform: translateY(-2px) rotate(-5deg);
+    }
+  }
+  @keyframes nav-settle {
+    45% {
+      transform: translateY(-3px);
+    }
+    75% {
+      transform: translateY(1px);
+    }
+  }
+  @keyframes navigation-pending {
+    from {
+      opacity: 0.25;
+      transform: scaleX(0.45);
+    }
+    to {
+      opacity: 1;
+      transform: scaleX(1);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clock-second {
+    display: none;
+  }
+}

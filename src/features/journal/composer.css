@@ -155,3 +155,15 @@
     min-height: 48px;
   }
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .journal-kind-picker label {
+    transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+  .journal-kind-picker label:active {
+    transform: scale(0.97);
+  }
+  .journal-schedule-fields > .field {
+    animation: journal-unfold 200ms ease-out both;
+  }
+}

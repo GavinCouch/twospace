@@ -25,6 +25,10 @@
   padding: 11px 13px;
   border-radius: 11px;
   font-size: 0.88rem;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
 }
 .activity-tabs.tabs [aria-selected="true"] {
   color: var(--ink);
@@ -41,6 +45,7 @@
 }
 .activity-tab-panel {
   min-width: 0;
+  animation: activity-enter 280ms cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 .activity-section-intro {
   display: flex;
@@ -167,6 +172,10 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 .idea-card:focus-within {
   border-color: var(--line);
@@ -324,6 +333,7 @@
   color: var(--ink);
   max-width: 640px;
   margin: 0;
+  animation: activity-enter 250ms ease-out;
 }
 .custom-question-form {
   display: grid;
@@ -356,6 +366,10 @@
   gap: 6px;
   font-size: 0.8rem;
   color: var(--muted);
+  transition: color 220ms ease;
+}
+.question-complete .question-status {
+  color: var(--accent);
 }
 .answer-pair {
   display: grid;
@@ -367,6 +381,12 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--bg);
+  transition:
+    background 260ms ease,
+    border-color 260ms ease;
+}
+.answers-revealing {
+  animation: answer-reveal 420ms cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 .answer-card.answer-visible {
   background: var(--raised);
@@ -418,6 +438,9 @@
   grid-template-columns: 56px 1fr;
   align-items: start;
   gap: 12px 17px;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease;
 }
 .game-option > svg {
   color: var(--accent);
@@ -438,6 +461,79 @@
 .game-option > button {
   grid-column: 2;
   justify-self: start;
+}
+.game-option:focus-within {
+  border-color: var(--line);
+}
+@media (hover: hover) and (pointer: fine) {
+  .activity-tabs.tabs button:hover {
+    background: var(--raised);
+    transform: translateY(-1px);
+  }
+  .idea-card:hover {
+    border-color: var(--line);
+    box-shadow: 0 8px 24px #00000015;
+    transform: translateY(-2px);
+  }
+  .game-option:hover {
+    border-color: var(--line);
+    transform: translateY(-2px);
+  }
+  .four-drop:enabled:hover svg {
+    transform: translateY(3px);
+  }
+}
+.activity-tabs.tabs button:active,
+.four-drop:enabled:active {
+  transform: scale(0.96);
+}
+@keyframes activity-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes answer-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes four-piece-drop {
+  0% {
+    transform: translateY(var(--four-drop-from));
+    animation-timing-function: cubic-bezier(0.42, 0, 0.9, 0.75);
+  }
+  76% {
+    transform: translateY(0);
+    animation-timing-function: ease-out;
+  }
+  88% {
+    transform: translateY(-9%);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+@keyframes four-win-emphasis {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px var(--ink);
+  }
+  45% {
+    box-shadow:
+      0 0 0 4px var(--ink),
+      0 0 18px #edb7c74d;
+  }
 }
 .games-grid > .panel {
   border-color: var(--line);
@@ -497,6 +593,16 @@
   border-radius: 6px;
   display: grid;
   place-items: center;
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+.four-drop svg {
+  transition: transform 160ms ease;
+}
+.four-drop:enabled:focus-visible svg {
+  transform: translateY(3px);
 }
 .four-drop:enabled:hover {
   background: var(--accent-soft);
@@ -506,19 +612,25 @@
   opacity: 0.3;
 }
 .four-board {
+  --four-gap: 5px;
   width: 100%;
   table-layout: fixed;
   border-collapse: separate;
-  border-spacing: 5px;
+  border-spacing: var(--four-gap);
   background: var(--raised);
   border: 1px solid #57535d;
   border-radius: 14px;
   padding: 6px;
 }
+.four-board-wrap {
+  overflow: hidden;
+  border-radius: 14px;
+}
 .four-board td {
   padding: 0;
 }
 .four-cell {
+  position: relative;
   display: grid;
   place-items: center;
   width: 100%;
@@ -529,18 +641,33 @@
   font-size: 0.85rem;
   font-weight: 600;
 }
-.four-cell.player-0 {
-  background: #edb7c7;
-  border-color: #edb7c7;
+.four-disc {
+  position: absolute;
+  inset: -1px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
 }
-.four-cell.player-1 {
-  background: #9dbce5;
-  border-color: #9dbce5;
+.four-disc-dropping {
+  z-index: 1;
+  animation: four-piece-drop 480ms both;
 }
 .winning-cell {
   outline: 3px solid #30212a;
   outline-offset: -6px;
   box-shadow: 0 0 0 2px var(--ink);
+}
+.winning-cell .four-disc {
+  box-shadow:
+    inset 0 0 0 3px #30212a,
+    inset 0 0 0 5px var(--ink);
+}
+.four-celebrating .winning-cell {
+  animation: four-win-emphasis 700ms ease-out var(--four-win-delay);
+}
+.four-celebrating .activity-heading > svg {
+  color: var(--accent);
+  animation: answer-reveal 350ms ease-out var(--four-win-delay) backwards;
 }
 .game-rules {
   font-size: 0.81rem;
@@ -964,7 +1091,7 @@
     gap: 13px;
   }
   .four-board {
-    border-spacing: 4px;
+    --four-gap: 4px;
     padding: 4px;
   }
   .four-controls {
@@ -1036,4 +1163,31 @@
 }
 .game-option > .section-art {
   margin-top: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity-tab-panel,
+  .question-prompt h3,
+  .answers-revealing,
+  .four-disc-dropping,
+  .four-celebrating .winning-cell,
+  .four-celebrating .activity-heading > svg {
+    animation: none;
+  }
+  .activity-tabs.tabs button,
+  .idea-card,
+  .game-option,
+  .question-status,
+  .answer-card,
+  .four-drop,
+  .four-drop svg {
+    transition: none;
+    transform: none;
+  }
+  .activity-tabs.tabs button:is(:hover, :active),
+  .idea-card:hover,
+  .game-option:hover,
+  .four-drop:enabled:is(:hover, :active),
+  .four-drop:enabled:is(:hover, :focus-visible) svg {
+    transform: none;
+  }
 }

@@ -17,6 +17,7 @@
   --on-accent: #30212a;
   --primary-ink: var(--on-accent);
   --danger-ink: #30201e;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: dark;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--ink);
@@ -379,4 +380,73 @@ a {
 .empty > .section-art,
 .journal-empty > .section-art {
   margin: 0 auto 22px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .button,
+  .secondary,
+  .quiet,
+  .header-icon {
+    transition:
+      background-color 160ms ease,
+      color 160ms ease,
+      border-color 160ms ease,
+      transform 180ms var(--ease-out),
+      box-shadow 180ms ease;
+  }
+  .button:active:not(:disabled),
+  .secondary:active:not(:disabled),
+  .quiet:active:not(:disabled),
+  .header-icon:active:not(:disabled) {
+    transform: scale(0.96);
+  }
+  .field input,
+  .field textarea,
+  .field select {
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+  .field :is(input, textarea, select):focus-visible {
+    box-shadow: 0 0 0 5px #edb7c70c;
+  }
+  .journal-page,
+  .activities-page,
+  .plans-page,
+  .settings-page,
+  .welcome-form,
+  .pairing-page {
+    animation: page-arrive 340ms var(--ease-out) both;
+  }
+  .form-error,
+  .auth-confirmation {
+    animation: feedback-arrive 200ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .button:hover:not(:disabled):not(:active),
+    .secondary:hover:not(:disabled):not(:active) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px #0002;
+    }
+  }
+  @keyframes page-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes feedback-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

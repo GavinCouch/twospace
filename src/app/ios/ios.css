@@ -70,6 +70,32 @@
   font-size: 0.75rem;
   padding-top: 24px;
 }
+@media (prefers-reduced-motion: no-preference) {
+  .ios-intro {
+    animation: page-arrive 500ms var(--ease-out) both;
+  }
+  .ios-features article {
+    animation: page-arrive 500ms var(--ease-out) both;
+  }
+  .ios-features article:nth-child(2) {
+    animation-delay: 80ms;
+  }
+  .ios-features article:nth-child(3) {
+    animation-delay: 160ms;
+  }
+  .ios-features .section-art,
+  .ios-app-mark {
+    transition: transform 360ms var(--ease-out);
+  }
+  @media (hover: hover) {
+    .ios-features article:hover .section-art {
+      transform: translateY(-5px) rotate(-4deg);
+    }
+    .ios-app-mark:hover {
+      transform: rotate(-3deg) scale(1.03);
+    }
+  }
+}
 @media (max-width: 600px) {
   .ios-page {
     padding: 0 22px 32px;

@@ -2,19 +2,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LogOut, Copy, Check, Sun, Moon } from "lucide-react";
+import { LogOut, Copy, Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { clearPrivateClientState } from "@/features/settings/client-state";
 import { Brand } from "./account-gate";
 import { api, useSpace } from "./space-provider";
 import "./shell.css";
 import { SectionArt } from "./section-art";
+import { SpaceNavigation } from "./space-navigation";
+import { SpaceClock } from "./space-clock";
 
-const navigation = [
-  { href: "/journal", name: "Journal", art: "journal" },
-  { href: "/activities", name: "Activities", art: "activities" },
-  { href: "/plans", name: "Plans", art: "plans" },
-] as const;
 export function AppShell({ children }: { children: ReactNode }) {
   const { data, isPending, error, refetch } = useSpace();
   const path = usePathname();
@@ -48,23 +45,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           <Brand />
         </Link>
-        <nav className="primary-navigation" aria-label="Main navigation">
-          {navigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={
-                path.startsWith(item.href) ? "nav-link active" : "nav-link"
-              }
-              aria-current={path.startsWith(item.href) ? "page" : undefined}
-            >
-              <SectionArt name={item.art} size={30} />
-              {item.name}
-            </Link>
-          ))}
-        </nav>
+        <SpaceNavigation path={path} />
         <div className="account-controls">
-          <Link href="/settings" className="header-icon" aria-label="Settings">
+          <Link
+            href="/settings"
+            className={`header-icon${path === "/settings" ? " active" : ""}`}
+            aria-label="Settings"
+            aria-current={path === "/settings" ? "page" : undefined}
+          >
             <SectionArt name="settings" size={28} />
           </Link>
           <button
@@ -92,41 +80,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               <h2>{data.space.name}</h2>
               <div className="partner-clocks">
-                {data.members.map((person) => {
-                  const hour = clock
-                    ? Number(
-                        new Intl.DateTimeFormat("en", {
-                          hour: "numeric",
-                          hourCycle: "h23",
-                          timeZone: person.timeZone,
-                        }).format(clock),
-                      )
-                    : 12;
-                  const ClockIcon = hour >= 7 && hour < 19 ? Sun : Moon;
-                  return (
-                    <div className="partner-clock" key={person.id}>
-                      <ClockIcon size={15} />
-                      <span>
-                        <strong>
-                          {clock
-                            ? new Intl.DateTimeFormat("en", {
-                                hour: "numeric",
-                                minute: "2-digit",
-                                timeZone: person.timeZone,
-                              }).format(clock)
-                            : "—"}
-                        </strong>
-                        <small>
-                          {person.name} ·{" "}
-                          {person.timeZone
-                            .split("/")
-                            .at(-1)
-                            ?.replaceAll("_", " ")}
-                        </small>
-                      </span>
-                    </div>
-                  );
-                })}
+                {data.members.map((person) => (
+                  <SpaceClock key={person.id} person={person} />
+                ))}
               </div>
             </div>
           </section>
@@ -162,28 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         </main>
       </div>
-      <nav className="mobile-navigation" aria-label="Mobile navigation">
-        {navigation.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={
-              path.startsWith(item.href) ? "nav-link active" : "nav-link"
-            }
-            aria-current={path.startsWith(item.href) ? "page" : undefined}
-          >
-            <SectionArt name={item.art} size={30} />
-            {item.name}
-          </Link>
-        ))}
-        <Link
-          className={path === "/settings" ? "nav-link active" : "nav-link"}
-          href="/settings"
-        >
-          <SectionArt name="settings" size={30} />
-          Settings
-        </Link>
-      </nav>
+      <SpaceNavigation path={path} mobile />
     </div>
   );
 }

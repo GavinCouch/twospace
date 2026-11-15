@@ -16,10 +16,20 @@ export function EntryConversation({ entry, members, me }: { entry: Entry; member
   const reply = useAction();
   const [expanded, setExpanded] = useState(false);
   const [announcement, setAnnouncement] = useState("");
+  const [heartSentCount, setHeartSentCount] = useState(0);
   const id = useId();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<z.infer<typeof replySchema>>({ resolver: zodResolver(replySchema), defaultValues: { body: "" } });
   const reacted = entry.reactions.includes(me.id);
   const partnerHearts = members.filter(person => person.id !== me.id && entry.reactions.includes(person.id));
+
+  async function toggleHeart() {
+    try {
+      const updated = await reaction.run<Entry>(`/api/entries/${entry.id}/reaction`, {});
+      if (!reacted && updated.reactions.includes(me.id)) {
+        setHeartSentCount(count => count + 1);
+      }
+    } catch { /* The mutation error stays visible; failed reactions do not celebrate. */ }
+  }
 
   async function addReply(values: z.infer<typeof replySchema>) {
     setAnnouncement("");
@@ -29,7 +39,7 @@ export function EntryConversation({ entry, members, me }: { entry: Entry; member
 
   return <div className="journal-conversation">
     <div className="journal-entry-actions">
-      <button type="button" className={`quiet journal-heart-button${reacted ? " is-selected" : ""}`} aria-pressed={reacted} aria-label={reacted ? "Remove your heart" : "Send a heart"} disabled={reaction.pending} onClick={() => { void reaction.run(`/api/entries/${entry.id}/reaction`, {}).catch(() => {}); }}><Heart size={17} fill={reacted ? "currentColor" : "none"} />{reacted ? "Heart sent" : "Heart"}</button>
+      <button type="button" className={`quiet journal-heart-button${reacted ? " is-selected" : ""}`} aria-pressed={reacted} aria-label={reacted ? "Remove your heart" : "Send a heart"} disabled={reaction.pending} onClick={() => { void toggleHeart(); }}><Heart key={heartSentCount} className={heartSentCount ? "journal-heart-pop" : undefined} size={17} fill={reacted ? "currentColor" : "none"} aria-hidden="true" />{reacted ? "Heart sent" : "Heart"}</button>
       <button type="button" className="quiet" aria-expanded={expanded} aria-controls={`${id}-replies`} onClick={() => setExpanded(value => !value)}><MessageCircle size={17} />{entry.replies.length ? `${entry.replies.length} ${entry.replies.length === 1 ? "reply" : "replies"}` : "Reply"}</button>
       {partnerHearts.length > 0 && <span className="journal-heart-byline">{partnerHearts.map(person => person.name).join(", ")} left a heart</span>}
     </div>
@@ -39,11 +49,11 @@ export function EntryConversation({ entry, members, me }: { entry: Entry; member
         <div className="journal-reply-byline"><strong>{members.find(person => person.id === item.authorId)?.name || "Member"}</strong><time dateTime={item.createdAt}>{entryDate(item.createdAt, me.timeZone)}</time></div>
         <p>{item.body}</p>
       </li>)}</ol>}
-      {entry.replies.length < 100 ? <form className="journal-reply-form" onSubmit={handleSubmit(addReply)} noValidate>
-        <label className="field" htmlFor={`${id}-reply`}>Your reply<textarea id={`${id}-reply`} rows={2} maxLength={2000} placeholder="Write a reply…" {...register("body")} aria-invalid={Boolean(errors.body)} aria-describedby={errors.body ? `${id}-reply-error` : undefined} /></label>
+      {entry.replies.length < 100 ? <form className="journal-reply-form" onSubmit={handleSubmit(addReply)} aria-busy={reply.pending} noValidate>
+        <label className="field" htmlFor={`${id}-reply`}>Your reply<textarea id={`${id}-reply`} rows={2} maxLength={2000} placeholder="Write a reply…" {...register("body")} readOnly={reply.pending} aria-invalid={Boolean(errors.body)} aria-describedby={errors.body ? `${id}-reply-error` : undefined} /></label>
         {errors.body && <p className="journal-field-error" id={`${id}-reply-error`}>{errors.body.message}</p>}
         {reply.error && <p className="form-error" role="alert">{reply.error}</p>}
-        <div className="journal-reply-footer"><span className="journal-visually-hidden" role="status">{announcement}</span><button type="submit" className="secondary" disabled={reply.pending}><Send size={15} />{reply.pending ? "Sending…" : "Send reply"}</button></div>
+        <div className="journal-reply-footer"><span className="journal-reply-status" role="status">{announcement}</span><button type="submit" className="secondary" disabled={reply.pending}><Send size={15} />{reply.pending ? "Sending…" : "Send reply"}</button></div>
       </form> : <p className="muted">This entry has reached its 100-reply limit.</p>}
     </div>
   </div>;

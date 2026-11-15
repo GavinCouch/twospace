@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   Check,
   CalendarPlus,
@@ -29,6 +29,7 @@ export function PlanCard({
   const [expanded, setExpanded] = useState(false);
   const [remove, setRemove] = useState(false);
   const [saved, setSaved] = useState(false);
+  const detailsId = useId();
   const date = new Intl.DateTimeFormat("en", {
     timeZone: me.timeZone,
     day: "numeric",
@@ -142,16 +143,17 @@ export function PlanCard({
             </button>
           )}
           <button
-            className="quiet"
+            className="quiet plan-details-toggle"
             aria-expanded={expanded}
+            aria-controls={detailsId}
             onClick={() => setExpanded(!expanded)}
           >
             Details
-            <ChevronDown size={14} />
+            <ChevronDown size={14} aria-hidden="true" />
           </button>
         </div>
         {expanded && (
-          <div className="plan-details">
+          <div className="plan-details" id={detailsId}>
             {plan.link && (
               <a
                 className="secondary"

@@ -22,12 +22,14 @@ export function EntryCard({
   me,
   collections = [],
   featured = false,
+  arriving = false,
 }: {
   entry: Entry;
   members: Person[];
   me: Person;
   collections?: string[];
   featured?: boolean;
+  arriving?: boolean;
 }) {
   const author = members.find((person) => person.id === entry.authorId);
   const [photoOpen, setPhotoOpen] = useState(false);
@@ -41,7 +43,7 @@ export function EntryCard({
 
   return (
     <article
-      className={`journal-entry journal-entry-${entry.kind}${entry.locked ? " is-locked" : ""}${featured ? " is-featured" : ""}`}
+      className={`journal-entry journal-entry-${entry.kind}${entry.locked ? " is-locked" : ""}${featured ? " is-featured" : ""}${arriving ? " is-arriving" : ""}`}
       id={`entry-${entry.id}`}
     >
       <header className="journal-entry-heading">
