@@ -205,6 +205,27 @@ export async function transaction<T>(
     }
   });
 }
+
+export async function withAuthMigrationLock<T>(
+  task: () => Promise<T>,
+): Promise<T> {
+  if (!pool) return task();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtext('twospace-auth-schema'))",
+    );
+    const result = await task();
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 export type ResourceRow = {
   id: string;
   space_id: string;

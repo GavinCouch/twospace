@@ -8,7 +8,12 @@ import {
 } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { authDatabase, databaseReady, dataDirectory, pool } from "./database";
+import {
+  authDatabase,
+  databaseReady,
+  dataDirectory,
+  withAuthMigrationLock,
+} from "./database";
 import { assertRuntimeConfiguration, runtimeConfig } from "./config";
 import { queueEmail } from "./email";
 
@@ -103,22 +108,10 @@ export function ready(): Promise<void> {
     .then(async () => {
       assertRuntimeConfiguration();
       await databaseReady();
-      const client = pool ? await pool.connect() : undefined;
-      try {
-        if (client)
-          await client.query(
-            "SELECT pg_advisory_lock(hashtext('twospace-auth-schema'))",
-          );
+      await withAuthMigrationLock(async () => {
         const { runMigrations } = await getMigrations(auth.options);
         await runMigrations();
-      } finally {
-        if (client) {
-          await client.query(
-            "SELECT pg_advisory_unlock(hashtext('twospace-auth-schema'))",
-          );
-          client.release();
-        }
-      }
+      });
     })
     .catch((error) => {
       globals.twospaceAuthReady = undefined;
