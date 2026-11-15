@@ -11,6 +11,7 @@ import {
 import { getObject, putObject, removeObject } from "./object-store";
 import { context, HttpError, type Context } from "./http";
 import type { Entry, PhotoPair } from "@/shared/types";
+import type { ProfilePhoto } from "./profile-photos";
 const LIMIT = 10 * 1024 * 1024;
 type Media = {
   id: string;
@@ -30,7 +31,7 @@ export async function assertMedia(ctx: Context, mediaId: string) {
     throw new HttpError(400, "Upload a file for this item first.");
   return media;
 }
-async function boundedBody(request: Request) {
+export async function boundedBody(request: Request) {
   if (Number(request.headers.get("content-length")) > LIMIT)
     throw new HttpError(413, "Choose a file smaller than 10 MB.");
   const reader = request.body?.getReader();
@@ -158,13 +159,22 @@ export async function uploadMedia(request: Request) {
 }
 export async function getMedia(request: Request, mediaId: string) {
   const ctx = await context(request);
-  const media = await row<Media>(
-    "SELECT * FROM media WHERE id=? AND space_id=?",
-    mediaId,
-    ctx.spaceId,
-  );
-  if (!media) throw new HttpError(404, "This file could not be found.");
-  if (media.owner_id !== ctx.account.id) {
+  async function permittedMedia() {
+    if (
+      !(await row(
+        "SELECT 1 FROM memberships WHERE user_id=? AND space_id=?",
+        ctx.account.id,
+        ctx.spaceId,
+      ))
+    )
+      throw new HttpError(403, "You no longer belong to this space.");
+    const media = await row<Media>(
+      "SELECT * FROM media WHERE id=? AND space_id=?",
+      mediaId,
+      ctx.spaceId,
+    );
+    if (!media) throw new HttpError(404, "This file could not be found.");
+    if (media.owner_id === ctx.account.id) return media;
     const visibleEntry = (await resources<Entry>(ctx.spaceId, "entry")).some(
       (entry) =>
         entry.mediaId === mediaId &&
@@ -173,10 +183,28 @@ export async function getMedia(request: Request, mediaId: string) {
     const visiblePair = (
       await resources<PhotoPair>(ctx.spaceId, "photoPair")
     ).some((pair) => pair.photos.some((photo) => photo.mediaId === mediaId));
-    if (!visibleEntry && !visiblePair)
+    const profilePhoto = (
+      await resources<ProfilePhoto>(ctx.spaceId, "profilePhoto")
+    ).some(
+      (photo) => photo.mediaId === mediaId && photo.authorId === media.owner_id,
+    );
+    const visibleProfile =
+      profilePhoto &&
+      Boolean(
+        await row(
+          "SELECT 1 FROM memberships WHERE user_id=? AND space_id=?",
+          media.owner_id,
+          ctx.spaceId,
+        ),
+      );
+    if (!visibleEntry && !visiblePair && !visibleProfile)
       throw new HttpError(404, "This file could not be found.");
+    return media;
   }
+  const media = await permittedMedia();
   const buffer = await getObject(media.filename);
+  // Storage can take time; a removed photo or departed viewer must not get a late response.
+  await permittedMedia();
   return new Response(Uint8Array.from(buffer), {
     headers: {
       "Content-Type": media.mime,
@@ -194,6 +222,9 @@ export async function discardUnusedMedia(spaceId: string, mediaId: string) {
     ) ||
     (await resources<PhotoPair>(spaceId, "photoPair")).some((pair) =>
       pair.photos.some((photo) => photo.mediaId === mediaId),
+    ) ||
+    (await resources<ProfilePhoto>(spaceId, "profilePhoto")).some(
+      (photo) => photo.mediaId === mediaId,
     );
   if (attached) return;
   const media = await row<Media>(

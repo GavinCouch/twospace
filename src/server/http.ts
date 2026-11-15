@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { auth, ready, appOrigin } from "./auth";
 import { runtimeConfig } from "./config";
-import { execute, row, rows, transaction } from "./database";
+import { execute, resources, row, rows, transaction } from "./database";
 import type { Account, Person } from "@/shared/types";
+import type { ProfilePhoto } from "./profile-photos";
 export class HttpError extends Error {
   constructor(
     public status: number,
@@ -86,6 +87,11 @@ export async function context(request: Request): Promise<Context> {
   ).map(person);
   if (!members.some((member) => member.id === current.id))
     throw new HttpError(403, "You no longer belong to this space.");
+  const photos = await resources<ProfilePhoto>(current.spaceId, "profilePhoto");
+  for (const member of members) {
+    const photo = photos.find((item) => item.authorId === member.id);
+    if (photo) member.avatarMediaId = photo.mediaId;
+  }
   return {
     account: current,
     spaceId: current.spaceId,

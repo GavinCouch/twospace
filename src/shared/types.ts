@@ -1,4 +1,4 @@
-export type Person = { id: string; name: string; timeZone: string; color: string; availableFrom: number; availableTo: number };
+export type Person = { id: string; name: string; timeZone: string; color: string; availableFrom: number; availableTo: number; avatarMediaId?: string };
 export type EntryKind = "note" | "photo" | "link" | "voice" | "drawing" | "memory";
 export type Reply = { id: string; authorId: string; body: string; createdAt: string };
 export type Entry = {
