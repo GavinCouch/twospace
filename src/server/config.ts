@@ -1,15 +1,18 @@
+import { assertEmailConfiguration, emailConfiguration } from "./email-config";
+
 export type RuntimeEnvironment = Record<string, string | undefined>;
 
 export function configuration(env: RuntimeEnvironment = process.env) {
   const cloud = env.TWOSPACE_STORAGE
     ? env.TWOSPACE_STORAGE === "cloud"
     : Boolean(env.DATABASE_URL);
+  const emailReady = Boolean(emailConfiguration(env));
   return {
     cloud,
     origin: env.BETTER_AUTH_URL || "http://127.0.0.1:3100",
     google: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
-    passwordReset: Boolean(env.RESEND_API_KEY && env.EMAIL_FROM),
-    emailPassword: !cloud || Boolean(env.RESEND_API_KEY && env.EMAIL_FROM),
+    passwordReset: emailReady,
+    emailPassword: !cloud || emailReady,
     emailVerification: cloud,
     objectStorage: env.SUPABASE_URL ? ("supabase" as const) : ("s3" as const),
   };
@@ -54,13 +57,11 @@ export function assertRuntimeConfiguration(
     if (env.NODE_ENV === "production" && !config.origin.startsWith("https://"))
       throw new Error("BETTER_AUTH_URL must use HTTPS in production.");
   }
-  for (const keys of [
-    ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
-    ["RESEND_API_KEY", "EMAIL_FROM"],
-  ]) {
+  for (const keys of [["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"]]) {
     if (keys.some((key) => env[key]) && !keys.every((key) => env[key]))
       throw new Error(`Finish configuring ${keys.join(", ")}.`);
   }
+  assertEmailConfiguration(env);
 }
 
 export const runtimeConfig = configuration();
