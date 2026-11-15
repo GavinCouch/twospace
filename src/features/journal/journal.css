@@ -314,22 +314,6 @@
 .journal-later > .journal-entry-grid {
   padding-top: 5px;
 }
-.journal-demo-credits {
-  padding: 16px 0 8px;
-  font-size: 0.7rem;
-  line-height: 1.8;
-  color: var(--j-muted);
-  max-width: 600px;
-}
-.journal-demo-credits summary {
-  cursor: pointer;
-}
-.journal-demo-credits p {
-  margin: 12px 0;
-}
-.journal-demo-credits a {
-  color: var(--j-blue);
-}
 .journal-empty,
 .journal-loading {
   padding: 28px 0;

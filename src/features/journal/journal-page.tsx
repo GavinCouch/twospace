@@ -243,46 +243,6 @@ export default function JournalPage() {
         </div>
         {!hasFilters && <JournalSidebar space={data} />}
       </div>
-      {data.space.isDemo && (
-        <details className="journal-demo-credits">
-          <summary>Demo photo credits</summary>
-          <p>
-            Illustrative photos by{" "}
-            <a
-              href="https://unsplash.com/photos/pasta-on-plate-with-fork-t8hTmte4O_g"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Bruna Branco
-            </a>
-            ,{" "}
-            <a
-              href="https://unsplash.com/photos/cloudy-sky-at-daytime-v9bnfMCyKbg"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Billy Huynh
-            </a>
-            ,{" "}
-            <a
-              href="https://unsplash.com/photos/coffee-in-cup-R5RtlMOYgX8"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Olivia Anne Snyder
-            </a>
-            , and{" "}
-            <a
-              href="https://unsplash.com/photos/cloudy-sky-2W5LoumSdfw"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Sebastien Gabriel
-            </a>{" "}
-            on Unsplash. Demo people and entries are fictional.
-          </p>
-        </details>
-      )}
       {composing && (
         <EntryComposer
           key={`${data.space.id}-${data.me.id}`}

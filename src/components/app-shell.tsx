@@ -8,7 +8,6 @@ import {
   CalendarDays,
   Settings,
   LogOut,
-  ChevronDown,
   Copy,
   Check,
   Sun,
@@ -30,30 +29,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const path = usePathname();
   const client = useQueryClient();
   const [clock, setClock] = useState<Date | null>(null);
-  const [switching, setSwitching] = useState(false);
   const [notice, setNotice] = useState("");
   useEffect(() => {
     setClock(new Date());
     const timer = setInterval(() => setClock(new Date()), 30_000);
     return () => clearInterval(timer);
   }, []);
-  async function switchProfile(userId: string) {
-    setSwitching(true);
-    setNotice("");
-    try {
-      await api("/api/demo/switch", {
-        method: "POST",
-        body: JSON.stringify({ userId }),
-      });
-      await clearPrivateClientState(client);
-      window.location.reload();
-    } catch (cause) {
-      setNotice(
-        cause instanceof Error ? cause.message : "Couldn’t switch profiles.",
-      );
-      setSwitching(false);
-    }
-  }
   async function signOut() {
     try {
       await api("/api/auth/sign-out", { method: "POST", body: "{}" });
@@ -92,24 +73,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
         <div className="account-controls">
-          {data?.space.isDemo && (
-            <label className="demo-switch">
-              <span>Demo</span>
-              <select
-                aria-label="View sample space as"
-                value={data.me.id}
-                disabled={switching}
-                onChange={(e) => switchProfile(e.target.value)}
-              >
-                {data.members.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown size={13} />
-            </label>
-          )}
           <Link href="/settings" className="header-icon" aria-label="Settings">
             <Settings size={20} />
           </Link>

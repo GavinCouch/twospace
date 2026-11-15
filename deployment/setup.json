@@ -50,6 +50,6 @@
       "Unknown emails receive the same public reset response"
     ]
   },
-  "sampleSpaces": "Each visitor gets an isolated cloud-backed sample space when deployed. Profile switching is restricted to the two generated sample identities. Sample access expires after 24 hours.",
-  "verificationStatus": "The hosted app passed Google sign-in, two synthetic cloud identities sharing updates, and private file access checks on 2026-11-15. Brevo confirmed reset-email delivery. Real partner onboarding and a full email-password reset remain user-driven checks."
+  "verificationStatus": "The hosted app passed Google sign-in, two synthetic cloud identities sharing updates, and private file access checks on 2026-11-15. Brevo confirmed reset-email delivery. Real partner onboarding and a full email-password reset remain user-driven checks.",
+  "accounts": "Every shared space requires real signed-in accounts. Sample creation and profile switching are retired; historical sample records remain stored but cannot be accessed through legacy sample sessions."
 }
