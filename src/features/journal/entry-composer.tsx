@@ -26,7 +26,7 @@ const composerSchema = noteSchema.extend({
 type ComposerValues = z.infer<typeof composerSchema>;
 const defaults: ComposerValues = { kind: "note", title: "", body: "", url: "", collection: "", revealLocal: "" };
 
-export function EntryComposer({ me, spaceId, collections, onClose }: { me: Person; spaceId: string; collections: string[]; onClose: () => void }) {
+export function EntryComposer({ me, spaceId, collections, onClose, onSaved }: { me: Person; spaceId: string; collections: string[]; onClose: () => void; onSaved?: () => void }) {
   const action = useAction();
   const upload = useMediaUpload();
   const audioUpload = useMediaUpload("audio");
@@ -87,6 +87,7 @@ export function EntryComposer({ me, spaceId, collections, onClose }: { me: Perso
         ...(revealAt ? { revealAt } : {}),
       });
       try { sessionStorage.removeItem(key); } catch { /* Saving the entry does not depend on local storage. */ }
+      onSaved?.();
       onClose();
     } catch { /* The mutation error remains visible and the draft stays intact. */ }
   }

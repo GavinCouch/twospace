@@ -21,14 +21,14 @@ export function EntryCard({
   members,
   me,
   collections = [],
-  featured = false,
+  timeOnly = false,
   arriving = false,
 }: {
   entry: Entry;
   members: Person[];
   me: Person;
   collections?: string[];
-  featured?: boolean;
+  timeOnly?: boolean;
   arriving?: boolean;
 }) {
   const author = members.find((person) => person.id === entry.authorId);
@@ -43,7 +43,7 @@ export function EntryCard({
 
   return (
     <article
-      className={`journal-entry journal-entry-${entry.kind}${entry.locked ? " is-locked" : ""}${featured ? " is-featured" : ""}${arriving ? " is-arriving" : ""}`}
+      className={`journal-entry journal-entry-${entry.kind}${entry.locked ? " is-locked" : ""}${arriving ? " is-arriving" : ""}`}
       id={`entry-${entry.id}`}
     >
       <header className="journal-entry-heading">
@@ -52,7 +52,13 @@ export function EntryCard({
           <strong>{author?.name || "Member"}</strong>
           <span>
             <time dateTime={entry.createdAt}>
-              {entryDate(entry.createdAt, me.timeZone)}
+              {timeOnly
+                ? new Intl.DateTimeFormat("en", {
+                    hour: "numeric",
+                    minute: "2-digit",
+                    timeZone: me.timeZone,
+                  }).format(new Date(entry.createdAt))
+                : entryDate(entry.createdAt, me.timeZone)}
             </time>
             <span aria-hidden="true"> · </span>
             {entryKindLabels[entry.kind]}
