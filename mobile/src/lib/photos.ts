@@ -1,16 +1,54 @@
 import * as ImagePicker from "expo-image-picker";
+import { ImageManipulator, SaveFormat } from "expo-image-manipulator";
+import { File } from "expo-file-system";
 import { api } from "./api";
+import { preparePhoto, validatePhoto } from "./photo-upload";
 export async function choosePhoto() {
-  const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.85, selectionLimit: 1, allowsMultipleSelection: false });
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ["images"],
+    quality: 0.85,
+    selectionLimit: 1,
+    allowsMultipleSelection: false,
+  });
   if (result.canceled || !result.assets[0]) return null;
-  const asset = result.assets[0];
-  if (asset.fileSize && asset.fileSize > 10 * 1024 * 1024) throw new Error("Choose a photo smaller than 10 MB.");
-  if (asset.width * asset.height > 25_000_000) throw new Error("Choose a photo smaller than 25 megapixels.");
+  const picked = result.assets[0];
+  const asset = {
+    ...picked,
+    fileSize: picked.fileSize ?? new File(picked.uri).size,
+  };
+  validatePhoto(asset);
   return asset;
 }
 export async function uploadPhoto(photo: ImagePicker.ImagePickerAsset) {
-  const blob = await (await fetch(photo.uri)).blob();
-  if (blob.size > 10 * 1024 * 1024) throw new Error("Choose a photo smaller than 10 MB.");
-  const result = await api<{ id: string }>("/api/media", { method: "POST", headers: { "Content-Type": photo.mimeType || blob.type || "image/jpeg" }, body: blob });
+  const blob = await preparePhoto(
+    { ...photo, fileSize: photo.fileSize ?? new File(photo.uri).size },
+    async (uri) => {
+      const context = ImageManipulator.manipulate(uri);
+      try {
+        const image = await context.renderAsync();
+        try {
+          const saved = await image.saveAsync({
+            format: SaveFormat.JPEG,
+            compress: 0.85,
+          });
+          return { ...saved, fileSize: new File(saved.uri).size };
+        } finally {
+          image.release();
+        }
+      } finally {
+        context.release();
+      }
+    },
+    async (uri) => (await fetch(uri)).blob(),
+    async (uri) => {
+      const file = new File(uri);
+      if (file.exists) await file.delete();
+    },
+  );
+  const result = await api<{ id: string }>("/api/media", {
+    method: "POST",
+    headers: { "Content-Type": "image/jpeg" },
+    body: blob,
+  });
   return result.id;
 }

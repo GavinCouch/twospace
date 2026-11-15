@@ -10,11 +10,26 @@ import { styles } from "./theme";
 function Gate() {
   useNativeQueryEvents();
   const account = useAccount();
-  useEffect(() => { if (account.data === null) queryClient.removeQueries({ queryKey: ["space"] }); }, [account.data]);
-  if (account.isPending) return <Loading/>;
-  if (account.error) return <Screen><ErrorText error={account.error}/><Button onPress={() => void account.refetch()}>Try again</Button></Screen>;
-  if (!account.data) return <SignInScreen/>;
-  if (!account.data.spaceId) return <PairingScreen account={account.data}/>;
-  return <Space key={account.data.id} account={account.data}/>;
+  useEffect(() => {
+    if (account.data === null)
+      queryClient.removeQueries({ queryKey: ["space"] });
+  }, [account.data]);
+  if (account.isPending) return <Loading />;
+  if (account.error)
+    return (
+      <Screen>
+        <ErrorText error={account.error} />
+        <Button onPress={() => void account.refetch()}>Try again</Button>
+      </Screen>
+    );
+  if (!account.data) return <SignInScreen />;
+  if (!account.data.spaceId) return <PairingScreen account={account.data} />;
+  return <Space key={account.data.id} account={account.data} />;
 }
-export function Root() { return <QueryClientProvider client={queryClient}><Gate/></QueryClientProvider>; }
+export function Root() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Gate />
+    </QueryClientProvider>
+  );
+}
