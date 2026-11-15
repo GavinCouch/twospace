@@ -54,7 +54,7 @@ describe("deployment configuration", () => {
       }),
     ).toMatchObject({ passwordReset: true, emailPassword: true });
   });
-  it("keeps the local account and demo experience available without cloud keys", () => {
+  it("keeps local email accounts available without cloud keys", () => {
     expect(configuration({ TWOSPACE_STORAGE: "local" })).toMatchObject({
       cloud: false,
       emailPassword: true,

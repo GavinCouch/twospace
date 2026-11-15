@@ -81,7 +81,6 @@ export const auth = betterAuth({
     sendOnSignUp: runtimeConfig.cloud,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      if (user.email.endsWith("@demo.twospace.invalid")) return;
       queueEmail({
         to: user.email,
         subject: "Confirm your TwoSpace email",

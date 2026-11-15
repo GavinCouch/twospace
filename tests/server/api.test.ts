@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { createTestIdentity } from "./fixtures/accounts";
 import type { WordState } from "@/shared/types";
 
 const directory = mkdtempSync(join(tmpdir(), "twospace-api-"));
@@ -29,22 +30,11 @@ const request = (cookie: string, body?: unknown, method = "POST") =>
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
-async function signUp(name: string) {
-  const result = await authModule.auth.api.signUpEmail({
-    body: {
-      name,
-      email: `${name.toLowerCase()}@example.test`,
-      password: "test-passphrase-12345",
-    },
-    asResponse: true,
-  });
-  expect(result.status).toBe(200);
-  const user = await result.json();
-  const cookie = result.headers
-    .getSetCookie()
-    .map((value) => value.split(";")[0])
-    .join("; ");
-  return { id: user.user.id as string, cookie };
+function signUp(name: string) {
+  return createTestIdentity(
+    { auth: authModule.auth, execute: storage.execute },
+    name,
+  );
 }
 beforeAll(async () => {
   authModule = await import("@/server/auth");

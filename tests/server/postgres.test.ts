@@ -1,6 +1,9 @@
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { randomBytes, randomUUID } from "node:crypto";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { randomBytes } from "node:crypto";
 import { Pool } from "pg";
+import { createTestIdentity } from "./fixtures/accounts";
+const { queueEmail } = vi.hoisted(() => ({ queueEmail: vi.fn() }));
+vi.mock("@/server/email", () => ({ queueEmail }));
 
 const connectionString = process.env.TWOSPACE_TEST_POSTGRES_URL;
 const enabled = Boolean(connectionString);
@@ -30,28 +33,11 @@ const request = (cookie: string, body?: unknown, method = "POST") =>
     },
     ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
   });
-async function identity(name: string): Promise<Identity> {
-  const email = `${name.toLowerCase()}.${randomUUID()}@demo.twospace.invalid`;
-  const password = randomBytes(30).toString("base64url");
-  const created = await authModule.auth.api.signUpEmail({
-    body: { name, email, password },
-  });
-  await storage.execute(
-    'UPDATE "twospace"."user" SET "emailVerified"=TRUE WHERE id=?',
-    created.user.id,
+function identity(name: string): Promise<Identity> {
+  return createTestIdentity(
+    { auth: authModule.auth, execute: storage.execute, cloud: true },
+    name,
   );
-  const signedIn = await authModule.auth.api.signInEmail({
-    body: { email, password },
-    asResponse: true,
-  });
-  expect(signedIn.status).toBe(200);
-  return {
-    id: created.user.id,
-    cookie: signedIn.headers
-      .getSetCookie()
-      .map((value) => value.split(";")[0])
-      .join("; "),
-  };
 }
 
 describe.skipIf(!enabled)(
