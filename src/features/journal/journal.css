@@ -964,3 +964,8 @@
     max-height: none;
   }
 }
+
+.journal-filter-toggle.has-filters {
+  color: var(--accent);
+  background: var(--accent-soft);
+}

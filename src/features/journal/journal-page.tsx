@@ -74,7 +74,7 @@ export default function JournalPage() {
         <div className="journal-heading-actions">
           <button
             type="button"
-            className="quiet journal-filter-toggle"
+            className={`quiet journal-filter-toggle${hasFilters ? " has-filters" : ""}`}
             aria-label="Filter journal"
             aria-expanded={filtersOpen}
             aria-controls="journal-filters"
@@ -91,7 +91,7 @@ export default function JournalPage() {
           </button>
         </div>
       </header>
-      {(filtersOpen || hasFilters) && (
+      {filtersOpen && (
         <div className="journal-toolbar" id="journal-filters">
           <label className="journal-search">
             <Search size={18} aria-hidden="true" />
