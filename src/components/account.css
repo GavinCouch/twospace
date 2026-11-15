@@ -209,3 +209,22 @@
 .welcome-preview img {
   filter: brightness(0.6) saturate(0.4);
 }
+.welcome {
+  max-width: 1160px;
+}
+.welcome-layout {
+  display: block;
+  max-width: 440px;
+  margin: 70px auto;
+}
+.welcome-form {
+  padding: 32px;
+}
+@media (max-width: 760px) {
+  .welcome-layout {
+    margin: 40px auto;
+  }
+  .welcome-form {
+    padding: 25px;
+  }
+}

@@ -57,7 +57,7 @@ export function Brand() {
   return (
     <span className="brand">
       <Image
-        src="/brand/logo.png"
+        src="/brand/logo-dark.png"
         width={44}
         height={44}
         sizes="44px"

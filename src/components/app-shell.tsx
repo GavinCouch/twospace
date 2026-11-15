@@ -15,6 +15,7 @@ import {
   Moon,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { clearPrivateClientState } from "@/features/settings/client-state";
 import { Brand } from "./account-gate";
 import { api, useSpace } from "./space-provider";
 import "./shell.css";
@@ -44,8 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         method: "POST",
         body: JSON.stringify({ userId }),
       });
-      await client.cancelQueries();
-      client.clear();
+      await clearPrivateClientState(client);
       window.location.reload();
     } catch (cause) {
       setNotice(
@@ -57,8 +57,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   async function signOut() {
     try {
       await api("/api/auth/sign-out", { method: "POST", body: "{}" });
-      await client.cancelQueries();
-      client.clear();
+      await clearPrivateClientState(client);
       window.location.assign("/");
     } catch (cause) {
       setNotice(cause instanceof Error ? cause.message : "Couldn’t sign out.");

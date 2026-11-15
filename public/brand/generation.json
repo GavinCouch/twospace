@@ -16,6 +16,12 @@
       "key": "twospace_background",
       "prompt": "Use case: stylized-concept. Asset type: subtle full-bleed website background texture for TwoSpace. A high quality warm-white handmade paper surface, almost ivory #faf8f3, with very subtle natural paper fibers and faint cool blue daylight near the far upper right edge and a trace of warm peach at the far lower left edge. Extremely restrained, bright and quiet, not a gradient design, not marble, not noise overlay, no objects, no shapes, no words, no borders or vignette. This image must support dark text and white content sheets. Wide landscape composition.",
       "transparent_background": false
+    },
+    {
+      "key": "twospace_logo_dark",
+      "file": "logo-dark.png",
+      "prompt": "Design a single refined brand symbol for an intimate private couples app called TwoSpace, no text or letters. Two soft offset rounded arch shapes gently fitting together with a small negative space gap: one warm ivory, one muted rose pink. Flat clean filled silhouettes with precise smooth edges, inspired by simple excellent iOS app icon marks, but original. Absolutely no hearts, gradients, shadows, glow, sparkles, lettering, border, or app icon tile. Compact balanced emblem, readable at 28px. Isolated on fully transparent background. The finished mark will sit on charcoal #131315. Please fill most of a square canvas with the emblem, minimal transparent margin.",
+      "transparent_background": true
     }
   ]
 }
