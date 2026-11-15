@@ -17,7 +17,8 @@ export async function createPlan(request: Request) {
 }
 export async function editPlan(request: Request, planId: string) {
   const ctx = await context(request);
-  const input = await json(request, z.object(planFields).partial().extend({
+  // Create defaults must not run on PATCH: omitted fields retain their stored value.
+  const input = await json(request, z.object({ ...planFields, link: optionalUrl, notes: z.string().trim().max(4000), checklist }).partial().extend({
     status: z.enum(['proposed', 'accepted', 'done']).optional(), accepted: z.boolean().optional(),
     checklistAction: z.discriminatedUnion('type', [
       z.object({ type: z.literal('add'), text: z.string().trim().min(1).max(300) }),
