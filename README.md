@@ -19,7 +19,7 @@
   </p>
 </div>
 
-![TwoSpace journal: entries grouped by date, with partner clocks and a simple note composer](docs/assets/journal-desktop.jpg)
+![TwoSpace journal: entries grouped by date, with partner clocks, replies, and reactions](docs/assets/journal-desktop.jpg)
 
 <p align="center"><sub>Product screenshots use fictional local test accounts.</sub></p>
 
