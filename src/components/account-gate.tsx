@@ -6,7 +6,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Link2 } from "lucide-react";
+import { ArrowRight, Link2, LogOut } from "lucide-react";
 import { api, RequestError, SpaceAccess } from "./space-provider";
 import {
   ProviderButtons,
@@ -14,7 +14,9 @@ import {
 } from "@/features/auth/provider-buttons";
 import { authRequest, authErrorMessage } from "@/features/auth/auth-api";
 import { useAuthConfig } from "@/features/auth/use-auth-config";
+import { clearPrivateClientState } from "@/features/settings/client-state";
 import type { Account } from "@/shared/types";
+import { IphoneAppLink } from "./iphone-app-link";
 import "./account.css";
 
 const credentials = z.object({
@@ -31,7 +33,16 @@ async function loadAccount() {
     throw error;
   }
 }
-export function AccountGate({ children }: { children: ReactNode }) {
+export type SignInMode = "sign-in" | "sign-up";
+export function AccountGate({
+  children,
+  signInMode = "sign-in",
+  signedInContent,
+}: {
+  children?: ReactNode;
+  signInMode?: SignInMode;
+  signedInContent?: ReactNode;
+}) {
   const account = useQuery({ queryKey: ["account"], queryFn: loadAccount });
   if (account.isPending)
     return (
@@ -50,7 +61,9 @@ export function AccountGate({ children }: { children: ReactNode }) {
         </button>
       </main>
     );
-  if (!account.data) return <SignIn />;
+  if (!account.data)
+    return <SignIn key={signInMode} initialMode={signInMode} />;
+  if (signedInContent !== undefined) return <>{signedInContent}</>;
   if (!account.data.spaceId) return <Pairing account={account.data} />;
   return <SpaceAccess enabled>{children}</SpaceAccess>;
 }
@@ -69,8 +82,8 @@ export function Brand() {
     </span>
   );
 }
-function SignIn() {
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+function SignIn({ initialMode = "sign-in" }: { initialMode?: SignInMode }) {
+  const [mode, setMode] = useState<SignInMode>(initialMode);
   const [error, setError] = useState("");
   const [verificationEmail, setVerificationEmail] = useState("");
   const config = useAuthConfig();
@@ -109,10 +122,10 @@ function SignIn() {
   return (
     <main className="welcome">
       <header>
-        <Brand />
-        <Link className="iphone-page-link" href="/ios">
-          iPhone app <span>Coming soon</span>
+        <Link href="/" aria-label="TwoSpace home">
+          <Brand />
         </Link>
+        <IphoneAppLink />
       </header>
       <div className="welcome-layout">
         <section className="welcome-form">
@@ -260,14 +273,21 @@ function SignIn() {
     </main>
   );
 }
-function Pairing({ account }: { account: Account }) {
+export function Pairing({
+  account,
+  onNavigate = (path) => window.location.assign(path),
+}: {
+  account: Account;
+  onNavigate?: (path: string) => void;
+}) {
   const client = useQueryClient();
   const [name, setName] = useState("Our space");
   const [token, setToken] = useState("");
   const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
+  const [pending, setPending] = useState<"pairing" | "signout" | null>(null);
   async function act(path: string, body: unknown) {
-    setPending(true);
+    if (pending) return;
+    setPending("pairing");
     setError("");
     try {
       await api(path, { method: "POST", body: JSON.stringify(body) });
@@ -275,12 +295,36 @@ function Pairing({ account }: { account: Account }) {
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Please try again.");
     } finally {
-      setPending(false);
+      setPending(null);
+    }
+  }
+  async function signOut() {
+    if (pending) return;
+    setPending("signout");
+    setError("");
+    try {
+      await api("/api/auth/sign-out", { method: "POST", body: "{}" });
+      await clearPrivateClientState(client);
+      onNavigate("/");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Couldn’t sign out.");
+      setPending(null);
     }
   }
   return (
     <main className="pairing-page">
-      <Brand />
+      <header className="pairing-header">
+        <Brand />
+        <button
+          type="button"
+          className="quiet"
+          onClick={() => void signOut()}
+          disabled={pending !== null}
+        >
+          <LogOut size={16} aria-hidden="true" />
+          {pending === "signout" ? "Signing out…" : "Sign out"}
+        </button>
+      </header>
       <section className="panel stack">
         <h1>Hi, {account.name}.</h1>
         <form
@@ -299,7 +343,7 @@ function Pairing({ account }: { account: Account }) {
               required
             />
           </label>
-          <button className="button" disabled={pending}>
+          <button className="button" disabled={pending !== null}>
             Create a space
           </button>
         </form>
@@ -320,7 +364,7 @@ function Pairing({ account }: { account: Account }) {
               required
             />
           </label>
-          <button className="secondary" disabled={pending}>
+          <button className="secondary" disabled={pending !== null}>
             <Link2 size={16} />
             Join their space
           </button>

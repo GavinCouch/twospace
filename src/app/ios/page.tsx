@@ -15,7 +15,7 @@ export default function IosPage() {
   return (
     <main className="ios-page">
       <header className="ios-header">
-        <Link href="/journal" aria-label="TwoSpace">
+        <Link href="/" aria-label="TwoSpace home">
           <Brand />
         </Link>
         <Link className="secondary" href="/journal">

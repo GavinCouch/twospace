@@ -1,0 +1,68 @@
+.iphone-app-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 54px;
+  padding: 9px 13px 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  text-align: left;
+}
+.iphone-app-link-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 34px;
+  color: var(--accent);
+}
+.iphone-app-link-copy {
+  display: grid;
+  gap: 2px;
+}
+.iphone-app-link-title {
+  font-size: 0.82rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.iphone-app-link-status {
+  font-size: 0.68rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.iphone-app-link-arrow {
+  margin-left: 8px;
+  color: var(--muted);
+}
+.iphone-app-link:hover {
+  border-color: var(--accent);
+  background: var(--raised);
+}
+.iphone-app-link:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .iphone-app-link {
+    transition:
+      background 180ms ease,
+      border-color 180ms ease;
+  }
+  .iphone-app-link-arrow {
+    transition: transform 180ms ease;
+  }
+  .iphone-app-link:hover .iphone-app-link-arrow {
+    transform: translate(2px, -2px);
+  }
+}
+@media (max-width: 380px) {
+  .iphone-app-link {
+    gap: 5px;
+    padding-right: 10px;
+  }
+  .iphone-app-link-arrow {
+    display: none;
+  }
+}
