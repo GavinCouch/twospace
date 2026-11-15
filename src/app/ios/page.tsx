@@ -32,12 +32,11 @@ export default function IosPage() {
             alt=""
           />
         </div>
-        <span className="ios-status">In development</span>
+        <span className="ios-status">In development · Available soon</span>
         <h1 id="ios-title">TwoSpace for iPhone</h1>
-        <p>The iPhone app is in development and will be available soon.</p>
         <p className="muted">
-          Use TwoSpace in your browser for now. Your account and shared space
-          will work in the app, too.
+          Your journal, activities, and plans, using the same account and shared
+          space as the website.
         </p>
         <Link className="button" href="/journal">
           Continue on the web
@@ -47,22 +46,17 @@ export default function IosPage() {
         <article>
           <SectionArt name="journal" size={68} />
           <h2>Journal</h2>
-          <p>
-            Leave a note, share a photo, and see what your partner has added.
-          </p>
+          <p>Notes, photos, replies, and reactions.</p>
         </article>
         <article>
           <SectionArt name="activities" size={68} />
           <h2>Activities</h2>
-          <p>Answer a question together or take your turn in a game.</p>
+          <p>Four-in-a-row and questions you answer together.</p>
         </article>
         <article>
           <SectionArt name="plans" size={68} />
           <h2>Plans</h2>
-          <p>
-            Arrange a call or an activity, with times shown in your own time
-            zone.
-          </p>
+          <p>Calls and activities, with times in your local time zone.</p>
         </article>
       </section>
       <footer className="ios-footer">
