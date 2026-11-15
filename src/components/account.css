@@ -62,27 +62,6 @@
   margin: 12px auto 6px;
   font-size: 0.78rem;
 }
-.demo-entry {
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
-  margin-top: 20px;
-  text-align: center;
-}
-.demo-entry p {
-  font-size: 0.73rem;
-  margin-bottom: 13px;
-  color: var(--muted);
-}
-.demo-entry .secondary {
-  width: 100%;
-  font-size: 0.8rem;
-}
-.demo-entry small {
-  display: block;
-  color: var(--muted);
-  font-size: 0.62rem;
-  margin-top: 12px;
-}
 .welcome-preview {
   grid-column: 1;
   grid-row: 1;
@@ -183,9 +162,6 @@
   .welcome-form .field input {
     font-size: 16px;
   }
-  .welcome-form .demo-entry {
-    margin-bottom: 0;
-  }
 }
 
 .brand {
@@ -227,4 +203,25 @@
   .welcome-form {
     padding: 25px;
   }
+}
+
+.welcome header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.iphone-page-link {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+.iphone-page-link span {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.iphone-page-link:hover {
+  color: var(--accent);
 }

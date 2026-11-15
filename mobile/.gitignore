@@ -1,0 +1,8 @@
+.expo/
+dist/
+ios/
+android/
+node_modules/
+.env*
+!.env.example
+*.tsbuildinfo

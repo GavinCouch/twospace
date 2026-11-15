@@ -375,3 +375,8 @@ a {
 .panel {
   box-shadow: none;
 }
+
+.empty > .section-art,
+.journal-empty > .section-art {
+  margin: 0 auto 22px;
+}

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays, MessagesSquare } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import type { SpaceSnapshot } from "@/shared/types";
 import { formatInZone } from "@/shared/time";
+import { SectionArt } from "@/components/section-art";
 import { PhotoPairs } from "./photo-pairs";
 
 export function JournalSidebar({ space }: { space: SpaceSnapshot }) {
@@ -21,7 +22,7 @@ export function JournalSidebar({ space }: { space: SpaceSnapshot }) {
     <aside className="journal-sidebar" aria-label="Together">
       <section className="journal-question-preview">
         <div className="sidebar-card-label">
-          <MessagesSquare size={18} />
+          <SectionArt name="questions" size={30} />
           <span>{question ? "An open question" : "Questions"}</span>
         </div>
         <h2>{question?.prompt || "Pick a question to answer together"}</h2>
@@ -43,7 +44,7 @@ export function JournalSidebar({ space }: { space: SpaceSnapshot }) {
       {plan && (
         <section className="journal-plan-preview">
           <div className="sidebar-card-label">
-            <CalendarDays size={18} />
+            <SectionArt name="plans" size={30} />
             <span>Next plan</span>
           </div>
           <h2>{plan.title}</h2>

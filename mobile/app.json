@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "TwoSpace",
+    "slug": "twospace",
+    "version": "0.1.0",
+    "scheme": "twospace",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#131315",
+    "ios": {
+      "bundleIdentifier": "dev.twospace.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose a photo to share in your TwoSpace journal.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ]
+    ],
+    "icon": "./assets/icon.png"
+  }
+}
