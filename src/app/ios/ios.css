@@ -1,0 +1,122 @@
+.ios-page {
+  max-width: 1040px;
+  margin: auto;
+  padding: 0 32px 36px;
+}
+.ios-header {
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.ios-header > a {
+  text-decoration: none;
+}
+.ios-intro {
+  max-width: 620px;
+  margin: 76px auto 64px;
+  text-align: center;
+}
+.ios-app-mark {
+  width: 144px;
+  height: 144px;
+  display: grid;
+  place-items: center;
+  border-radius: 32px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  margin: 0 auto 28px;
+}
+.ios-status {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--accent);
+  margin-bottom: 15px;
+}
+.ios-intro h1 {
+  font-size: clamp(2rem, 5vw, 3.35rem);
+  letter-spacing: -0.055em;
+  line-height: 1.12;
+  margin-bottom: 22px;
+}
+.ios-intro p {
+  margin: 0 auto 15px;
+  max-width: 480px;
+}
+.ios-intro .button {
+  margin-top: 14px;
+  min-height: 48px;
+}
+.ios-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 36px;
+  padding: 36px 0;
+  border-top: 1px solid var(--line);
+}
+.ios-features h2 {
+  margin: 18px 0 10px;
+  font-size: 1.1rem;
+}
+.ios-features p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 0.9rem;
+}
+.ios-footer {
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding-top: 24px;
+}
+@media (max-width: 600px) {
+  .ios-page {
+    padding: 0 22px 32px;
+  }
+  .ios-header {
+    min-height: 82px;
+    gap: 12px;
+  }
+  .ios-header .brand {
+    font-size: 1.1rem;
+    gap: 8px;
+  }
+  .ios-header .brand img {
+    width: 32px;
+    height: 32px;
+  }
+  .ios-header .secondary {
+    padding: 10px 12px;
+    font-size: 0.75rem;
+  }
+  .ios-intro {
+    margin: 46px auto;
+  }
+  .ios-app-mark {
+    width: 120px;
+    height: 120px;
+    border-radius: 28px;
+  }
+  .ios-app-mark img {
+    width: 88px;
+    height: 88px;
+  }
+  .ios-features {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .ios-features article {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    column-gap: 20px;
+  }
+  .ios-features .section-art {
+    grid-row: 1 / 3;
+    width: 56px !important;
+    height: 56px !important;
+  }
+  .ios-features h2 {
+    margin-top: 0;
+  }
+}
