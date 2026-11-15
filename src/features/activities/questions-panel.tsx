@@ -123,7 +123,7 @@ export function QuestionsPanel({ space }: { space: SpaceSnapshot }) {
           <>
             <div className="question-prompt">
               <SectionArt name="questions" size={56} />
-              <h3>{chosen.prompt}</h3>
+              <h3 key={chosen.prompt}>{chosen.prompt}</h3>
             </div>
             <div className="activity-heading">
               <button className="quiet" onClick={() => setIndex(index + 1)}>

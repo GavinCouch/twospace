@@ -99,6 +99,7 @@ export default function ActivitiesPage() {
           aria-labelledby={`activity-tab-${tab}`}
           tabIndex={0}
           className="activity-tab-panel"
+          key={tab}
         >
           {tab === "ideas" ? (
             <ActivityLibrary space={query.data} onOpen={selectTab} />

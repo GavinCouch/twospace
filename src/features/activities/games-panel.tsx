@@ -21,7 +21,16 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
       ? (game.state as WordState).solved
       : !!(game.state as FourState).winner || (game.state as FourState).draw;
   const active = games.filter((game) => !isFinished(game));
-  const visible = history ? games : active;
+  // Keep the final move visible for games played during this visit.
+  const [seenActive, setSeenActive] = useState(
+    () => new Set(active.map((game) => game.id)),
+  );
+  if (active.some((game) => !seenActive.has(game.id))) {
+    setSeenActive(new Set([...seenActive, ...active.map((game) => game.id)]));
+  }
+  const visible = history
+    ? games
+    : games.filter((game) => !isFinished(game) || seenActive.has(game.id));
   const hasFour = active.some((game) => game.kind === "four");
   return (
     <div className="games-panel">
@@ -80,12 +89,18 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
       )}
       {creatingWord && <WordCreate onClose={() => setCreatingWord(false)} />}
       <div className="activity-heading games-list-heading">
-        <h2>{history ? "Your games" : "In play"}</h2>
+        <h2>
+          {history || visible.some(isFinished) ? "Your games" : "In play"}
+        </h2>
         {games.some(isFinished) && (
           <button
             className="quiet"
             aria-pressed={history}
-            onClick={() => setHistory(!history)}
+            onClick={() => {
+              if (history)
+                setSeenActive(new Set(active.map((game) => game.id)));
+              setHistory(!history);
+            }}
           >
             {history ? "Show current games" : "Include finished games"}
           </button>
