@@ -307,6 +307,55 @@ describe("daily music", () => {
     ).toBeVisible();
   });
 
+  it.each([
+    {
+      openedAt: "2026-11-16T06:00:10Z",
+      clickedAt: "2026-11-16T06:00:10Z",
+      button: "Pick today’s song",
+    },
+    {
+      openedAt: "2026-11-16T05:59:55Z",
+      clickedAt: "2026-11-16T06:00:01Z",
+      button: "Change your pick",
+    },
+  ])(
+    "opens today’s picker with the current local date at $clickedAt",
+    async ({ openedAt, clickedAt, button }) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(openedAt));
+      render(
+        <MusicContent
+          space={space}
+          data={{ songs: [song], today: song.day, searchAvailable: false }}
+        />,
+        { wrapper },
+      );
+      vi.setSystemTime(new Date(clickedAt));
+      fireEvent.click(screen.getByRole("button", { name: button }));
+      fireEvent.click(screen.getByRole("tab", { name: "Song link" }));
+      requests.api.mockResolvedValue(track);
+      fireEvent.change(
+        screen.getByRole("textbox", { name: "Spotify song link" }),
+        { target: { value: track.url } },
+      );
+      await act(async () =>
+        fireEvent.submit(
+          screen.getByRole("button", { name: "Find song" }).closest("form")!,
+        ),
+      );
+      await act(async () =>
+        fireEvent.submit(
+          screen.getByRole("textbox", { name: "Your note" }).closest("form")!,
+        ),
+      );
+      expect(requests.save).toHaveBeenCalledWith(
+        "/api/music/today",
+        expect.objectContaining({ day: "2026-11-16", revision: 0 }),
+        "PUT",
+      );
+    },
+  );
+
   it("keeps the Spotify destination available if an embedded player fails", () => {
     render(<SongCard song={song} person={people[0]} mine={false} />);
     const player = screen.getByTitle("Spotify player: The song");

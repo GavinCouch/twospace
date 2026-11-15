@@ -69,7 +69,13 @@ export function MusicContent({
   const mine = today.find((item) => item.person.id === space.me.id)?.song;
   const todayIds = new Set(today.map((item) => item.song?.id));
   const history = data.songs.filter((song) => !todayIds.has(song.id));
-  const choose = () => setPicker({ initial: mine, day: data.today });
+  const choose = () => {
+    const day = localDateInZone(new Date().toISOString(), space.me.timeZone);
+    const initial = data.songs.find(
+      (song) => song.authorId === space.me.id && song.day === day,
+    );
+    setPicker({ initial, day });
+  };
   return (
     <div className="music-page">
       <header className="page-title music-page-heading">
@@ -144,7 +150,7 @@ export function MusicContent({
         ) : (
           <div className="music-history-empty">
             <Music2 size={20} aria-hidden="true" />
-            <p>Your past picks and notes will stay here.</p>
+            <p>No past picks yet.</p>
           </div>
         )}
       </section>
