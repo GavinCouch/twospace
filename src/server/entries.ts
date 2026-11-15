@@ -9,7 +9,7 @@ import {
 } from "./database";
 import {
   spaceTransaction,
-  context,
+  pairedContext,
   found,
   HttpError,
   json,
@@ -60,7 +60,7 @@ export function visibleEntry(
   return { ...entry, locked: false };
 }
 export async function createEntry(request: Request) {
-  const ctx = await context(request),
+  const ctx = await pairedContext(request),
     input = await json(request, entryInput);
   return spaceTransaction(ctx, async () => {
     if (input.mediaId) {
@@ -85,7 +85,7 @@ export async function createEntry(request: Request) {
   });
 }
 export async function editEntry(request: Request, entryId: string) {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   const input = await json(
     request,
     z.object({
@@ -111,7 +111,7 @@ export async function editEntry(request: Request, entryId: string) {
   });
 }
 export async function deleteEntry(request: Request, entryId: string) {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   const result = await spaceTransaction(ctx, async () => {
     const entry = found(await resource<Entry>(ctx.spaceId, "entry", entryId));
     if (entry.authorId !== ctx.account.id)
@@ -129,7 +129,7 @@ export async function deleteEntry(request: Request, entryId: string) {
   return result;
 }
 export async function replyToEntry(request: Request, entryId: string) {
-  const ctx = await context(request),
+  const ctx = await pairedContext(request),
     { body } = await json(
       request,
       z.object({ body: z.string().trim().min(1).max(2000) }),
@@ -153,7 +153,7 @@ export async function replyToEntry(request: Request, entryId: string) {
   });
 }
 export async function reactToEntry(request: Request, entryId: string) {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   return await spaceTransaction(ctx, async () => {
     const entry = found(await resource<Entry>(ctx.spaceId, "entry", entryId));
     if (visibleEntry(entry, ctx.account.id).locked)
@@ -165,7 +165,7 @@ export async function reactToEntry(request: Request, entryId: string) {
   });
 }
 export async function createPhotoPair(request: Request) {
-  const ctx = await context(request),
+  const ctx = await pairedContext(request),
     { prompt } = await json(request, z.object({ prompt: shortText.min(1) }));
   return spaceTransaction(ctx, () =>
     insertResource(ctx.spaceId, "photoPair", ctx.account.id, {
@@ -177,7 +177,7 @@ export async function createPhotoPair(request: Request) {
   );
 }
 export async function contributePhoto(request: Request, pairId: string) {
-  const ctx = await context(request),
+  const ctx = await pairedContext(request),
     input = await json(
       request,
       z.object({

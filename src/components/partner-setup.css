@@ -1,0 +1,138 @@
+.partner-setup {
+  max-width: 860px;
+  margin: 64px auto;
+}
+.partner-setup-heading {
+  margin-bottom: 38px;
+}
+.partner-space-name {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-bottom: 12px;
+}
+.partner-setup h1 {
+  font-size: clamp(1.65rem, 4vw, 2.15rem);
+  letter-spacing: -0.04em;
+  margin: 0 0 12px;
+}
+.partner-setup p {
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 0.9rem;
+  margin: 0 0 22px;
+}
+.partner-setup-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 38px;
+  border-top: 1px solid var(--line);
+  padding-top: 30px;
+}
+.partner-setup h2 {
+  font-size: 1.04rem;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.partner-invite,
+.partner-join {
+  min-width: 0;
+}
+.partner-join {
+  border-left: 1px solid var(--line);
+  padding-left: 38px;
+}
+.partner-join .stack {
+  gap: 12px;
+}
+.partner-join .stack > p {
+  margin-bottom: 6px;
+}
+.partner-code-row {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+.partner-code-row input {
+  min-width: 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+}
+.partner-code-row .secondary {
+  flex-shrink: 0;
+}
+.partner-invite > small {
+  display: block;
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+.partner-invite > .quiet {
+  padding-left: 0;
+  font-size: 0.8rem;
+  margin: 8px 0;
+}
+.partner-waiting {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 24px;
+}
+.partner-waiting > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.partner-switch-confirm {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  cursor: pointer;
+  margin: 6px 0;
+}
+.partner-switch-confirm input {
+  width: 17px;
+  height: 17px;
+  margin: 2px 0 0;
+  padding: 0;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+.partner-setup-history {
+  max-width: 540px;
+}
+.settings-section .partner-setup {
+  margin: 0;
+}
+.settings-partner-setup .partner-setup {
+  grid-column: 1 / -1;
+  max-width: none;
+}
+.settings-section .partner-setup h1 {
+  font-size: 1.25rem;
+}
+@media (max-width: 620px) {
+  .partner-setup {
+    margin: 36px auto;
+  }
+  .partner-setup-options {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .partner-join {
+    padding: 28px 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .partner-code-row {
+    flex-wrap: wrap;
+  }
+  .partner-code-row input {
+    flex: 1 1 180px;
+  }
+}

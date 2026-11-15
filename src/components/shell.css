@@ -45,6 +45,11 @@
 .nav-link:hover {
   color: var(--ink);
 }
+.nav-link.nav-link-locked {
+  opacity: 0.42;
+  cursor: default;
+  color: var(--muted);
+}
 .account-controls {
   display: flex;
   gap: 10px;

@@ -1,16 +1,12 @@
 .journal-photo-pairs {
   display: grid;
-  grid-template-columns: 170px minmax(0, 1fr);
-  gap: 20px 32px;
-  border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  padding: 26px 0;
-  margin: 4px 0 32px;
+  gap: 24px;
+  padding: 28px 0;
 }
 .journal-pairs-heading {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
   gap: 12px;
 }
 .journal-pairs-heading h2 {
@@ -21,16 +17,18 @@
 }
 .journal-pairs-heading .quiet {
   font-size: 0.78rem;
-  margin-left: -10px;
+  margin-right: -10px;
   color: var(--accent);
 }
 .journal-pairs-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
 }
 .journal-pair {
   min-width: 0;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 24px;
 }
 .journal-pair h3 {
   font-size: 0.85rem;
@@ -55,20 +53,18 @@
   width: 100%;
   cursor: zoom-in;
   background: var(--raised);
-  border-radius: 3px;
+  border-radius: 7px;
   overflow: hidden;
 }
 .journal-pair-photo img {
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  max-height: 170px;
+  aspect-ratio: 1;
   object-fit: cover;
 }
 .journal-pair-placeholder {
   display: flex;
-  aspect-ratio: 16 / 9;
-  max-height: 170px;
+  aspect-ratio: 1;
   flex-direction: column;
   gap: 8px;
   align-items: center;
@@ -76,7 +72,7 @@
   width: 100%;
   padding: 12px;
   border: 1px dashed var(--line);
-  border-radius: 3px;
+  border-radius: 7px;
   font-size: 0.72rem;
   color: var(--muted);
   text-align: center;
@@ -105,7 +101,7 @@ button.journal-pair-placeholder {
 }
 .journal-photo-pairs > .quiet {
   justify-self: start;
-  grid-column: 2;
+  grid-column: 1;
   font-size: 0.8rem;
 }
 .journal-pair-full {

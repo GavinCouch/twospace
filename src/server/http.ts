@@ -103,6 +103,11 @@ export async function context(request: Request): Promise<Context> {
     members,
   };
 }
+export async function pairedContext(request: Request): Promise<Context> {
+  const ctx = await context(request);
+  requirePartner(ctx);
+  return ctx;
+}
 export async function spaceTransaction<T>(
   ctx: Context,
   fn: () => T | Promise<T>,
@@ -131,7 +136,8 @@ export function requirePartner(ctx: Context) {
   if (ctx.members.length !== 2)
     throw new HttpError(
       409,
-      "Invite your partner before starting this activity.",
+      "Your partner needs to join before you can use this feature.",
+      "PARTNER_REQUIRED",
     );
 }
 export async function json<T>(

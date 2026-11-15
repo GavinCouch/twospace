@@ -21,7 +21,7 @@ export function ActivitiesScreen({
   refresh,
   refreshing,
 }: SpaceScreenProps) {
-  const [tab, setTab] = useState<"Questions" | "Games" | "Ideas">("Questions");
+  const [tab, setTab] = useState<"Questions" | "Games" | "Ideas">("Games");
   const [prompt, setPrompt] = useState("");
   const [adding, setAdding] = useState(false);
   const question = useSpaceMutation(data.me.id, async () => {
@@ -38,7 +38,7 @@ export function ActivitiesScreen({
     <Screen refresh={refresh} refreshing={refreshing}>
       <SectionHeading title="Activities" />
       <View style={styles.wrap}>
-        {(["Questions", "Games", "Ideas"] as const).map((name) => (
+        {(["Games", "Questions", "Ideas"] as const).map((name) => (
           <Chip
             key={name}
             label={name}
@@ -130,7 +130,7 @@ export function ActivitiesScreen({
         secondary
         onPress={() => void Linking.openURL(`${API_URL}/activities`)}
       >
-        Open drawings and word clues on the website
+        More games and drawings on the website
       </Button>
     </Screen>
   );

@@ -10,6 +10,7 @@ import { SettingsScreen } from "./screens/settings";
 import { PlansScreen } from "./screens/plans";
 import { ActivitiesScreen } from "./screens/activities";
 import { colors, styles } from "./theme";
+import { PartnerSetupScreen } from "./components/partner-setup";
 type Tab = "Journal" | "Activities" | "Plans" | "Settings";
 export function Space({ account }: { account: Account }) {
   const space = useSpace(account.id);
@@ -43,7 +44,9 @@ export function Space({ account }: { account: Account }) {
           </Text>
         </View>
       )}
-      {tab === "Journal" ? (
+      {space.data.members.length < 2 && tab !== "Settings" ? (
+        <PartnerSetupScreen {...props} onSettings={() => setTab("Settings")} />
+      ) : tab === "Journal" ? (
         <JournalScreen {...props} />
       ) : tab === "Activities" ? (
         <ActivitiesScreen {...props} />
@@ -68,10 +71,18 @@ export function Space({ account }: { account: Account }) {
             <Pressable
               key={name}
               accessibilityRole="tab"
-              accessibilityState={{ selected: tab === name }}
+              accessibilityState={{
+                selected: tab === name,
+                disabled: space.data.members.length < 2 && name !== "Settings",
+              }}
+              disabled={space.data.members.length < 2 && name !== "Settings"}
               onPress={() => setTab(name)}
               style={{
                 flex: 1,
+                opacity:
+                  space.data.members.length < 2 && name !== "Settings"
+                    ? 0.4
+                    : 1,
                 minHeight: 66,
                 justifyContent: "center",
                 alignItems: "center",

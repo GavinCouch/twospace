@@ -11,7 +11,35 @@ export type PhotoPair = { id: string; prompt: string; createdAt: string; photos:
 export type QuestionRound = { id: string; prompt: string; category: string; createdAt: string; answers: { userId: string; body: string | null }[]; complete: boolean };
 export type FourState = { board: (string | null)[][]; turn: string; winner: string | null; draw: boolean; winningCells: number[][] };
 export type WordState = { answer: string; clues: string[]; guesses: string[]; solved: boolean; authorId: string };
-export type Game = { id: string; kind: "four" | "word"; createdAt: string; revision: number; state: FourState | WordState };
+export type TicState = {
+  board: (string | null)[];
+  players: string[];
+  turn: string;
+  winner: string | null;
+  draw: boolean;
+  winningCells: number[];
+};
+export type RpsChoice = "rock" | "paper" | "scissors";
+export type RpsRound = {
+  number: number;
+  choices: Record<string, RpsChoice>;
+  winner: string | null;
+};
+export type RpsState = {
+  players: string[];
+  round: number;
+  choices: Record<string, RpsChoice | null>;
+  rounds: RpsRound[];
+  scores: Record<string, number>;
+  winner: string | null;
+};
+export type Game = {
+  id: string;
+  kind: "four" | "word" | "tic" | "rps";
+  createdAt: string;
+  revision: number;
+  state: FourState | WordState | TicState | RpsState;
+};
 export type Point = { x: number; y: number };
 export type Stroke = { id: string; authorId: string; tool: "pen" | "line" | "circle" | "square"; color: string; width: number; points: Point[] };
 export type Drawing = { id: string; title: string; caption: string; createdAt: string; strokes: Stroke[]; revision: number; turnUserId: string };
@@ -19,7 +47,7 @@ export type Idea = { id: string; title: string; description: string; duration: n
 export type ChecklistItem = { id: string; text: string; done: boolean };
 export type Plan = { id: string; title: string; startsAt: string; timeZone: string; duration: number; kind: "call" | "date" | "visit"; status: "proposed" | "accepted" | "done"; proposedBy: string; acceptedBy: string[]; link: string; notes: string; checklist: ChecklistItem[] };
 export type SpaceSnapshot = {
-  space: { id: string; name: string; createdAt: string; isDemo: boolean };
+  space: { id: string; name: string; createdAt: string; isDemo: boolean; hasPairedBefore?: boolean; canSwitch?: boolean };
   me: Person; members: Person[]; entries: Entry[]; photoPairs: PhotoPair[];
   questions: QuestionRound[]; games: Game[]; drawings: Drawing[]; ideas: Idea[]; plans: Plan[];
 };

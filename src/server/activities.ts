@@ -1,11 +1,21 @@
 import { z } from "zod";
 import { initialFour, playFour } from "@/shared/four";
+import {
+  initialRps,
+  initialTic,
+  isGameFinished,
+  playRps,
+  playTic,
+  visibleRps,
+} from "@/shared/games";
 import { ACTIVITY_IDEAS } from "@/shared/content";
 import type {
   FourState,
   Game,
   Idea,
   QuestionRound,
+  RpsState,
+  TicState,
   WordState,
 } from "@/shared/types";
 import {
@@ -39,6 +49,8 @@ export function visibleQuestion(
   };
 }
 export function visibleGame(game: Game, userId: string): Game {
+  if (game.kind === "rps")
+    return { ...game, state: visibleRps(game.state as RpsState, userId) };
   if (game.kind !== "word") return game;
   const state = game.state as WordState;
   return {
@@ -99,6 +111,8 @@ export async function createGame(request: Request) {
     request,
     z.discriminatedUnion("kind", [
       z.object({ kind: z.literal("four") }),
+      z.object({ kind: z.literal("tic") }),
+      z.object({ kind: z.literal("rps") }),
       z.object({
         kind: z.literal("word"),
         answer: z.string().trim().min(2).max(80),
@@ -106,28 +120,43 @@ export async function createGame(request: Request) {
       }),
     ]),
   );
-  const state: FourState | WordState =
+  const players = [
+    ctx.account.id,
+    ctx.members.find((member) => member.id !== ctx.account.id)!.id,
+  ];
+  const state: Game["state"] =
     input.kind === "four"
-      ? initialFour([
-          ctx.account.id,
-          ctx.members.find((member) => member.id !== ctx.account.id)!.id,
-        ])
-      : {
-          answer: input.answer,
-          clues: input.clues,
-          guesses: [],
-          solved: false,
-          authorId: ctx.account.id,
-        };
-  return spaceTransaction(ctx, () =>
-    insertResource(ctx.spaceId, "game", ctx.account.id, {
+      ? initialFour(players)
+      : input.kind === "tic"
+        ? initialTic(players)
+        : input.kind === "rps"
+          ? initialRps(players)
+          : {
+              answer: input.answer,
+              clues: input.clues,
+              guesses: [],
+              solved: false,
+              authorId: ctx.account.id,
+            };
+  return spaceTransaction(ctx, async () => {
+    if (
+      input.kind !== "word" &&
+      (await resources<Game>(ctx.spaceId, "game")).some(
+        (game) => game.kind === input.kind && !isGameFinished(game),
+      )
+    )
+      throw new HttpError(
+        409,
+        "You already have this game in progress. Finish it before starting another.",
+      );
+    return insertResource(ctx.spaceId, "game", ctx.account.id, {
       id: id(),
       kind: input.kind,
       createdAt: now(),
       revision: 0,
       state,
-    } satisfies Game),
-  );
+    } satisfies Game);
+  });
 }
 export async function moveGame(request: Request, gameId: string) {
   const ctx = await context(request);
@@ -137,12 +166,21 @@ export async function moveGame(request: Request, gameId: string) {
     z.object({
       revision: z.number().int().nonnegative(),
       column: z.number().int().min(0).max(6).optional(),
+      cell: z.number().int().min(0).max(8).optional(),
+      choice: z.enum(["rock", "paper", "scissors"]).optional(),
+      round: z.number().int().positive().optional(),
       guess: z.string().trim().min(1).max(80).optional(),
     }),
   );
   return await spaceTransaction(ctx, async () => {
     const game = found(await resource<Game>(ctx.spaceId, "game", gameId));
-    if (input.revision !== game.revision)
+    // Two choices sent from the same snapshot may both land in this round.
+    // The round number still prevents a delayed choice from entering the next one.
+    const sameRpsRound =
+      game.kind === "rps" &&
+      input.round === (game.state as RpsState).round &&
+      input.revision <= game.revision;
+    if (input.revision !== game.revision && !sameRpsRound)
       throw new HttpError(
         409,
         "The game changed. Try your move again.",
@@ -158,6 +196,27 @@ export async function moveGame(request: Request, gameId: string) {
           input.column,
           ctx.members.map((member) => member.id),
         );
+      } catch (error) {
+        throw new HttpError(409, (error as Error).message);
+      }
+    } else if (game.kind === "tic" || game.kind === "rps") {
+      if (game.kind === "tic" && input.cell === undefined)
+        throw new HttpError(400, "Choose a square.");
+      if (game.kind === "rps" && (!input.choice || input.round === undefined))
+        throw new HttpError(
+          400,
+          "Choose rock, paper, or scissors for this round.",
+        );
+      try {
+        game.state =
+          game.kind === "tic"
+            ? playTic(game.state as TicState, ctx.account.id, input.cell!)
+            : playRps(
+                game.state as RpsState,
+                ctx.account.id,
+                input.choice!,
+                input.round!,
+              );
       } catch (error) {
         throw new HttpError(409, (error as Error).message);
       }
@@ -201,6 +260,7 @@ export async function allIdeas(spaceId: string): Promise<Idea[]> {
 }
 export async function createIdea(request: Request) {
   const ctx = await context(request);
+  requirePartner(ctx);
   const input = await json(
     request,
     z.object({
@@ -223,11 +283,12 @@ export async function createIdea(request: Request) {
   );
 }
 export async function editIdea(request: Request, ideaId: string) {
-  const ctx = await context(request),
-    input = await json(
-      request,
-      z.object({ saved: z.boolean().optional(), done: z.boolean().optional() }),
-    );
+  const ctx = await context(request);
+  requirePartner(ctx);
+  const input = await json(
+    request,
+    z.object({ saved: z.boolean().optional(), done: z.boolean().optional() }),
+  );
   return await spaceTransaction(ctx, async () => {
     const stored = await resource<Idea>(ctx.spaceId, "idea", ideaId);
     const idea = found(

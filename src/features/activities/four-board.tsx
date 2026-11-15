@@ -5,6 +5,7 @@ import { useState, type CSSProperties } from "react";
 import { useAction } from "@/components/space-provider";
 import { FOUR_COLUMNS } from "@/shared/four";
 import type { FourState, Game, SpaceSnapshot } from "@/shared/types";
+import { PlayAgain } from "./play-again";
 
 function addedPiece(before: FourState["board"], after: FourState["board"]) {
   let added: { row: number; column: number } | null = null;
@@ -23,9 +24,11 @@ function addedPiece(before: FourState["board"], after: FourState["board"]) {
 export function FourBoard({
   game,
   space,
+  onStarted,
 }: {
   game: Game;
   space: SpaceSnapshot;
+  onStarted?: (id: string) => void;
 }) {
   const action = useAction();
   const state = game.state as FourState;
@@ -74,11 +77,14 @@ export function FourBoard({
   }
   return (
     <article
+      id={`game-${game.id}`}
+      tabIndex={-1}
+      aria-labelledby={`game-heading-${game.id}`}
       className={`panel four-game${transition.won ? " four-celebrating" : ""}`}
       style={{ "--four-win-delay": transition.winDelay } as CSSProperties}
     >
       <div className="activity-heading">
-        <h3>Four-in-a-row</h3>
+        <h3 id={`game-heading-${game.id}`}>Four-in-a-row</h3>
         {state.winner && <Trophy size={24} aria-hidden="true" />}
       </div>
       <p className="game-status" role="status">
@@ -178,6 +184,9 @@ export function FourBoard({
         <p className="form-error" role="alert">
           {action.error}
         </p>
+      )}
+      {(state.winner || state.draw) && (
+        <PlayAgain kind="four" space={space} onStarted={onStarted} />
       )}
       <details className="game-rules">
         <summary>How to play</summary>

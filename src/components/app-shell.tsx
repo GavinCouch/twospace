@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { LogOut, Copy, Check } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { clearPrivateClientState } from "@/features/settings/client-state";
 import { Brand } from "./account-gate";
@@ -11,6 +11,7 @@ import "./shell.css";
 import { SectionArt } from "./section-art";
 import { SpaceNavigation } from "./space-navigation";
 import { SpaceClock } from "./space-clock";
+import { PartnerSetup } from "./partner-setup";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { data, isPending, error, refetch } = useSpace();
@@ -45,7 +46,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         >
           <Brand />
         </Link>
-        <SpaceNavigation path={path} />
+        <SpaceNavigation
+          path={path}
+          locked={!data || data.members.length < 2}
+        />
         <div className="account-controls">
           <Link
             href="/settings"
@@ -65,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       <div className="app-body">
-        {data && path === "/journal" && (
+        {data && data.members.length === 2 && path === "/journal" && (
           <section className="space-cover" aria-label="Your shared space">
             <div className="space-cover-content">
               <span className="cover-date">
@@ -110,65 +114,18 @@ export function AppShell({ children }: { children: ReactNode }) {
                 Try again
               </button>
             </div>
+          ) : data && data.members.length < 2 && path !== "/settings" ? (
+            <PartnerSetup key={data.space.id} space={data} />
           ) : (
-            <>
-              {data?.members.length === 1 && <InviteBanner />}
-              {children}
-            </>
+            children
           )}
         </main>
       </div>
-      <SpaceNavigation path={path} mobile />
+      <SpaceNavigation
+        path={path}
+        mobile
+        locked={!data || data.members.length < 2}
+      />
     </div>
-  );
-}
-function InviteBanner() {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState("");
-  const [pending, setPending] = useState(false);
-  const [copied, setCopied] = useState(false);
-  async function invite() {
-    setPending(true);
-    setError("");
-    try {
-      const result = await api<{ token: string }>("/api/invites", {
-        method: "POST",
-        body: "{}",
-      });
-      setCode(result.token);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Try again.");
-    } finally {
-      setPending(false);
-    }
-  }
-  return (
-    <section className="invite-banner">
-      <div>
-        <strong>Invite your partner</strong>
-        {code && <code>{code}</code>}
-        {error && <p role="alert">{error}</p>}
-      </div>
-      {code ? (
-        <button
-          className="secondary"
-          onClick={async () => {
-            try {
-              await navigator.clipboard.writeText(code);
-              setCopied(true);
-            } catch {
-              setError("Copy the code above and send it to your partner.");
-            }
-          }}
-        >
-          {copied ? <Check /> : <Copy />}
-          {copied ? "Copied" : "Copy code"}
-        </button>
-      ) : (
-        <button className="secondary" disabled={pending} onClick={invite}>
-          {pending ? "Creating…" : "Create invitation"}
-        </button>
-      )}
-    </section>
   );
 }

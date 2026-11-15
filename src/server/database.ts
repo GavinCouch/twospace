@@ -171,7 +171,7 @@ export async function execute(sql: string, ...params: SQLInputValue[]) {
 }
 export async function transaction<T>(
   fn: () => T | Promise<T>,
-  lockKey = "shared",
+  lockKey: string | string[] = "shared",
 ): Promise<T> {
   await databaseReady();
   if (scope.getStore()) return fn();
@@ -179,10 +179,16 @@ export async function transaction<T>(
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-      await client.query(
-        "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
-        [lockKey],
-      );
+      // A membership switch touches two spaces. Always take every lock in the
+      // same order so simultaneous switches cannot deadlock one another.
+      const keys = [
+        ...new Set(Array.isArray(lockKey) ? lockKey : [lockKey]),
+      ].sort();
+      for (const key of keys)
+        await client.query(
+          "SELECT pg_advisory_xact_lock(hashtextextended($1, 0))",
+          [key],
+        );
       const result = await scope.run({ client }, fn);
       await client.query("COMMIT");
       return result;

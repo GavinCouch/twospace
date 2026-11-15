@@ -142,6 +142,13 @@ describe.skipIf(!enabled)(
       await spaces.createSpace(
         request(outsider.cookie, { name: "Separate space" }),
       );
+      const outsiderPartner = await identity("CaseyPartner");
+      const outsideInvitation = await spaces.invite(
+        request(outsider.cookie, {}),
+      );
+      await spaces.acceptInvite(
+        request(outsiderPartner.cookie, { token: outsideInvitation.token }),
+      );
       const invitation = await spaces.invite(request(alex.cookie, {}));
       await spaces.acceptInvite(
         request(jamie.cookie, { token: invitation.token }),
@@ -287,6 +294,87 @@ describe.skipIf(!enabled)(
           ) as PromiseRejectedResult
         ).reason,
       ).toMatchObject({ status: 409, code: "STALE_REVISION" });
+    });
+    it("switches empty solo memberships under ordered account and space locks", async () => {
+      const first = await identity("SwitchFirst");
+      const second = await identity("SwitchSecond");
+      const firstSpace = await spaces.createSpace(
+        request(first.cookie, { name: "First" }),
+      );
+      const secondSpace = await spaces.createSpace(
+        request(second.cookie, { name: "Second" }),
+      );
+      const firstInvite = await spaces.invite(request(first.cookie));
+      const secondInvite = await spaces.invite(request(second.cookie));
+      const switches = await Promise.allSettled([
+        spaces.acceptInvite(
+          request(first.cookie, {
+            token: secondInvite.token,
+            switchSpace: true,
+          }),
+        ),
+        spaces.acceptInvite(
+          request(second.cookie, {
+            token: firstInvite.token,
+            switchSpace: true,
+          }),
+        ),
+      ]);
+      expect(
+        switches.filter((item) => item.status === "fulfilled"),
+      ).toHaveLength(1);
+      expect(
+        switches.filter((item) => item.status === "rejected"),
+      ).toHaveLength(1);
+      const memberships = await storage.rows<{ space_id: string }>(
+        "SELECT space_id FROM memberships WHERE user_id=? OR user_id=?",
+        first.id,
+        second.id,
+      );
+      expect(memberships).toHaveLength(2);
+      expect(new Set(memberships.map((item) => item.space_id)).size).toBe(1);
+      expect([firstSpace.id, secondSpace.id]).toContain(
+        memberships[0].space_id,
+      );
+      expect(
+        await storage.row("SELECT id FROM spaces WHERE id=?", firstSpace.id),
+      ).toBeDefined();
+      expect(
+        await storage.row("SELECT id FROM spaces WHERE id=?", secondSpace.id),
+      ).toBeDefined();
+    });
+    it("allows only one destination when two switches use the same account", async () => {
+      const user = await identity("SameAccountSwitch");
+      await spaces.createSpace(
+        request(user.cookie, { name: "Accidental space" }),
+      );
+      const first = await identity("SameAccountTargetOne");
+      const second = await identity("SameAccountTargetTwo");
+      await spaces.createSpace(request(first.cookie, { name: "Target one" }));
+      await spaces.createSpace(request(second.cookie, { name: "Target two" }));
+      const invitations = await Promise.all([
+        spaces.invite(request(first.cookie)),
+        spaces.invite(request(second.cookie)),
+      ]);
+      const results = await Promise.allSettled(
+        invitations.map((invite) =>
+          spaces.acceptInvite(
+            request(user.cookie, { token: invite.token, switchSpace: true }),
+          ),
+        ),
+      );
+      expect(
+        results.filter((item) => item.status === "fulfilled"),
+      ).toHaveLength(1);
+      expect(results.filter((item) => item.status === "rejected")).toHaveLength(
+        1,
+      );
+      expect(
+        await storage.rows(
+          "SELECT space_id FROM memberships WHERE user_id=?",
+          user.id,
+        ),
+      ).toHaveLength(1);
     });
     it("serializes daily song picks and keeps deleted revisions from removing a replacement", async () => {
       const input = {
@@ -468,6 +556,130 @@ describe.skipIf(!enabled)(
       ).toEqual([]);
       await media.finishMediaDeletions();
       expect(testObjects.size).toBe(0);
+    });
+    it("moves the account avatar with a switch but refuses unrelated uploads", async () => {
+      const user = await identity("AvatarSwitch");
+      const partner = await identity("AvatarDestination");
+      const source = await spaces.createSpace(
+        request(user.cookie, { name: "Accidental" }),
+      );
+      const destination = await spaces.createSpace(
+        request(partner.cookie, { name: "Together" }),
+      );
+      const bytes = await sharp({
+        create: { width: 8, height: 8, channels: 3, background: "#b78999" },
+      })
+        .png()
+        .toBuffer();
+      const avatar = await profilePhotos.uploadProfilePhoto(
+        new Request("http://127.0.0.1:3100/api/profile/photo", {
+          method: "PUT",
+          headers: { cookie: user.cookie, "content-type": "image/png" },
+          body: Uint8Array.from(bytes),
+        }),
+      );
+      const original = await storage.row<{ filename: string }>(
+        "SELECT filename FROM media WHERE id=?",
+        avatar.avatarMediaId,
+      );
+      expect(
+        (await snapshots.getSnapshot(request(user.cookie, undefined, "GET")))
+          .space.canSwitch,
+      ).toBe(true);
+      await storage.execute(
+        "INSERT INTO media(id,space_id,owner_id,filename,mime,size,created_at) VALUES(?,?,?,?,?,?,?)",
+        "orphan-image",
+        source.id,
+        user.id,
+        "orphan-image.webp",
+        "image/webp",
+        12,
+        storage.now(),
+      );
+      const invite = await spaces.invite(request(partner.cookie));
+      await expect(
+        spaces.acceptInvite(
+          request(user.cookie, { token: invite.token, switchSpace: true }),
+        ),
+      ).rejects.toMatchObject({ code: "SPACE_NOT_EMPTY" });
+      expect(
+        await storage.row(
+          "SELECT space_id FROM memberships WHERE user_id=?",
+          user.id,
+        ),
+      ).toEqual({ space_id: source.id });
+      await storage.execute("DELETE FROM media WHERE id=?", "orphan-image");
+      await spaces.acceptInvite(
+        request(user.cookie, { token: invite.token, switchSpace: true }),
+      );
+      expect(
+        (await snapshots.getSnapshot(request(user.cookie, undefined, "GET"))).me
+          .avatarMediaId,
+      ).toBe(avatar.avatarMediaId);
+      expect(await storage.resources(source.id, "profilePhoto")).toEqual([]);
+      expect(
+        await storage.row(
+          "SELECT space_id, filename FROM media WHERE id=?",
+          avatar.avatarMediaId,
+        ),
+      ).toEqual({ space_id: destination.id, filename: original!.filename });
+      await expect(
+        media.getMedia(
+          request(partner.cookie, undefined, "GET"),
+          avatar.avatarMediaId,
+        ),
+      ).resolves.toBeInstanceOf(Response);
+      await profilePhotos.removeProfilePhoto(
+        request(user.cookie, undefined, "DELETE"),
+      );
+      await media.finishMediaDeletions();
+    });
+    it("keeps saved attachments downloadable through export when the space becomes unpaired", async () => {
+      const user = await identity("ArchiveOwner");
+      const partner = await identity("ArchivePartner");
+      const space = await spaces.createSpace(
+        request(user.cookie, { name: "Archive" }),
+      );
+      const invitation = await spaces.invite(request(user.cookie));
+      await spaces.acceptInvite(
+        request(partner.cookie, { token: invitation.token }),
+      );
+      const bytes = await sharp({
+        create: { width: 8, height: 8, channels: 3, background: "#b78999" },
+      })
+        .png()
+        .toBuffer();
+      const photo = await media.storeImage(space.id, user.id, bytes);
+      await entries.createEntry(
+        request(user.cookie, {
+          kind: "photo",
+          mediaId: photo.id,
+          title: "A saved photo",
+        }),
+      );
+      await spaces.leaveSpace(request(partner.cookie));
+      await expect(
+        media.getMedia(request(user.cookie, undefined, "GET"), photo.id),
+      ).rejects.toMatchObject({ code: "PARTNER_REQUIRED" });
+      const exported = await (
+        await snapshots.exportSnapshot(request(user.cookie, undefined, "GET"))
+      ).json();
+      expect(exported.files).toEqual([
+        {
+          id: photo.id,
+          name: `A saved photo-${photo.id.slice(0, 8)}.webp`,
+          url: `/api/export/media/${photo.id}`,
+        },
+      ]);
+      const downloaded = await media.getMedia(
+        request(user.cookie, undefined, "GET"),
+        photo.id,
+        true,
+      );
+      expect(downloaded.headers.get("content-disposition")).toMatch(
+        /^attachment;/,
+      );
+      expect((await downloaded.arrayBuffer()).byteLength).toBeGreaterThan(0);
     });
     it("holds the migration lock in a transaction and releases it after success or failure", async () => {
       await storage.withAuthMigrationLock(async () => {

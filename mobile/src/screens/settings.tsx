@@ -3,6 +3,7 @@ import { Alert, Linking, Text, View } from "react-native";
 import { SectionHeading } from "../components/section-heading";
 import { Button, ErrorText, Field, Screen } from "../components/ui";
 import { Invitation } from "../components/invitation";
+import { JoinPartner } from "../components/partner-setup";
 import { api, patch } from "../lib/api";
 import { API_URL } from "../lib/config";
 import { signOut } from "../lib/sign-out";
@@ -129,7 +130,10 @@ export function SettingsScreen({
         </Button>
         <ErrorText error={space.error} />
       </View>
-      {data.members.length === 1 && <Invitation />}
+      {data.members.length === 1 && !data.space.hasPairedBefore && (
+        <Invitation />
+      )}
+      {data.members.length === 1 && <JoinPartner data={data} />}
       {!!notice && (
         <Text accessibilityLiveRegion="polite" style={styles.muted}>
           {notice}
@@ -148,7 +152,7 @@ export function SettingsScreen({
           onPress={() =>
             Alert.alert(
               "Leave this space?",
-              "You’ll lose access to its entries and plans. Your partner keeps their access. This does not delete your account.",
+              "You’ll lose access to this space. Shared features will lock, but your partner can still export the saved content on the website. This does not delete your account.",
               [
                 { text: "Cancel", style: "cancel" },
                 {

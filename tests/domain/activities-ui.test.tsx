@@ -12,12 +12,16 @@ import "@testing-library/jest-dom/vitest";
 import { QuestionCard } from "../../src/features/activities/question-round";
 import { FourBoard } from "../../src/features/activities/four-board";
 import { GamesPanel } from "../../src/features/activities/games-panel";
+import { TicBoard } from "../../src/features/activities/tic-board";
+import { RpsGame } from "../../src/features/activities/rps-game";
+import { initialRps, initialTic, playRps } from "../../src/shared/games";
 import { DrawingSurface } from "../../src/features/activities/drawing-surface";
 import { initialFour, playFour } from "../../src/shared/four";
 import type { QuestionRound, SpaceSnapshot } from "../../src/shared/types";
 
 const request = vi.hoisted(() => vi.fn());
 const actionState = vi.hoisted(() => ({ pending: false }));
+const originalScrollIntoView = HTMLElement.prototype.scrollIntoView;
 vi.mock("@/components/space-provider", () => ({
   useAction: () => ({
     run: request,
@@ -70,13 +74,163 @@ const round: QuestionRound = {
   complete: false,
 };
 beforeEach(() => {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+  vi.stubGlobal("matchMedia", vi.fn().mockReturnValue({ matches: true }));
   actionState.pending = false;
   request.mockReset();
   request.mockResolvedValue({});
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+  if (originalScrollIntoView)
+    HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+  else Reflect.deleteProperty(HTMLElement.prototype, "scrollIntoView");
+});
 
 describe("activity interactions", () => {
+  it("focuses a newly started board when its snapshot arrives", async () => {
+    const user = userEvent.setup();
+    const game = {
+      id: "new-tic",
+      kind: "tic" as const,
+      revision: 0,
+      createdAt: "2026-11-15T00:00:00Z",
+      state: initialTic(["a", "b"]),
+    };
+    request.mockResolvedValueOnce(game);
+    const view = render(<GamesPanel space={space} />);
+    await user.click(screen.getByRole("button", { name: "Play Tic-tac-toe" }));
+    view.rerender(<GamesPanel space={{ ...space, games: [game] }} />);
+    const board = screen.getByRole("article", { name: "Tic-tac-toe" });
+    expect(board).toHaveFocus();
+    expect(board.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "auto",
+      block: "center",
+    });
+    view.rerender(
+      <GamesPanel space={{ ...space, games: [structuredClone(game)] }} />,
+    );
+    expect(board.scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+  it("continues the current board without creating another game", async () => {
+    const user = userEvent.setup();
+    const game = {
+      id: "existing-rps",
+      kind: "rps" as const,
+      revision: 0,
+      createdAt: "2026-11-15T00:00:00Z",
+      state: initialRps(["a", "b"]),
+    };
+    render(<GamesPanel space={{ ...space, games: [game] }} />);
+    await user.click(
+      screen.getByRole("button", { name: "Continue Rock, paper, scissors" }),
+    );
+    expect(
+      screen.getByRole("article", { name: "Rock, paper, scissors" }),
+    ).toHaveFocus();
+    expect(request).not.toHaveBeenCalled();
+  });
+  it("moves focus to a rematch after it is created", async () => {
+    const user = userEvent.setup();
+    const state = initialTic(["a", "b"]);
+    const oldGame = {
+      id: "old-tic",
+      kind: "tic" as const,
+      revision: 5,
+      createdAt: "2026-11-15T00:00:00Z",
+      state: { ...state, winner: "a" },
+    };
+    const rematch = {
+      ...oldGame,
+      id: "rematch",
+      revision: 0,
+      createdAt: "2026-11-15T01:00:00Z",
+      state,
+    };
+    request.mockResolvedValueOnce(rematch);
+    const view = render(<GamesPanel space={{ ...space, games: [oldGame] }} />);
+    await user.click(
+      screen.getByRole("button", { name: "Include finished games" }),
+    );
+    await user.click(screen.getByRole("button", { name: "Play again" }));
+    expect(request).toHaveBeenCalledWith("/api/games", { kind: "tic" });
+    view.rerender(
+      <GamesPanel space={{ ...space, games: [oldGame, rematch] }} />,
+    );
+    expect(document.getElementById("game-rematch")).toHaveFocus();
+  });
+  it("starts each board game with its actual game kind", async () => {
+    const user = userEvent.setup();
+    render(<GamesPanel space={space} />);
+    await user.click(screen.getByRole("button", { name: "Play Tic-tac-toe" }));
+    expect(request).toHaveBeenLastCalledWith("/api/games", { kind: "tic" });
+    await user.click(
+      screen.getByRole("button", { name: "Play Rock, paper, scissors" }),
+    );
+    expect(request).toHaveBeenLastCalledWith("/api/games", { kind: "rps" });
+  });
+  it("sends a tic-tac-toe square with its revision and waits for the partner", async () => {
+    const user = userEvent.setup();
+    const game = {
+      id: "tic",
+      kind: "tic" as const,
+      revision: 0,
+      createdAt: "2026-11-15T00:00:00Z",
+      state: initialTic(["a", "b"]),
+    };
+    const view = render(<TicBoard game={game} space={space} />);
+    await user.click(
+      screen.getByRole("button", { name: "Row 2, column 2: empty" }),
+    );
+    expect(request).toHaveBeenCalledWith("/api/games/tic/moves", {
+      cell: 4,
+      revision: 0,
+    });
+    view.rerender(
+      <TicBoard
+        game={{ ...game, state: { ...game.state, turn: "b" } }}
+        space={space}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Row 2, column 2: empty" }),
+    ).toBeDisabled();
+  });
+  it("locks a rock-paper-scissors choice and shows the revealed round", async () => {
+    const user = userEvent.setup();
+    const game = {
+      id: "rps",
+      kind: "rps" as const,
+      revision: 0,
+      createdAt: "2026-11-15T00:00:00Z",
+      state: initialRps(["a", "b"]),
+    };
+    const view = render(<RpsGame game={game} space={space} />);
+    await user.click(screen.getByRole("button", { name: "Rock" }));
+    expect(request).toHaveBeenCalledWith("/api/games/rps/moves", {
+      choice: "rock",
+      round: 1,
+      revision: 0,
+    });
+    const chosen = playRps(game.state, "a", "rock", 1);
+    view.rerender(
+      <RpsGame game={{ ...game, revision: 1, state: chosen }} space={space} />,
+    );
+    expect(screen.getByRole("button", { name: "Paper" })).toBeDisabled();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Rock locked in. Waiting for Sam.",
+    );
+    const revealed = playRps(chosen, "b", "paper", 1);
+    view.rerender(
+      <RpsGame
+        game={{ ...game, revision: 2, state: revealed }}
+        space={space}
+      />,
+    );
+    expect(screen.getByText("Round 1: Sam wins")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Paper" })).toBeEnabled();
+  });
   it("prevents editing or duplicate submission while an answer is saving", async () => {
     const user = userEvent.setup();
     let finishSave!: () => void;
