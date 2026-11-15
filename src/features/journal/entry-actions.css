@@ -1,0 +1,28 @@
+.journal-entry-options { margin-left: auto; position: relative; }
+.journal-entry-heading .journal-pin-mark + .journal-entry-options { margin-left: 0; }
+.journal-options-menu > summary { list-style: none; cursor: pointer; }
+.journal-options-menu > summary::-webkit-details-marker { display: none; }
+.journal-menu-items { position: absolute; right: 0; top: 44px; min-width: 190px; background: #fff; border: 1px solid #dce2e6; box-shadow: 0 6px 20px #26313c14; border-radius: 8px; padding: 5px; z-index: 5; }
+.journal-menu-items button { display: flex; gap: 10px; align-items: center; border: 0; background: transparent; padding: 12px; border-radius: 5px; font-size: .8rem; color: #3c4b54; width: 100%; text-align: left; cursor: pointer; }
+.journal-menu-items button:hover { background: #f0f4f2; }
+.journal-menu-items button.danger { color: #a13a32; }
+.journal-option-error { position: absolute; right: 0; width: 250px; z-index: 4; }
+.journal-edit-footer { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.journal-delete-copy { line-height: 1.7; margin: 0 0 28px; }
+.journal-delete-button { background: #a13a32; }
+.journal-delete-button:hover { background: #802f29; }
+.journal-conversation { margin-top: 20px; }
+.journal-entry-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-left: -10px; }
+.journal-entry-actions button { font-size: .78rem; min-height: 40px; font-weight: 500; }
+.journal-heart-button.is-selected { color: #a04c3d; }
+.journal-heart-byline { margin-left: auto; font-size: .72rem; color: #7b6b67; }
+.journal-replies { margin-top: 16px; border-left: 2px solid #dce6e1; padding-left: 20px; }
+.journal-reply-list { margin: 0 0 20px; padding: 0; list-style: none; max-height: 450px; overflow-y: auto; }
+.journal-reply-list li + li { margin-top: 20px; }
+.journal-reply-byline { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; font-size: .78rem; }
+.journal-reply-byline time { color: #73808a; font-size: .7rem; }
+.journal-reply-list p { margin: 7px 0 0; font-size: .9rem; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+.journal-reply-form .field textarea { min-height: 80px; line-height: 1.6; }
+.journal-reply-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+.journal-reply-footer .secondary { min-height: 38px; font-size: .78rem; }
+@media (max-width: 460px) { .journal-heart-byline { flex-basis: 100%; margin: 4px 10px; } .journal-replies { padding-left: 14px; } .journal-page-heading { align-items: flex-start; } .journal-page-heading > .button { max-width: 135px; font-size: .8rem; } }

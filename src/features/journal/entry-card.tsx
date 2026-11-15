@@ -5,10 +5,12 @@ import { Clock3, ExternalLink, LockKeyhole, Pin } from "lucide-react";
 import type { Entry, Person } from "@/shared/types";
 import { formatInZone } from "@/shared/time";
 import { JournalDialog } from "./journal-dialog";
+import { EntryOptions } from "./entry-options";
+import { EntryConversation } from "./entry-conversation";
 import { SavedDrawing } from "./saved-drawing";
 import { entryDate, entryKindLabels, initials, linkLabel, safeExternalUrl } from "./journal-utils";
 
-export function EntryCard({ entry, members, me }: { entry: Entry; members: Person[]; me: Person }) {
+export function EntryCard({ entry, members, me, collections = [] }: { entry: Entry; members: Person[]; me: Person; collections?: string[] }) {
   const author = members.find(person => person.id === entry.authorId);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [photoFailed, setPhotoFailed] = useState(false);
@@ -22,6 +24,7 @@ export function EntryCard({ entry, members, me }: { entry: Entry; members: Perso
       <span className="journal-avatar" style={{ backgroundColor: author?.color || "#245c55" }} aria-hidden="true">{initials(author?.name || "Member")}</span>
       <div className="journal-byline"><strong>{author?.name || "Member"}</strong><span><time dateTime={entry.createdAt}>{entryDate(entry.createdAt, me.timeZone)}</time><span aria-hidden="true"> · </span>{entryKindLabels[entry.kind]}</span></div>
       {entry.pinned && <Pin size={16} className="journal-pin-mark" aria-label="Pinned" />}
+      {!entry.locked && <EntryOptions entry={entry} meId={me.id} collections={collections} />}
     </header>
     {entry.locked ? <div className="journal-locked-note">
       <LockKeyhole size={23} strokeWidth={1.5} aria-hidden="true" />
@@ -39,6 +42,7 @@ export function EntryCard({ entry, members, me }: { entry: Entry; members: Perso
       {entry.body && <p className="journal-entry-body">{entry.body}</p>}
       {link && <a className="journal-link-preview" href={link} target="_blank" rel="noopener noreferrer"><span><span className="journal-link-host">{linkLabel(link)}</span><span>{entry.title || "Open saved link"}</span></span><ExternalLink size={19} aria-hidden="true" /><span className="journal-visually-hidden"> (opens in a new tab)</span></a>}
       {entry.collection && <span className="journal-collection-label">{entry.collection}</span>}
+      <EntryConversation entry={entry} members={members} me={me} />
     </>}
     {photoOpen && <JournalDialog title={entry.title || "Photo"} wide onClose={() => setPhotoOpen(false)}><img className="journal-full-photo" src={`/api/media/${entry.mediaId}`} alt={description.slice(0, 300)} /><p className="journal-photo-caption">{entry.body}</p></JournalDialog>}
   </article>;
