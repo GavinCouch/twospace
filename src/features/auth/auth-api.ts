@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-export const authConfigSchema = z.object({ google: z.boolean(), passwordReset: z.boolean() });
+export const authConfigSchema = z.object({
+  google: z.boolean(), passwordReset: z.boolean(),
+  emailPassword: z.boolean().optional(), emailVerification: z.boolean().optional(),
+});
 export type AuthConfig = z.infer<typeof authConfigSchema>;
 export type SocialProvider = "google";
 

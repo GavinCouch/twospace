@@ -5,14 +5,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  ArrowRight,
-  Link2,
-  NotebookPen,
-  CalendarDays,
-  Shapes,
-} from "lucide-react";
+import { ArrowRight, Link2 } from "lucide-react";
 import { api, RequestError, SpaceAccess } from "./space-provider";
+import {
+  ProviderButtons,
+  PasswordRecoveryLink,
+} from "@/features/auth/provider-buttons";
+import { authRequest, authErrorMessage } from "@/features/auth/auth-api";
+import { useAuthConfig } from "@/features/auth/use-auth-config";
 import type { Account } from "@/shared/types";
 import "./account.css";
 
@@ -22,18 +22,16 @@ const credentials = z.object({
   password: z.string().min(10, "Use at least 10 characters.").max(128),
 });
 type Credentials = z.infer<typeof credentials>;
+async function loadAccount() {
+  try {
+    return await api<Account>("/api/account");
+  } catch (error) {
+    if (error instanceof RequestError && error.status === 401) return null;
+    throw error;
+  }
+}
 export function AccountGate({ children }: { children: ReactNode }) {
-  const account = useQuery({
-    queryKey: ["account"],
-    queryFn: async () => {
-      try {
-        return await api<Account>("/api/account");
-      } catch (error) {
-        if (error instanceof RequestError && error.status === 401) return null;
-        throw error;
-      }
-    },
-  });
+  const account = useQuery({ queryKey: ["account"], queryFn: loadAccount });
   if (account.isPending)
     return (
       <main className="account-loading" aria-label="Loading your space">
@@ -73,7 +71,9 @@ export function Brand() {
 function SignIn() {
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [error, setError] = useState("");
+  const [verificationEmail, setVerificationEmail] = useState("");
   const [demoPending, setDemoPending] = useState(false);
+  const config = useAuthConfig();
   const client = useQueryClient();
   const form = useForm<Credentials>({
     resolver: zodResolver(credentials),
@@ -81,22 +81,29 @@ function SignIn() {
   });
   async function submit(values: Credentials) {
     setError("");
+    if (!config.data || config.data.emailPassword === false) {
+      setError("Email sign-in is not available yet.");
+      return;
+    }
     if (mode === "sign-up" && !values.name.trim()) {
       form.setError("name", { message: "What should we call you?" });
       return;
     }
     try {
-      await api(`/api/auth/${mode}/email`, {
-        method: "POST",
-        body: JSON.stringify(values),
-      });
-      await client.invalidateQueries({ queryKey: ["account"] });
+      await authRequest(`/api/auth/${mode}/email`, values);
+      const account = await loadAccount();
+      if (account) {
+        await client.cancelQueries({ queryKey: ["space"] });
+        client.removeQueries({ queryKey: ["space"] });
+        client.setQueryData(["account"], account);
+      } else if (mode === "sign-up") {
+        setVerificationEmail(values.email);
+        form.reset({ name: "", email: values.email, password: "" });
+      } else {
+        setError("Sign-in did not complete. Please try again.");
+      }
     } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "Sign-in failed. Please try again.",
-      );
+      setError(authErrorMessage(cause));
     }
   }
   async function demo() {
@@ -123,78 +130,148 @@ function SignIn() {
       </header>
       <div className="welcome-layout">
         <section className="welcome-form">
-          <h1>{mode === "sign-in" ? "Sign in" : "Create account"}</h1>
-          <form className="stack" onSubmit={form.handleSubmit(submit)}>
-            {mode === "sign-up" && (
-              <label className="field">
-                Your name
-                <input autoComplete="given-name" {...form.register("name")} />
-                {form.formState.errors.name && (
-                  <small className="danger">
-                    {form.formState.errors.name.message}
-                  </small>
-                )}
-              </label>
-            )}
-            <label className="field">
-              Email
-              <input
-                type="email"
-                autoComplete="email"
-                {...form.register("email")}
-              />
-              {form.formState.errors.email && (
-                <small className="danger">
-                  {form.formState.errors.email.message}
-                </small>
-              )}
-            </label>
-            <label className="field">
-              Password
-              <input
-                type="password"
-                autoComplete={
-                  mode === "sign-in" ? "current-password" : "new-password"
-                }
-                {...form.register("password")}
-              />
-              {form.formState.errors.password && (
-                <small className="danger">
-                  {form.formState.errors.password.message}
-                </small>
-              )}
-            </label>
-            {error && (
+          <h1>
+            {verificationEmail
+              ? "Check your email"
+              : mode === "sign-in"
+                ? "Sign in"
+                : "Create account"}
+          </h1>
+          {config.isPending && <p role="status">Loading sign-in options…</p>}
+          {config.error && (
+            <div className="stack">
               <p className="form-error" role="alert">
-                {error}
+                {config.error.message}
               </p>
-            )}
-            <button
-              className="button"
-              disabled={form.formState.isSubmitting || demoPending}
-            >
-              {form.formState.isSubmitting
-                ? "Opening…"
-                : mode === "sign-in"
-                  ? "Sign in"
-                  : "Create account"}
-              <ArrowRight size={17} />
-            </button>
-          </form>
-          <button
-            className="quiet auth-toggle"
-            onClick={() => {
-              setMode(mode === "sign-in" ? "sign-up" : "sign-in");
-              setError("");
-              form.clearErrors();
-            }}
-          >
-            {mode === "sign-in"
-              ? "Create an account"
-              : "I already have an account"}
-          </button>
+              <button
+                className="secondary"
+                onClick={() => void config.refetch()}
+                disabled={config.isFetching}
+              >
+                Try again
+              </button>
+            </div>
+          )}
+          {config.data && !config.error && (
+            <>
+              {verificationEmail ? (
+                <div className="stack">
+                  <p role="status">Check your email to finish signing up.</p>
+                  <p className="muted">
+                    Open the verification link sent to {verificationEmail}.
+                  </p>
+                  <button
+                    className="secondary"
+                    onClick={() => {
+                      setVerificationEmail("");
+                      setMode("sign-in");
+                      setError("");
+                    }}
+                  >
+                    Back to sign in
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <ProviderButtons
+                    disabled={form.formState.isSubmitting || demoPending}
+                  />
+                  {config.data.emailPassword === false ? (
+                    <p className="muted">Email sign-in is not available yet.</p>
+                  ) : (
+                    <>
+                      <form
+                        className="stack"
+                        onSubmit={form.handleSubmit(submit)}
+                      >
+                        {mode === "sign-up" && (
+                          <label className="field">
+                            Your name
+                            <input
+                              autoComplete="given-name"
+                              {...form.register("name")}
+                            />
+                            {form.formState.errors.name && (
+                              <small className="danger">
+                                {form.formState.errors.name.message}
+                              </small>
+                            )}
+                          </label>
+                        )}
+                        <label className="field">
+                          Email
+                          <input
+                            type="email"
+                            autoComplete="email"
+                            {...form.register("email")}
+                          />
+                          {form.formState.errors.email && (
+                            <small className="danger">
+                              {form.formState.errors.email.message}
+                            </small>
+                          )}
+                        </label>
+                        <label className="field">
+                          Password
+                          <input
+                            type="password"
+                            autoComplete={
+                              mode === "sign-in"
+                                ? "current-password"
+                                : "new-password"
+                            }
+                            {...form.register("password")}
+                          />
+                          {form.formState.errors.password && (
+                            <small className="danger">
+                              {form.formState.errors.password.message}
+                            </small>
+                          )}
+                        </label>
+                        {mode === "sign-in" && <PasswordRecoveryLink />}
+                        {mode === "sign-up" &&
+                          config.data.emailVerification && (
+                            <p className="muted small">
+                              You’ll need to verify your email.
+                            </p>
+                          )}
+                        <button
+                          className="button"
+                          disabled={form.formState.isSubmitting || demoPending}
+                        >
+                          {form.formState.isSubmitting
+                            ? "Opening…"
+                            : mode === "sign-in"
+                              ? "Sign in"
+                              : "Create account"}
+                          <ArrowRight size={17} />
+                        </button>
+                      </form>
+                      <button
+                        className="quiet auth-toggle"
+                        disabled={form.formState.isSubmitting || demoPending}
+                        onClick={() => {
+                          setMode(mode === "sign-in" ? "sign-up" : "sign-in");
+                          setError("");
+                          form.clearErrors();
+                        }}
+                      >
+                        {mode === "sign-in"
+                          ? "Create an account"
+                          : "I already have an account"}
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+            </>
+          )}
+          {error && (
+            <p className="form-error" role="alert">
+              {error}
+            </p>
+          )}
           <div className="demo-entry">
-            <p>Try it first</p>
             <button
               className="secondary"
               disabled={demoPending || form.formState.isSubmitting}
@@ -207,15 +284,6 @@ function SignIn() {
             </button>
             <small>Private demo · no account needed</small>
           </div>
-        </section>
-        <section className="welcome-preview" aria-label="TwoSpace illustration">
-          <Image
-            src="/brand/cover.png"
-            fill
-            priority
-            sizes="(max-width:760px) 100vw, 680px"
-            alt="Two separate rooms, one in daylight and one at night"
-          />
         </section>
       </div>
     </main>
