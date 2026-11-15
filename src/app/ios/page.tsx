@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import logo from "../../../public/brand/logo-dark.png";
 import Link from "next/link";
 import { Brand } from "@/components/account-gate";
 import { SectionArt } from "@/components/section-art";
@@ -25,7 +26,7 @@ export default function IosPage() {
       <section className="ios-intro" aria-labelledby="ios-title">
         <div className="ios-app-mark">
           <Image
-            src="/brand/logo-dark.png"
+            src={logo}
             width={104}
             height={104}
             sizes="104px"

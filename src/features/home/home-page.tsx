@@ -1,4 +1,5 @@
 import Image from "next/image";
+import logo from "../../../public/brand/logo-dark.png";
 import Link from "next/link";
 import {
   ArrowDown,
@@ -18,7 +19,7 @@ function HomeBrand() {
   return (
     <span className="home-brand">
       <Image
-        src="/brand/logo-dark.png"
+        src={logo}
         width={36}
         height={36}
         sizes="36px"

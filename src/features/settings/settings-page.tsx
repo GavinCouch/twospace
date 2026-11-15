@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
+import logo from "../../../public/brand/logo-dark.png";
 
 import { useSpace } from "@/components/space-provider";
 import { ProfileSettings } from "./profile-settings";
@@ -48,7 +49,7 @@ export default function SettingsPage() {
             aria-labelledby="iphone-settings-title"
           >
             <Image
-              src="/brand/logo-dark.png"
+              src={logo}
               width={56}
               height={56}
               sizes="56px"
