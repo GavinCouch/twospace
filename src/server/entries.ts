@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { db, id, now, resource, insertResource, updateResource, transaction } from './database';
 import { context, found, HttpError, json, optionalUrl, shortText } from './http';
-import { assertMedia } from './media';
+import { assertMedia, discardUnusedMedia } from './media';
 import type { Entry, PhotoPair } from '@/shared/types';
 
 const entryInput = z.object({
@@ -41,6 +41,7 @@ export async function deleteEntry(request: Request, entryId: string) {
   const ctx = await context(request), entry = found(resource<Entry>(ctx.spaceId, 'entry', entryId));
   if (entry.authorId !== ctx.account.id) throw new HttpError(403, 'Only the author can delete this entry.');
   db.prepare('DELETE FROM resources WHERE id=? AND space_id=? AND kind=?').run(entryId, ctx.spaceId, 'entry');
+  if (entry.mediaId) await discardUnusedMedia(ctx.spaceId, entry.mediaId);
   return { ok: true };
 }
 export async function replyToEntry(request: Request, entryId: string) {
@@ -69,9 +70,13 @@ export async function createPhotoPair(request: Request) {
 export async function contributePhoto(request: Request, pairId: string) {
   const ctx = await context(request), input = await json(request, z.object({ mediaId: z.string().uuid(), caption: z.string().trim().max(1000).default('') }));
   if (!assertMedia(ctx, input.mediaId).mime.startsWith('image/')) throw new HttpError(400, 'Choose a photo.');
-  return transaction(() => {
+  let replacedMedia: string | undefined;
+  const result = transaction(() => {
     const pair = found(resource<PhotoPair>(ctx.spaceId, 'photoPair', pairId));
+    replacedMedia = pair.photos.find(photo => photo.userId === ctx.account.id)?.mediaId;
     pair.photos = [...pair.photos.filter(photo => photo.userId !== ctx.account.id), { ...input, userId: ctx.account.id }];
     return updateResource(ctx.spaceId, 'photoPair', pair);
   });
+  if (replacedMedia && replacedMedia !== input.mediaId) await discardUnusedMedia(ctx.spaceId, replacedMedia);
+  return result;
 }

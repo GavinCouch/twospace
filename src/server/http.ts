@@ -21,6 +21,9 @@ export async function account(request: Request): Promise<Account> {
   if (!session) throw new HttpError(401, 'Sign in to continue.');
   const profile = ensureProfile(session.user.id, session.user.name);
   const membership = row<{ space_id: string }>('SELECT space_id FROM memberships WHERE user_id=?', session.user.id);
+  if (profile.is_demo && (!membership || !row('SELECT 1 FROM demo_rooms WHERE space_id=? AND expires_at>?', membership.space_id, new Date().toISOString()))) {
+    throw new HttpError(401, 'This sample space has expired. Open a new demo.');
+  }
   return { id: session.user.id, name: profile.name, email: session.user.email, spaceId: membership?.space_id ?? null, isDemo: !!profile.is_demo };
 }
 export async function context(request: Request): Promise<Context> {
@@ -33,8 +36,23 @@ export function requirePartner(ctx: Context) {
   if (ctx.members.length !== 2) throw new HttpError(409, 'Invite your partner before starting this activity.');
 }
 export async function json<T>(request: Request, schema: z.ZodType<T>): Promise<T> {
-  const text = await request.text();
-  if (Buffer.byteLength(text) > 500_000) throw new HttpError(413, 'That update is too large.');
+  const limit = 500_000;
+  if (Number(request.headers.get('content-length')) > limit) throw new HttpError(413, 'That update is too large.');
+  const reader = request.body?.getReader();
+  const chunks: Uint8Array[] = [];
+  let length = 0;
+  if (reader) {
+    try {
+      while (true) {
+        const result = await reader.read();
+        if (result.done) break;
+        length += result.value.byteLength;
+        if (length > limit) { await reader.cancel(); throw new HttpError(413, 'That update is too large.'); }
+        chunks.push(result.value);
+      }
+    } finally { reader.releaseLock(); }
+  }
+  const text = Buffer.concat(chunks).toString('utf8');
   try { return schema.parse(JSON.parse(text || '{}')); }
   catch (error) {
     if (error instanceof z.ZodError) throw error;
@@ -64,4 +82,8 @@ export function route(fn: (request: Request, params: Record<string, string>) => 
 }
 export function found<T>(value: T | undefined): T { if (!value) throw new HttpError(404, 'That item could not be found.'); return value; }
 export const shortText = z.string().trim().max(160);
-export const optionalUrl = z.string().trim().max(2000).refine(value => !value || /^https?:\/\//i.test(value), 'Use an http or https link.');
+export const optionalUrl = z.string().trim().max(2000).refine(value => {
+  if (!value) return true;
+  try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password; }
+  catch { return false; }
+}, 'Use a complete http or https link.');

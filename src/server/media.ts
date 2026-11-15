@@ -1,7 +1,8 @@
 import sharp from 'sharp';
 import { mkdir, readFile, writeFile, unlink } from 'node:fs/promises';
+import { unlinkSync } from 'node:fs';
 import { join } from 'node:path';
-import { db, dataDirectory, id, now, resource, resources, row } from './database';
+import { db, dataDirectory, id, now, resources, row } from './database';
 import { context, HttpError, type Context } from './http';
 import type { Entry, PhotoPair } from '@/shared/types';
 
@@ -77,4 +78,15 @@ export async function getMedia(request: Request, mediaId: string) {
   }
   const buffer = await readFile(join(directory, media.filename));
   return new Response(buffer, { headers: { 'Content-Type': media.mime, 'Content-Length': String(buffer.length), 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Disposition': 'inline' } });
+}
+
+export function discardUnusedMedia(spaceId: string, mediaId: string) {
+  const attached = resources<Entry>(spaceId, 'entry').some(entry => entry.mediaId === mediaId)
+    || resources<PhotoPair>(spaceId, 'photoPair').some(pair => pair.photos.some(photo => photo.mediaId === mediaId));
+  if (attached) return;
+  const media = row<Media>('SELECT * FROM media WHERE id=? AND space_id=?', mediaId, spaceId);
+  if (!media) return;
+  try { unlinkSync(join(directory, media.filename)); }
+  catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+  db.prepare('DELETE FROM media WHERE id=? AND space_id=?').run(mediaId, spaceId);
 }
