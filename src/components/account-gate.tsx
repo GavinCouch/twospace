@@ -32,7 +32,16 @@ async function loadAccount() {
     throw error;
   }
 }
-export function AccountGate({ children }: { children: ReactNode }) {
+export type SignInMode = "sign-in" | "sign-up";
+export function AccountGate({
+  children,
+  signInMode = "sign-in",
+  signedInContent,
+}: {
+  children?: ReactNode;
+  signInMode?: SignInMode;
+  signedInContent?: ReactNode;
+}) {
   const account = useQuery({ queryKey: ["account"], queryFn: loadAccount });
   if (account.isPending)
     return (
@@ -51,7 +60,9 @@ export function AccountGate({ children }: { children: ReactNode }) {
         </button>
       </main>
     );
-  if (!account.data) return <SignIn />;
+  if (!account.data)
+    return <SignIn key={signInMode} initialMode={signInMode} />;
+  if (signedInContent !== undefined) return <>{signedInContent}</>;
   if (!account.data.spaceId) return <Pairing account={account.data} />;
   return <SpaceAccess enabled>{children}</SpaceAccess>;
 }
@@ -70,8 +81,8 @@ export function Brand() {
     </span>
   );
 }
-function SignIn() {
-  const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
+function SignIn({ initialMode = "sign-in" }: { initialMode?: SignInMode }) {
+  const [mode, setMode] = useState<SignInMode>(initialMode);
   const [error, setError] = useState("");
   const [verificationEmail, setVerificationEmail] = useState("");
   const config = useAuthConfig();

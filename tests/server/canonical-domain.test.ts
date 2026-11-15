@@ -14,6 +14,15 @@ beforeEach(() => vi.stubEnv("BETTER_AUTH_URL", "https://twospace.online"));
 afterEach(() => vi.unstubAllEnvs());
 
 describe("custom domain cutover", () => {
+  it.each(["/sign-in", "/sign-up"])(
+    "keeps the new account page on the canonical domain: %s",
+    (path) => {
+      expect(proxy(request(path)).headers.get("location")).toBe(
+        `https://twospace.online${path}`,
+      );
+      expect(proxy(request(path, "POST")).headers.get("location")).toBeNull();
+    },
+  );
   it.each(["GET", "HEAD"])(
     "moves %s page requests without losing a reset token or query parameters",
     (method) => {
