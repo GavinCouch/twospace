@@ -10,7 +10,8 @@
   --accent-soft: #34262e;
   --coral: #edb7c7;
   --danger: #ffa8a0;
-  --radius: 20px;
+  --radius: 16px;
+  --app-header-height: 76px;
   --paper: var(--bg);
   --card: var(--surface);
   --primary: var(--accent);
@@ -47,7 +48,7 @@ button {
   cursor: pointer;
 }
 button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.6;
 }
 a {

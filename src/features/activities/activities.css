@@ -636,7 +636,7 @@
   }
 }
 .games-grid > .panel {
-  scroll-margin-top: 24px;
+  scroll-margin-top: calc(var(--app-header-height) + 24px);
   border-color: var(--line);
   border-radius: 18px;
 }
