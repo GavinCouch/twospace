@@ -44,8 +44,6 @@ export async function renameSpace(request: Request) {
 }
 export async function invite(request: Request) {
   const ctx = await context(request);
-  if (ctx.account.isDemo)
-    throw new HttpError(400, "Create your own account to invite a partner.");
   return await spaceTransaction(ctx, async () => {
     if (ctx.members.length > 1)
       throw new HttpError(409, "Both places in this space are already taken.");
@@ -68,8 +66,6 @@ export async function invite(request: Request) {
 }
 export async function acceptInvite(request: Request) {
   const current = await account(request);
-  if (current.isDemo)
-    throw new HttpError(400, "Use your own account to accept an invitation.");
   const { token } = await json(
     request,
     z.object({ token: z.string().min(20).max(128) }),
@@ -122,8 +118,6 @@ export async function acceptInvite(request: Request) {
 }
 export async function leaveSpace(request: Request) {
   const ctx = await context(request);
-  if (ctx.account.isDemo)
-    throw new HttpError(400, "Start a new demo to reset this sample space.");
   await spaceTransaction(ctx, async () => {
     await execute("DELETE FROM invitations WHERE space_id=?", ctx.spaceId);
     await execute(
