@@ -86,7 +86,12 @@
   margin: 55px auto;
   padding: 24px;
 }
-.pairing-page > .brand {
+.pairing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 38px;
 }
 .pairing-page h1 {
