@@ -9,6 +9,7 @@ import {
   transaction,
 } from "./database";
 import { getObject, putObject, removeObject } from "./object-store";
+import { createMediaResponse } from "./media-response";
 import { context, pairedContext, HttpError, type Context } from "./http";
 import type { Entry, PhotoPair } from "@/shared/types";
 import type { ProfilePhoto } from "./profile-photos";
@@ -294,16 +295,13 @@ export async function getMedia(
   const buffer = await getObject(media.filename);
   // Storage can take time; a removed photo or departed viewer must not get a late response.
   await permittedMedia();
-  return new Response(Uint8Array.from(buffer), {
-    headers: {
-      "Content-Type": media.mime,
-      "Content-Length": String(buffer.length),
-      "Cache-Control": "private, no-store",
-      "X-Content-Type-Options": "nosniff",
-      "Content-Disposition": media.downloadName
-        ? `attachment; filename*=UTF-8''${encodeURIComponent(media.downloadName).replace(/['()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)}`
-        : "inline",
-    },
+  return createMediaResponse(request, buffer, {
+    "Content-Type": media.mime,
+    "Cache-Control": "private, no-store",
+    "X-Content-Type-Options": "nosniff",
+    "Content-Disposition": media.downloadName
+      ? `attachment; filename*=UTF-8''${encodeURIComponent(media.downloadName).replace(/['()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)}`
+      : "inline",
   });
 }
 export async function discardUnusedMedia(spaceId: string, mediaId: string) {
