@@ -1,5 +1,5 @@
 const configured =
-  process.env.EXPO_PUBLIC_API_URL || "https://twospace-cptv.onrender.com";
+  process.env.EXPO_PUBLIC_API_URL || "https://twospace.online";
 const url = new URL(configured);
 const local = ["localhost", "127.0.0.1", "10.0.2.2"].includes(url.hostname);
 if (url.protocol !== "https:" && !(__DEV__ && local))

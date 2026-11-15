@@ -1,10 +1,26 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { randomBytes } from "node:crypto";
 import { Pool } from "pg";
+import sharp from "sharp";
 import { createTestIdentity } from "./fixtures/accounts";
 import { localDateInZone } from "@/shared/time";
 const { queueEmail } = vi.hoisted(() => ({ queueEmail: vi.fn() }));
 vi.mock("@/server/email", () => ({ queueEmail }));
+const testObjects = vi.hoisted(() => new Map<string, Buffer>());
+vi.mock("@/server/object-store", () => ({
+  objectStoreReady: async () => {},
+  putObject: async (key: string, value: Buffer) => {
+    testObjects.set(key, Buffer.from(value));
+  },
+  getObject: async (key: string) => {
+    const value = testObjects.get(key);
+    if (!value) throw new Error("Test object not found");
+    return Buffer.from(value);
+  },
+  removeObject: async (key: string) => {
+    testObjects.delete(key);
+  },
+}));
 vi.mock("@/server/spotify", () => ({
   getSpotifyTrack: async (id: string) => ({
     id,
@@ -30,6 +46,8 @@ let activities: typeof import("@/server/activities");
 let plans: typeof import("@/server/plans");
 let snapshots: typeof import("@/server/snapshot");
 let music: typeof import("@/server/music");
+let profilePhotos: typeof import("@/server/profile-photos");
+let media: typeof import("@/server/media");
 type Identity = { id: string; cookie: string };
 let alex: Identity, jamie: Identity, outsider: Identity;
 const previous: Record<string, string | undefined> = {};
@@ -111,6 +129,10 @@ describe.skipIf(!enabled)(
           import("@/server/snapshot"),
           import("@/server/music"),
         ]);
+      [profilePhotos, media] = await Promise.all([
+        import("@/server/profile-photos"),
+        import("@/server/media"),
+      ]);
       alex = await identity("Alex");
       jamie = await identity("Jamie");
       outsider = await identity("Casey");
@@ -324,6 +346,78 @@ describe.skipIf(!enabled)(
           )
         ).status,
       ).toBe("proposed");
+    });
+    it("replaces profile photos atomically and keeps photos still attached to the journal", async () => {
+      const bytes = await sharp({
+        create: { width: 48, height: 48, channels: 3, background: "#b78999" },
+      })
+        .jpeg()
+        .toBuffer();
+      const upload = () =>
+        new Request("http://127.0.0.1:3100/api/profile/photo", {
+          method: "PUT",
+          headers: { cookie: alex.cookie, "content-type": "image/jpeg" },
+          body: Uint8Array.from(bytes),
+        });
+      const first = await profilePhotos.uploadProfilePhoto(upload());
+      const entry = await entries.createEntry(
+        request(alex.cookie, {
+          kind: "photo",
+          mediaId: first.avatarMediaId,
+          body: "Keep this photo",
+        }),
+      );
+      const results = await Promise.all([
+        profilePhotos.uploadProfilePhoto(upload()),
+        profilePhotos.uploadProfilePhoto(upload()),
+      ]);
+      const partner = await snapshots.getSnapshot(
+        request(jamie.cookie, undefined, "GET"),
+      );
+      const current = partner.members.find(
+        (person) => person.id === alex.id,
+      )!.avatarMediaId!;
+      expect(results.map((result) => result.avatarMediaId)).toContain(current);
+      expect(
+        await storage.resources(partner.space.id, "profilePhoto"),
+      ).toHaveLength(1);
+      expect(
+        await storage.rows(
+          "SELECT * FROM media WHERE space_id=?",
+          partner.space.id,
+        ),
+      ).toHaveLength(2);
+      await expect(
+        media.getMedia(request(jamie.cookie, undefined, "GET"), current),
+      ).resolves.toBeInstanceOf(Response);
+      await expect(
+        media.getMedia(request(outsider.cookie, undefined, "GET"), current),
+      ).rejects.toMatchObject({ status: 404 });
+      await profilePhotos.removeProfilePhoto(
+        request(alex.cookie, undefined, "DELETE"),
+      );
+      expect(
+        (await snapshots.getSnapshot(request(alex.cookie, undefined, "GET"))).me
+          .avatarMediaId,
+      ).toBeUndefined();
+      expect(
+        await storage.rows(
+          "SELECT * FROM media WHERE space_id=?",
+          partner.space.id,
+        ),
+      ).toHaveLength(1);
+      await entries.deleteEntry(
+        request(alex.cookie, undefined, "DELETE"),
+        entry.id,
+      );
+      expect(
+        await storage.rows(
+          "SELECT * FROM media WHERE space_id=?",
+          partner.space.id,
+        ),
+      ).toEqual([]);
+      await media.finishMediaDeletions();
+      expect(testObjects.size).toBe(0);
     });
     it("holds the migration lock in a transaction and releases it after success or failure", async () => {
       await storage.withAuthMigrationLock(async () => {

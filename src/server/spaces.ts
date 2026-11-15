@@ -10,6 +10,7 @@ import {
   spaceTransaction,
 } from "./http";
 import { hashToken } from "./auth";
+import { clearProfilePhoto } from "./profile-photos";
 export async function createSpace(request: Request) {
   const current = await account(request);
   const { name } = await json(
@@ -124,6 +125,7 @@ export async function leaveSpace(request: Request) {
       "INSERT OR IGNORE INTO pair_history(space_id) VALUES(?)",
       ctx.spaceId,
     );
+    await clearProfilePhoto(ctx.spaceId, ctx.account.id);
     await execute("DELETE FROM memberships WHERE user_id=?", ctx.account.id);
   });
   return { ok: true };

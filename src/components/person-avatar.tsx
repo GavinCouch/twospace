@@ -5,7 +5,7 @@ import { useState, type CSSProperties } from "react";
 import type { Person } from "@/shared/types";
 import "./person-avatar.css";
 
-type AvatarPerson = Pick<Person, "id" | "name" | "color">;
+type AvatarPerson = Pick<Person, "id" | "name" | "color" | "avatarMediaId">;
 
 export function avatarVariant(identity: string) {
   let hash = 0;
@@ -27,8 +27,16 @@ export function PersonAvatar({
   className?: string;
 }) {
   const variant = avatarVariant(person?.id || seed);
-  const src = `/artwork/avatar-${variant}.png`;
-  const [failedSource, setFailedSource] = useState<string | null>(null);
+  const artwork = `/artwork/avatar-${variant}.png`;
+  const customPhoto = person?.avatarMediaId
+    ? `/api/media/${encodeURIComponent(person.avatarMediaId)}`
+    : null;
+  const [failedSources, setFailedSources] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const src =
+    customPhoto && !failedSources.has(customPhoto) ? customPhoto : artwork;
+  const isPhoto = src === customPhoto;
   const accent =
     person?.color && /^#[0-9a-f]{6}$/i.test(person.color)
       ? person.color
@@ -40,6 +48,7 @@ export function PersonAvatar({
     <span
       className={`person-avatar ${className}`.trim()}
       data-variant={variant}
+      data-photo={isPhoto || undefined}
       aria-hidden="true"
       style={
         {
@@ -48,7 +57,7 @@ export function PersonAvatar({
         } as CSSProperties
       }
     >
-      {failedSource === src ? (
+      {failedSources.has(src) ? (
         <span className="person-avatar-fallback">{fallback}</span>
       ) : (
         <Image
@@ -57,7 +66,10 @@ export function PersonAvatar({
           width={size}
           height={size}
           sizes={`${size}px`}
-          onError={() => setFailedSource(src)}
+          unoptimized={isPhoto}
+          onError={() =>
+            setFailedSources((previous) => new Set([...previous, src]))
+          }
         />
       )}
     </span>
