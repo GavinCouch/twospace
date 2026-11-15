@@ -67,6 +67,10 @@ export async function account(request: Request): Promise<Account> {
     id: session.user.id,
     name: profile.name,
     email: session.user.email,
+    firstName: session.user.firstName ?? undefined,
+    lastName: session.user.lastName ?? undefined,
+    gender: session.user.gender ?? undefined,
+    birthday: session.user.birthday ?? undefined,
     spaceId: membership?.space_id ?? null,
     isDemo: !!profile.is_demo,
   };

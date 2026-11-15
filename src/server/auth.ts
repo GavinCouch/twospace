@@ -4,6 +4,7 @@ import { getMigrations } from "better-auth/db/migration";
 import { randomBytes, createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { z } from "zod";
 import {
   authDatabase,
   databaseReady,
@@ -42,6 +43,52 @@ export const auth = betterAuth({
   baseURL: appOrigin,
   secret,
   database: authDatabase,
+  user: {
+    // Optional in the API so existing accounts, native clients and OAuth stay compatible.
+    additionalFields: {
+      firstName: {
+        type: "string",
+        required: false,
+        validator: {
+          input: z
+            .string()
+            .trim()
+            .min(1, "Enter your first name.")
+            .max(60, "Use at most 60 characters for your first name."),
+        },
+      },
+      lastName: {
+        type: "string",
+        required: false,
+        validator: {
+          input: z
+            .string()
+            .trim()
+            .min(1, "Enter your last name.")
+            .max(60, "Use at most 60 characters for your last name."),
+        },
+      },
+      gender: {
+        type: ["woman", "man", "non-binary", "prefer-not-to-say"],
+        required: false,
+        validator: {
+          input: z.enum(["woman", "man", "non-binary", "prefer-not-to-say"]),
+        },
+      },
+      birthday: {
+        type: "string",
+        required: false,
+        validator: {
+          input: z.iso
+            .date("Enter a valid birthday.")
+            .refine(
+              (value) => value <= new Date().toISOString().slice(0, 10),
+              "Your birthday cannot be in the future.",
+            ),
+        },
+      },
+    },
+  },
   plugins: [expo()],
   advanced: { disableCSRFCheck: false, disableOriginCheck: false },
   trustedOrigins: runtimeConfig.cloud

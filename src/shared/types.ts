@@ -23,5 +23,10 @@ export type SpaceSnapshot = {
   me: Person; members: Person[]; entries: Entry[]; photoPairs: PhotoPair[];
   questions: QuestionRound[]; games: Game[]; drawings: Drawing[]; ideas: Idea[]; plans: Plan[];
 };
-export type Account = { id: string; name: string; email: string; spaceId: string | null; isDemo: boolean };
+export type Account = {
+  id: string; name: string; email: string; spaceId: string | null; isDemo: boolean;
+  firstName?: string; lastName?: string;
+  gender?: "woman" | "man" | "non-binary" | "prefer-not-to-say";
+  birthday?: string;
+};
 export type ApiError = { error: string; code?: string };
