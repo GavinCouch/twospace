@@ -15,6 +15,7 @@ import {
 import { authRequest, authErrorMessage } from "@/features/auth/auth-api";
 import { useAuthConfig } from "@/features/auth/use-auth-config";
 import type { Account } from "@/shared/types";
+import { IphoneAppLink } from "./iphone-app-link";
 import "./account.css";
 
 const credentials = z.object({
@@ -109,10 +110,10 @@ function SignIn() {
   return (
     <main className="welcome">
       <header>
-        <Brand />
-        <Link className="iphone-page-link" href="/ios">
-          iPhone app <span>Coming soon</span>
+        <Link href="/" aria-label="TwoSpace home">
+          <Brand />
         </Link>
+        <IphoneAppLink />
       </header>
       <div className="welcome-layout">
         <section className="welcome-form">
