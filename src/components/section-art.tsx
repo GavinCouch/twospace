@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 export type SectionArtName =
-  "journal" | "activities" | "plans" | "settings" | "questions" | "drawing";
+  "journal" | "activities" | "plans" | "music" | "settings" | "questions" | "drawing";
 
 export function SectionArt({
   name,

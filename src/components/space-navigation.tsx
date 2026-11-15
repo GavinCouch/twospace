@@ -8,6 +8,7 @@ const links = [
   { href: "/journal", name: "Journal", art: "journal" },
   { href: "/activities", name: "Activities", art: "activities" },
   { href: "/plans", name: "Plans", art: "plans" },
+  { href: "/music", name: "Music", art: "music" },
   { href: "/settings", name: "Settings", art: "settings" },
 ] as const;
 
@@ -18,14 +19,19 @@ export function SpaceNavigation({
   path: string;
   mobile?: boolean;
 }) {
-  const items = mobile ? links : links.slice(0, 3);
+  const items = mobile ? links : links.slice(0, -1);
   const active = items.findIndex((item) => path.startsWith(item.href));
   return (
     <nav
       className={mobile ? "mobile-navigation" : "primary-navigation"}
       aria-label={mobile ? "Mobile navigation" : "Main navigation"}
       data-active={active >= 0}
-      style={{ "--active-index": Math.max(0, active) } as CSSProperties}
+      style={
+        {
+          "--active-index": Math.max(0, active),
+          "--nav-count": items.length,
+        } as CSSProperties
+      }
     >
       {items.map((item) => (
         <Link

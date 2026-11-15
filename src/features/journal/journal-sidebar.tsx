@@ -6,6 +6,7 @@ import type { SpaceSnapshot } from "@/shared/types";
 import { formatInZone } from "@/shared/time";
 import { SectionArt } from "@/components/section-art";
 import { PhotoPairs } from "./photo-pairs";
+import { MusicPreview } from "@/features/music/music-preview";
 
 export function JournalSidebar({ space }: { space: SpaceSnapshot }) {
   const question = space.questions.find((item) => !item.complete);
@@ -20,6 +21,7 @@ export function JournalSidebar({ space }: { space: SpaceSnapshot }) {
   );
   return (
     <aside className="journal-sidebar" aria-label="Together">
+      <MusicPreview space={space} />
       <section className="journal-question-preview">
         <div className="sidebar-card-label">
           <SectionArt name="questions" size={30} />
