@@ -18,6 +18,13 @@ const storageFault = vi.hoisted(() => ({
   remove: false,
   afterPut: null as null | (() => Promise<unknown>),
   afterGet: null as null | (() => Promise<unknown>),
+  beforeRemove: null as null | (() => Promise<unknown>),
+}));
+const deferredCleanup = vi.hoisted(() => [] as Array<() => Promise<void>>);
+vi.mock("next/server", () => ({
+  after: (callback: () => Promise<void>) => {
+    deferredCleanup.push(callback);
+  },
 }));
 vi.mock("@/server/object-store", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/server/object-store")>();
@@ -34,6 +41,7 @@ vi.mock("@/server/object-store", async (importOriginal) => {
       return value;
     },
     removeObject: async (...args: Parameters<typeof actual.removeObject>) => {
+      await storageFault.beforeRemove?.();
       if (storageFault.remove) throw new Error("Simulated deletion failure");
       return actual.removeObject(...args);
     },
@@ -121,6 +129,8 @@ beforeEach(async () => {
   storageFault.remove = false;
   storageFault.afterPut = null;
   storageFault.afterGet = null;
+  storageFault.beforeRemove = null;
+  deferredCleanup.length = 0;
   await db.execute("DELETE FROM resources");
   await db.execute("DELETE FROM media");
   await db.execute("DELETE FROM media_deletions");
@@ -243,6 +253,7 @@ describe("private profile photos", () => {
     expect(second.avatarMediaId).not.toBe(first.avatarMediaId);
     expect(await record(first.avatarMediaId)).toBeUndefined();
     const objects = await import("@/server/object-store");
+    await media.finishMediaDeletions();
     await expect(objects.getObject(firstRow.filename)).rejects.toMatchObject({
       code: "ENOENT",
     });
@@ -433,4 +444,54 @@ describe("private profile photos", () => {
       ))!.count,
     ).toBe(500);
   });
+  it.each(["replace", "remove", "leave"] as const)(
+    "%s returns its committed result before slow object cleanup starts",
+    async (operation) => {
+      const first = await photos.uploadProfilePhoto(upload());
+      const oldFile = (await record(first.avatarMediaId))!.filename;
+      let finishRemoval!: () => void;
+      let removalStarted!: () => void;
+      const held = new Promise<void>((resolve) => {
+        finishRemoval = resolve;
+      });
+      const started = new Promise<void>((resolve) => {
+        removalStarted = resolve;
+      });
+      storageFault.beforeRemove = () => {
+        removalStarted();
+        return held;
+      };
+      const ctx = { params: Promise.resolve({}) };
+      const response =
+        operation === "replace"
+          ? await route.PUT(upload(), ctx)
+          : operation === "remove"
+            ? await route.DELETE(request(alex.cookie, undefined, "DELETE"), ctx)
+            : await (
+                await import("@/app/api/space/membership/route")
+              ).DELETE(request(alex.cookie, undefined, "DELETE"), ctx);
+      expect(response.status).toBe(200);
+      const result = await response.json();
+      if (operation === "replace")
+        expect(result.avatarMediaId).not.toBe(first.avatarMediaId);
+      else
+        expect(result).toEqual(
+          operation === "remove" ? { avatarMediaId: null } : { ok: true },
+        );
+      expect(deferredCleanup).toHaveLength(1);
+      expect(await record(first.avatarMediaId)).toBeUndefined();
+      expect(await db.rows("SELECT * FROM media_deletions")).toHaveLength(1);
+      const cleanup = deferredCleanup[0]();
+      await started;
+      // The HTTP response has already completed while storage deletion is still blocked.
+      expect(response.bodyUsed).toBe(true);
+      finishRemoval();
+      await cleanup;
+      expect(await db.rows("SELECT * FROM media_deletions")).toEqual([]);
+      const objects = await import("@/server/object-store");
+      await expect(objects.getObject(oldFile)).rejects.toMatchObject({
+        code: "ENOENT",
+      });
+    },
+  );
 });

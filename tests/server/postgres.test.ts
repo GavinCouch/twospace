@@ -416,6 +416,7 @@ describe.skipIf(!enabled)(
           partner.space.id,
         ),
       ).toEqual([]);
+      await media.finishMediaDeletions();
       expect(testObjects.size).toBe(0);
     });
     it("holds the migration lock in a transaction and releases it after success or failure", async () => {

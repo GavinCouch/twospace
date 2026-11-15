@@ -9,7 +9,7 @@ import {
   updateResource,
 } from "./database";
 import { context, HttpError, spaceTransaction } from "./http";
-import { boundedBody, discardUnusedMedia, finishMediaDeletions } from "./media";
+import { boundedBody, discardUnusedMedia } from "./media";
 import { putObject, removeObject } from "./object-store";
 
 export type ProfilePhoto = { id: string; authorId: string; mediaId: string };
@@ -132,7 +132,6 @@ export async function uploadProfilePhoto(request: Request) {
     }
     throw error;
   }
-  await finishMediaDeletions();
   return { avatarMediaId: mediaId };
 }
 
@@ -158,6 +157,5 @@ export async function removeProfilePhoto(request: Request) {
   await spaceTransaction(ctx, () =>
     clearProfilePhoto(ctx.spaceId, ctx.account.id),
   );
-  await finishMediaDeletions();
   return { avatarMediaId: null };
 }
