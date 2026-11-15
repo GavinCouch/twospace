@@ -5,7 +5,7 @@
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.065em;
-  color: #273456;
+  color: var(--ink);
 }
 .brand img {
   width: 43px;
@@ -31,8 +31,8 @@
   grid-column: 2;
   grid-row: 1;
   padding: 35px 38px;
-  background: #fffefa;
-  border: 1px solid #e8e2d6;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 18px;
   box-shadow: 0 8px 35px #4b3c2a06;
 }
@@ -53,7 +53,7 @@
 }
 .welcome-form .field input {
   padding: 12px;
-  background: #fff;
+  background: var(--bg);
   border-radius: 9px;
   font-size: 0.86rem;
 }
@@ -87,10 +87,10 @@
   grid-column: 1;
   grid-row: 1;
   height: 460px;
-  border-radius: 150px 150px 20px 20px;
+  border-radius: 24px;
   overflow: hidden;
   position: relative;
-  background: #f5e7ce;
+  background: var(--surface);
   box-shadow: 0 10px 30px #56433207;
 }
 .welcome-preview img {
@@ -124,8 +124,8 @@
   padding: 30px;
 }
 .auth-confirmation {
-  color: #314b35;
-  background: #eff5ec;
+  color: var(--accent);
+  background: var(--accent-soft);
   font-size: 0.85rem;
   padding: 12px;
   border-radius: 9px;
@@ -186,4 +186,26 @@
   .welcome-form .demo-entry {
     margin-bottom: 0;
   }
+}
+
+.brand {
+  color: var(--ink);
+  font-size: 1.45rem;
+  font-weight: 650;
+  letter-spacing: -0.045em;
+  gap: 10px;
+}
+.brand img {
+  width: 36px;
+  height: 36px;
+}
+.welcome-form {
+  box-shadow: none;
+  border-radius: 24px;
+}
+.welcome-preview {
+  background: var(--surface);
+}
+.welcome-preview img {
+  filter: brightness(0.6) saturate(0.4);
 }

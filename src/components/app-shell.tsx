@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
@@ -127,14 +126,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="app-body">
         {data && path === "/journal" && (
           <section className="space-cover" aria-label="Your shared space">
-            <Image
-              src="/brand/cover.png"
-              fill
-              sizes="(max-width: 760px) 100vw, 1200px"
-              priority
-              alt=""
-              className="space-cover-art"
-            />
             <div className="space-cover-content">
               <span className="cover-date">
                 {clock
@@ -146,7 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                     }).format(clock)
                   : ""}
               </span>
-              <h1>{data.space.name}</h1>
+              <h2>{data.space.name}</h2>
               <div className="partner-clocks">
                 {data.members.map((person) => {
                   const hour = clock
