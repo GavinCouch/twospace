@@ -25,4 +25,4 @@ export function useSpace(userId: string) {
   return useQuery({ queryKey: spaceKey(userId), queryFn: ({ signal }) => api<SpaceSnapshot>("/api/space", { signal }), refetchInterval: 4000, refetchIntervalInBackground: false });
 }
 export async function refreshSpace(userId: string) { await queryClient.invalidateQueries({ queryKey: spaceKey(userId) }); }
-export async function refreshAccount() { await queryClient.cancelQueries(); queryClient.clear(); await queryClient.invalidateQueries({ queryKey: accountKey }); }
+export async function refreshAccount() { await queryClient.cancelQueries(); queryClient.removeQueries({ queryKey: ["space"] }); await queryClient.resetQueries({ queryKey: accountKey }); }
