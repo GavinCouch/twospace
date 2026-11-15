@@ -3,9 +3,8 @@ import { useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { ArrowRight, Link2, LogOut } from "lucide-react";
 import { api, RequestError, SpaceAccess } from "./space-provider";
 import {
@@ -14,17 +13,19 @@ import {
 } from "@/features/auth/provider-buttons";
 import { authRequest, authErrorMessage } from "@/features/auth/auth-api";
 import { useAuthConfig } from "@/features/auth/use-auth-config";
+import {
+  credentialsPayload,
+  credentialsSchema,
+  emptyCredentials,
+  birthdayTodayLimit,
+  type Credentials,
+} from "@/features/auth/credentials";
+import { PasswordStrength } from "@/features/auth/password-strength";
 import { clearPrivateClientState } from "@/features/settings/client-state";
 import type { Account } from "@/shared/types";
 import { IphoneAppLink } from "./iphone-app-link";
 import "./account.css";
 
-const credentials = z.object({
-  name: z.string().max(60),
-  email: z.email("Enter a valid email address."),
-  password: z.string().min(10, "Use at least 10 characters.").max(128),
-});
-type Credentials = z.infer<typeof credentials>;
 async function loadAccount() {
   try {
     return await api<Account>("/api/account");
@@ -89,21 +90,32 @@ function SignIn({ initialMode = "sign-in" }: { initialMode?: SignInMode }) {
   const config = useAuthConfig();
   const client = useQueryClient();
   const form = useForm<Credentials>({
-    resolver: zodResolver(credentials),
-    defaultValues: { name: "", email: "", password: "" },
+    resolver: zodResolver(credentialsSchema(mode)),
+    defaultValues: emptyCredentials,
   });
+  const [password, confirmPassword, firstName, lastName, email] = useWatch({
+    control: form.control,
+    name: ["password", "confirmPassword", "firstName", "lastName", "email"],
+  });
+  const confirmationMismatch = Boolean(
+    confirmPassword && password !== confirmPassword,
+  );
+  const confirmationError = confirmationMismatch
+    ? "Passwords don’t match."
+    : !confirmPassword
+      ? form.formState.errors.confirmPassword?.message
+      : undefined;
   async function submit(values: Credentials) {
     setError("");
     if (!config.data || config.data.emailPassword === false) {
       setError("Email sign-in is not available yet.");
       return;
     }
-    if (mode === "sign-up" && !values.name.trim()) {
-      form.setError("name", { message: "What should we call you?" });
-      return;
-    }
     try {
-      await authRequest(`/api/auth/${mode}/email`, values);
+      await authRequest(
+        `/api/auth/${mode}/email`,
+        credentialsPayload(mode, values),
+      );
       const account = await loadAccount();
       if (account) {
         await client.cancelQueries({ queryKey: ["space"] });
@@ -111,7 +123,7 @@ function SignIn({ initialMode = "sign-in" }: { initialMode?: SignInMode }) {
         client.setQueryData(["account"], account);
       } else if (mode === "sign-up") {
         setVerificationEmail(values.email);
-        form.reset({ name: "", email: values.email, password: "" });
+        form.reset({ ...emptyCredentials, email: values.email });
       } else {
         setError("Sign-in did not complete. Please try again.");
       }
@@ -127,7 +139,9 @@ function SignIn({ initialMode = "sign-in" }: { initialMode?: SignInMode }) {
         </Link>
         <IphoneAppLink />
       </header>
-      <div className="welcome-layout">
+      <div
+        className={`welcome-layout${mode === "sign-up" && !verificationEmail ? " welcome-layout-signup" : ""}`}
+      >
         <section className="welcome-form">
           <h1>
             {verificationEmail
@@ -177,54 +191,230 @@ function SignIn({ initialMode = "sign-in" }: { initialMode?: SignInMode }) {
                     <p className="muted">Email sign-in is not available yet.</p>
                   ) : (
                     <>
+                      {config.data.google && (
+                        <div className="auth-divider">or</div>
+                      )}
                       <form
                         className="stack"
                         onSubmit={form.handleSubmit(submit)}
+                        noValidate
                       >
                         {mode === "sign-up" && (
-                          <label className="field">
-                            Your name
-                            <input
-                              autoComplete="given-name"
-                              {...form.register("name")}
-                            />
-                            {form.formState.errors.name && (
-                              <small className="danger">
-                                {form.formState.errors.name.message}
-                              </small>
-                            )}
-                          </label>
+                          <>
+                            <div className="auth-name-fields">
+                              <div className="field">
+                                <label htmlFor="signup-first-name">
+                                  First name
+                                </label>
+                                <input
+                                  id="signup-first-name"
+                                  required
+                                  autoComplete="given-name"
+                                  maxLength={60}
+                                  readOnly={form.formState.isSubmitting}
+                                  aria-invalid={Boolean(
+                                    form.formState.errors.firstName,
+                                  )}
+                                  aria-describedby={
+                                    form.formState.errors.firstName
+                                      ? "signup-first-name-error"
+                                      : undefined
+                                  }
+                                  {...form.register("firstName")}
+                                />
+                                {form.formState.errors.firstName && (
+                                  <small
+                                    className="danger"
+                                    id="signup-first-name-error"
+                                  >
+                                    {form.formState.errors.firstName.message}
+                                  </small>
+                                )}
+                              </div>
+                              <div className="field">
+                                <label htmlFor="signup-last-name">
+                                  Last name
+                                </label>
+                                <input
+                                  id="signup-last-name"
+                                  required
+                                  autoComplete="family-name"
+                                  maxLength={60}
+                                  readOnly={form.formState.isSubmitting}
+                                  aria-invalid={Boolean(
+                                    form.formState.errors.lastName,
+                                  )}
+                                  aria-describedby={
+                                    form.formState.errors.lastName
+                                      ? "signup-last-name-error"
+                                      : undefined
+                                  }
+                                  {...form.register("lastName")}
+                                />
+                                {form.formState.errors.lastName && (
+                                  <small
+                                    className="danger"
+                                    id="signup-last-name-error"
+                                  >
+                                    {form.formState.errors.lastName.message}
+                                  </small>
+                                )}
+                              </div>
+                            </div>
+                            <div className="auth-profile-fields">
+                              <div className="field">
+                                <label htmlFor="signup-birthday">
+                                  Birthday
+                                </label>
+                                <input
+                                  id="signup-birthday"
+                                  required
+                                  type="date"
+                                  autoComplete="bday"
+                                  max={birthdayTodayLimit()}
+                                  readOnly={form.formState.isSubmitting}
+                                  aria-invalid={Boolean(
+                                    form.formState.errors.birthday,
+                                  )}
+                                  aria-describedby={
+                                    form.formState.errors.birthday
+                                      ? "signup-birthday-error"
+                                      : undefined
+                                  }
+                                  {...form.register("birthday")}
+                                />
+                                {form.formState.errors.birthday && (
+                                  <small
+                                    className="danger"
+                                    id="signup-birthday-error"
+                                  >
+                                    {form.formState.errors.birthday.message}
+                                  </small>
+                                )}
+                              </div>
+                              <div className="field">
+                                <label htmlFor="signup-gender">
+                                  <span>
+                                    Gender{" "}
+                                    <span className="auth-optional">
+                                      (optional)
+                                    </span>
+                                  </span>
+                                </label>
+                                <select
+                                  id="signup-gender"
+                                  disabled={form.formState.isSubmitting}
+                                  {...form.register("gender")}
+                                >
+                                  <option value="">Select an option</option>
+                                  <option value="woman">Woman</option>
+                                  <option value="man">Man</option>
+                                  <option value="non-binary">Non-binary</option>
+                                  <option value="prefer-not-to-say">
+                                    Prefer not to say
+                                  </option>
+                                </select>
+                              </div>
+                            </div>
+                          </>
                         )}
-                        <label className="field">
-                          Email
+                        <div className="field">
+                          <label htmlFor="auth-email">Email</label>
                           <input
+                            id="auth-email"
+                            required
                             type="email"
                             autoComplete="email"
+                            readOnly={form.formState.isSubmitting}
+                            aria-invalid={Boolean(form.formState.errors.email)}
+                            aria-describedby={
+                              form.formState.errors.email
+                                ? "auth-email-error"
+                                : undefined
+                            }
                             {...form.register("email")}
                           />
                           {form.formState.errors.email && (
-                            <small className="danger">
+                            <small className="danger" id="auth-email-error">
                               {form.formState.errors.email.message}
                             </small>
                           )}
-                        </label>
-                        <label className="field">
-                          Password
+                        </div>
+                        <div className="field">
+                          <label htmlFor="auth-password">Password</label>
                           <input
+                            id="auth-password"
+                            required
                             type="password"
                             autoComplete={
                               mode === "sign-in"
                                 ? "current-password"
                                 : "new-password"
                             }
+                            maxLength={128}
+                            readOnly={form.formState.isSubmitting}
+                            aria-invalid={Boolean(
+                              form.formState.errors.password,
+                            )}
+                            aria-describedby={
+                              [
+                                mode === "sign-up"
+                                  ? "signup-password-help"
+                                  : "",
+                                form.formState.errors.password
+                                  ? "auth-password-error"
+                                  : "",
+                              ]
+                                .filter(Boolean)
+                                .join(" ") || undefined
+                            }
                             {...form.register("password")}
                           />
                           {form.formState.errors.password && (
-                            <small className="danger">
+                            <small className="danger" id="auth-password-error">
                               {form.formState.errors.password.message}
                             </small>
                           )}
-                        </label>
+                        </div>
+                        {mode === "sign-up" && (
+                          <>
+                            <PasswordStrength
+                              password={password}
+                              firstName={firstName}
+                              lastName={lastName}
+                              email={email}
+                            />
+                            <div className="field">
+                              <label htmlFor="signup-confirm-password">
+                                Confirm password
+                              </label>
+                              <input
+                                id="signup-confirm-password"
+                                required
+                                type="password"
+                                autoComplete="new-password"
+                                maxLength={128}
+                                readOnly={form.formState.isSubmitting}
+                                aria-invalid={Boolean(confirmationError)}
+                                aria-describedby="signup-confirmation-help"
+                                {...form.register("confirmPassword")}
+                              />
+                              <small
+                                id="signup-confirmation-help"
+                                aria-live="polite"
+                                aria-atomic="true"
+                                className={
+                                  confirmationError
+                                    ? "danger"
+                                    : "auth-password-match"
+                                }
+                              >
+                                {confirmationError ||
+                                  (confirmPassword && "Passwords match.")}
+                              </small>
+                            </div>
+                          </>
+                        )}
                         {mode === "sign-in" && <PasswordRecoveryLink />}
                         {mode === "sign-up" &&
                           config.data.emailVerification && (
