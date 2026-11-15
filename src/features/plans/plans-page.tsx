@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Plus, CalendarDays } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSpace } from "@/components/space-provider";
 import type { Plan, SpaceSnapshot } from "@/shared/types";
 import { PlanForm } from "./plan-form";
 import { PlanCard } from "./plan-card";
+import { SectionArt } from "@/components/section-art";
 import { Availability } from "./availability";
 import "./plans.css";
 
@@ -85,7 +86,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
             </div>
           ) : (
             <div className="empty">
-              <CalendarDays size={30} />
+              <SectionArt name="plans" size={80} />
               <h2>
                 {filter === "done" ? "No completed plans yet" : "No plans yet"}
               </h2>

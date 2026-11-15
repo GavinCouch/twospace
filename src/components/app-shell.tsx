@@ -2,28 +2,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import {
-  BookOpen,
-  Shapes,
-  CalendarDays,
-  Settings,
-  LogOut,
-  Copy,
-  Check,
-  Sun,
-  Moon,
-} from "lucide-react";
+import { LogOut, Copy, Check, Sun, Moon } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { clearPrivateClientState } from "@/features/settings/client-state";
 import { Brand } from "./account-gate";
 import { api, useSpace } from "./space-provider";
 import "./shell.css";
+import { SectionArt } from "./section-art";
 
 const navigation = [
-  { href: "/journal", name: "Journal", icon: BookOpen },
-  { href: "/activities", name: "Activities", icon: Shapes },
-  { href: "/plans", name: "Plans", icon: CalendarDays },
-];
+  { href: "/journal", name: "Journal", art: "journal" },
+  { href: "/activities", name: "Activities", art: "activities" },
+  { href: "/plans", name: "Plans", art: "plans" },
+] as const;
 export function AppShell({ children }: { children: ReactNode }) {
   const { data, isPending, error, refetch } = useSpace();
   const path = usePathname();
@@ -67,14 +58,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               }
               aria-current={path.startsWith(item.href) ? "page" : undefined}
             >
-              <item.icon size={18} />
+              <SectionArt name={item.art} size={30} />
               {item.name}
             </Link>
           ))}
         </nav>
         <div className="account-controls">
           <Link href="/settings" className="header-icon" aria-label="Settings">
-            <Settings size={20} />
+            <SectionArt name="settings" size={28} />
           </Link>
           <button
             className="header-icon signout-icon"
@@ -181,7 +172,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             }
             aria-current={path.startsWith(item.href) ? "page" : undefined}
           >
-            <item.icon size={21} />
+            <SectionArt name={item.art} size={30} />
             {item.name}
           </Link>
         ))}
@@ -189,7 +180,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           className={path === "/settings" ? "nav-link active" : "nav-link"}
           href="/settings"
         >
-          <Settings size={21} />
+          <SectionArt name="settings" size={30} />
           Settings
         </Link>
       </nav>

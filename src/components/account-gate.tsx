@@ -1,6 +1,7 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -109,6 +110,9 @@ function SignIn() {
     <main className="welcome">
       <header>
         <Brand />
+        <Link className="iphone-page-link" href="/ios">
+          iPhone app <span>Coming soon</span>
+        </Link>
       </header>
       <div className="welcome-layout">
         <section className="welcome-form">

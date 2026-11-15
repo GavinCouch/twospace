@@ -1,4 +1,5 @@
 "use client";
+import { SectionArt } from "@/components/section-art";
 
 import { useMemo, useState } from "react";
 import { Pin, Plus, Search, SlidersHorizontal, X } from "lucide-react";
@@ -178,6 +179,7 @@ export default function JournalPage() {
           )}
           {!entries.length && (
             <div className="journal-empty">
+              <SectionArt name="journal" size={88} />
               <h2>
                 {hasFilters ? "No matching entries" : "Your journal is empty"}
               </h2>
