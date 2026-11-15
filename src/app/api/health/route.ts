@@ -1,12 +1,12 @@
 import { ready } from "@/server/auth";
+import { row } from "@/server/database";
 import { objectStoreReady } from "@/server/object-store";
-import { finishMediaDeletions } from "@/server/media";
 export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     await ready();
     await objectStoreReady();
-    await finishMediaDeletions();
+    await row("SELECT 1 AS ok");
     return Response.json(
       { ok: true },
       { headers: { "Cache-Control": "no-store" } },

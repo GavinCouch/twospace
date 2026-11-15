@@ -6,7 +6,9 @@
     "startCommand": "npm run start",
     "healthCheckPath": "/api/health",
     "domain": "Use the free HTTPS Render address or configure a custom domain. Set BETTER_AUTH_URL to exactly the chosen origin.",
-    "persistence": "Production requires managed PostgreSQL and private cloud object storage. The local SQLite/files adapter is for development and tests only."
+    "persistence": "Production requires managed PostgreSQL and private cloud object storage. The local SQLite/files adapter is for development and tests only.",
+    "branch": "main",
+    "autoDeploy": "After CI Checks Pass"
   },
   "database": {
     "provider": "Any compatible managed PostgreSQL service, including Supabase",
@@ -33,7 +35,7 @@
     "brevoLimit": "Brevo temporarily replaces personal or unauthenticated sender addresses with a compliant address. Recipients may see that rewritten address. This is a temporary deliverability measure; Brevo recommends an authenticated custom domain for ongoing use. Account approval, plan limits, and recipient delivery still need a live check.",
     "resend": "Verify a sender domain, create a restricted sending API key, and set EMAIL_PROVIDER=resend, RESEND_API_KEY and EMAIL_FROM in hosting secrets.",
     "configuration": "Only the selected provider's key enables email features. Missing keys, unsupported providers, and invalid sender addresses are rejected. Configuration readiness does not prove that the provider has approved the sender or delivered an email.",
-    "externalDeliveryStatus": "Pending. Request formats and failure handling are covered by local tests; no live Brevo account, API key, sender approval, or recipient delivery has been verified.",
+    "externalDeliveryStatus": "Verified on the hosted app on 2026-11-15: the password-reset request succeeded and Brevo reported delivery. Inbox placement and reset-token redemption were not checked; no user password was changed.",
     "references": [
       "https://developers.brevo.com/reference/send-transac-email",
       "https://help.brevo.com/hc/en-us/articles/14925263522578-Comply-with-Gmail-Yahoo-and-Microsoft-s-requirements-for-email-senders"
@@ -49,5 +51,5 @@
     ]
   },
   "sampleSpaces": "Each visitor gets an isolated cloud-backed sample space when deployed. Profile switching is restricted to the two generated sample identities. Sample access expires after 24 hours.",
-  "verificationStatus": "Local regression tests do not prove cloud provider configuration. A real two-account, two-device flow, private file access, OAuth callback, and email delivery must be checked against the configured deployment."
+  "verificationStatus": "The hosted app passed Google sign-in, two synthetic cloud identities sharing updates, and private file access checks on 2026-11-15. Brevo confirmed reset-email delivery. Real partner onboarding and a full email-password reset remain user-driven checks."
 }

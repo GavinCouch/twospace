@@ -22,6 +22,14 @@
       "cause": "A positioned region looked like a dialog but did not provide browser modal behavior.",
       "change": "Use a native dialog, preserve Escape handling, and restore focus when it closes.",
       "verification": "tests/plans/dialog.test.tsx plus browser verification at 390px: focus stayed inside the modal and Escape returned focus to New plan."
+    },
+    {
+      "title": "Health checks waited for file deletion retries",
+      "foundBy": "Assistant reviewing the live service before configuring Render's HTTP health check",
+      "cause": "The health endpoint awaited a maintenance pass that can delete ten cloud files sequentially. Each storage request allows a 30-second timeout, so a stalled deletion could exceed Render's five-second health-check deadline even while the application was otherwise available.",
+      "change": "Remove file cleanup from the health request and use a read-only SELECT 1 on every probe. Keep the existing startup and private-storage readiness checks and the generic, uncached 503 response.",
+      "verification": "The stalled-cleanup regression exceeded its simulated four-second deadline before the fix. The focused route tests cover prompt success despite stalled cleanup, fresh database probes, startup/storage/database failures without secret error details, and recovery after a temporary database failure.",
+      "discussion": "Explain why background maintenance should not determine whether a web process is ready for traffic, and why cached startup checks still need a live database query."
     }
   ]
 }
