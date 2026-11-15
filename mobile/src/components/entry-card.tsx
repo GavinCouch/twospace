@@ -1,3 +1,4 @@
+import { PrivatePhoto } from "./private-photo";
 import { useState } from "react";
 import { Alert, Linking, Text, View } from "react-native";
 import type { Entry, SpaceSnapshot } from "../domain";
@@ -20,6 +21,7 @@ export function EntryCard({ entry, data }: { entry: Entry; data: SpaceSnapshot }
   if (entry.locked) return <View style={styles.card}><Text style={styles.heading}>A note for later</Text><Text style={styles.muted}>Opens {new Date(entry.revealAt!).toLocaleString()}</Text></View>;
   return <View style={styles.card}><View style={[styles.row, { justifyContent: "space-between" }]}><Text style={styles.label}>{name}</Text><Text style={styles.muted}>{new Date(entry.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</Text></View>
     {!!entry.title && <Text style={styles.heading}>{entry.title}</Text>}
+    {entry.kind === "photo" && entry.mediaId && <PrivatePhoto mediaId={entry.mediaId} description={entry.body || entry.title}/>}
     {!!entry.body && <Text selectable style={styles.text}>{entry.body}</Text>}
     {entry.url && <Button secondary onPress={() => { if (/^https?:\/\//i.test(entry.url!)) void Linking.openURL(entry.url!); }}>Open link</Button>}
     {["voice", "drawing"].includes(entry.kind) && <Button secondary onPress={() => void Linking.openURL(`${API_URL}/journal`)}>Open {entry.kind === "voice" ? "recording" : "drawing"} on the website</Button>}
