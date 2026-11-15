@@ -47,17 +47,19 @@ export function VoiceRecorder({ upload }: { upload: MediaUpload }) {
       const next = new MediaRecorder(input, { mimeType, audioBitsPerSecond: 64_000 });
       recorder.current = next;
       const chunks: Blob[] = [];
+      let failed = false;
       next.ondataavailable = event => { if (event.data.size) chunks.push(event.data); };
       next.onstop = () => {
         stopTracks();
         if (!mounted.current) return;
         setPhase("idle");
+        if (failed) return;
         const blob = new Blob(chunks, { type: next.mimeType });
         if (!blob.size) { setError("No audio was recorded. Try again or upload a recording."); return; }
         const extension = next.mimeType.includes("mp4") ? "m4a" : next.mimeType.includes("ogg") ? "ogg" : "webm";
         upload.upload(new File([blob], `voice-note.${extension}`, { type: next.mimeType }));
       };
-      next.onerror = () => { stopTracks(); if (mounted.current) { setPhase("idle"); setError("The recording stopped unexpectedly. Please try again."); } };
+      next.onerror = () => { failed = true; stopTracks(); if (mounted.current) { setPhase("idle"); setError("The recording stopped unexpectedly. Please try again."); } };
       upload.clear(); setSeconds(0); setPhase("recording");
       next.start(250);
       const started = Date.now();
@@ -81,7 +83,7 @@ export function VoiceRecorder({ upload }: { upload: MediaUpload }) {
     </div>
     <p className="muted journal-record-help">Up to 2 minutes. Recording stops when you close this window.</p>
     {upload.previewUrl && <audio controls src={upload.previewUrl} aria-label="Preview your voice note" />}
-    {phase !== "recording" && phase !== "requesting" && <label className="journal-audio-file field" htmlFor={id}>Or upload a recording<input id={id} type="file" accept="audio/webm,audio/mp4,audio/ogg,.m4a,.webm,.ogg" onChange={event => { const file = event.target.files?.[0]; if (file) { setError(null); upload.upload(file); } event.target.value = ""; }} /><small>WebM, MP4/M4A, or Ogg · up to 10 MB</small></label>}
+    {phase !== "recording" && phase !== "requesting" && <label className="journal-audio-file field" htmlFor={id}>Or upload a recording<input id={id} type="file" accept="audio/webm,audio/mp4,audio/ogg" onChange={event => { const file = event.target.files?.[0]; if (file) { setError(null); upload.upload(file); } event.target.value = ""; }} /><small>WebM, MP4, or Ogg · up to 10 MB</small></label>}
     {upload.status === "uploading" && <div className="journal-upload-progress" role="status"><progress max={100} value={upload.progress} aria-label="Audio upload progress" /><span>{upload.progress === 100 ? "Saving recording…" : `Uploading ${upload.progress}%`}</span></div>}
     {upload.status === "ready" && <p className="journal-upload-ready">Recording uploaded. Add a caption below.</p>}
     {(error || upload.error) && <div className="form-error" role="alert"><p>{error || upload.error}</p>{upload.error && upload.file && <button type="button" className="secondary" onClick={upload.retry}><RotateCcw size={15} /> Retry upload</button>}</div>}

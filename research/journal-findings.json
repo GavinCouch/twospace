@@ -9,6 +9,22 @@
       "impact": "A form could appear valid and only fail after submission or upload, leaving users to discover avoidable validation errors.",
       "fix": "Aligned note validation to 6,000 characters and upload choices to JPEG/PNG/WebP images and WebM/Ogg/MP4 audio. Error copy and file-picker accept attributes now match.",
       "status": "Corrected during integration, before the affected feature was committed. End-to-end checks follow once the assembled app serves."
+    },
+    {
+      "id": "voice-error-partial-upload",
+      "discoveredBy": "Assistant-authored failure-path test in tests/journal/voice-recorder.test.tsx",
+      "before": "A recorder error stopped microphone tracks, but a following stop event still uploaded collected partial audio.",
+      "impact": "The interface could report a recording failure and then present an incomplete clip as an uploaded recording.",
+      "fix": "Track the failed recording session and discard its stop-event payload while still stopping all microphone tracks.",
+      "verification": "Regression test reproduced an unexpected upload after the error event; the corrected handler blocks that upload."
+    },
+    {
+      "id": "composer-accessible-names",
+      "discoveredBy": "Accessible-role inspection during composer interaction tests",
+      "before": "Link help text and the live character count were children of wrapping labels, so assistive names included the help text or changing count.",
+      "impact": "Inputs had unnecessarily long and unstable accessible names.",
+      "fix": "Give the Link and note fields explicit stable label IDs; associate the help and count separately as descriptions.",
+      "verification": "The link input is now addressable by its exact accessible name, and the unsafe-link submission test exercises it."
     }
   ]
 }
