@@ -7,9 +7,7 @@
     "symptom": "Turbopack warned that the dynamic runtime-data path caused the whole project to be traced into server output.",
     "cause": "The development database path was resolved from an environment variable. Static build analysis could not determine which runtime files it needed.",
     "fix": "Tell Turbopack not to trace the runtime-data path. Cloud deployments use managed storage, so local development data is not a build dependency.",
-    "relatedFiles": [
-      "src/server/database.ts"
-    ],
+    "relatedFiles": ["src/server/database.ts"],
     "verification": "A second npm run build succeeded without the tracing warning. No deployment or credential exposure was observed.",
     "learningExercise": "Explain the difference between application assets that belong in a deployment and mutable data that belongs in a persistent storage service."
   },
@@ -51,6 +49,19 @@
       "Google OAuth callback with a real account",
       "Email verification and password reset delivery",
       "TLS and the actual hosted domain"
-    ]
+    ],
+    "ciCollationFix": {
+      "id": "membership-compared-using-different-collations",
+      "title": "Unchanged memberships were rejected on Linux PostgreSQL",
+      "discovery": "The first GitHub Actions PostgreSQL job failed three of five integration tests with an incorrect 409 response saying that the people in the space had changed.",
+      "ciRun": "https://github.com/GavinCouch/twospace/actions/runs/43682868927/job/132717056895",
+      "cause": "The membership query sorted IDs using the database locale, while the expected IDs were sorted with JavaScript code-point ordering. Mixed-case Better Auth IDs can have different orders under the Linux database locale. The local temporary cluster used the C locale, which had masked the defect.",
+      "fix": "Compare membership sets and their sizes without depending on database ordering. Continue rejecting removed actors and genuinely changed partners before a mutation runs.",
+      "regression": "A deterministic test supplies the unchanged IDs a and Z in both database orders. Before the fix, one of four tests failed with the same incorrect 409. After the fix, all four pass, including the removed-actor and changed-partner checks.",
+      "verification": "The five actual PostgreSQL integration tests pass again on the isolated local cluster. TypeScript and git diff --check pass. The cluster was stopped and removed. The Linux CI rerun is pending.",
+      "relatedFiles": ["src/server/http.ts", "tests/server/membership.test.ts"],
+      "recordedBy": "Coding assistant",
+      "learningExercise": "Explain why ordering from a database locale cannot be assumed to match JavaScript string sorting, and why a membership check should compare identities rather than order."
+    }
   }
 }
