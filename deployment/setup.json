@@ -1,0 +1,45 @@
+{
+  "application": "TwoSpace",
+  "hosting": {
+    "runtime": "Node.js 26",
+    "buildCommand": "npm ci && npm run build",
+    "startCommand": "npm run start",
+    "healthCheckPath": "/api/health",
+    "domain": "Configure the user's chosen domain and HTTPS on the host, then set BETTER_AUTH_URL to exactly that origin.",
+    "persistence": "Production requires managed PostgreSQL and private cloud object storage. The local SQLite/files adapter is for development and tests only."
+  },
+  "database": {
+    "provider": "Any compatible managed PostgreSQL service, including Supabase",
+    "connection": "Use the provider's direct or session-pool connection URL. Keep DATABASE_URL in hosting secrets. TLS certificate verification is enabled; supply DATABASE_SSL_CA only if the provider needs an additional CA certificate.",
+    "schema": "twospace",
+    "migrations": "Application tables and Better Auth tables are initialized on readiness. PostgreSQL advisory locks serialize schema initialization and shared mutations.",
+    "access": "The application uses its own server-only schema. Do not expose twospace through Supabase's public Data API."
+  },
+  "files": {
+    "supabase": "Create a private bucket named twospace-media. Set SUPABASE_URL, SUPABASE_STORAGE_BUCKET and a server-only SUPABASE_SECRET_KEY. A legacy SUPABASE_SERVICE_ROLE_KEY is also supported. Never put these keys in NEXT_PUBLIC variables.",
+    "s3Alternative": "Set the S3 variables and leave SUPABASE_URL unset. Configure the bucket as private and block public access using the provider's controls.",
+    "delivery": "Images and recordings are read through membership-checked application endpoints. Raw storage URLs and credentials are not sent to the browser."
+  },
+  "google": {
+    "clientType": "Web application",
+    "authorizedOrigin": "The exact BETTER_AUTH_URL origin",
+    "redirectUri": "BETTER_AUTH_URL + /api/auth/callback/google",
+    "scope": "Basic account identity only",
+    "verification": "Finish the provider consent-screen configuration and test a real account after deployment."
+  },
+  "email": {
+    "provider": "Resend",
+    "setup": "Verify a sender domain, create a restricted sending API key, and set RESEND_API_KEY and EMAIL_FROM in hosting secrets.",
+    "behavior": "Cloud email accounts require email verification. Password resets use single-use Better Auth tokens and revoke existing sessions after a successful reset. Email features are unavailable until a delivery provider is configured.",
+    "checks": [
+      "Verification email reaches the recipient",
+      "Verification creates a valid signed-in session",
+      "Reset email reaches an existing account",
+      "Used and expired reset tokens are rejected",
+      "Existing sessions stop working after reset",
+      "Unknown emails receive the same public reset response"
+    ]
+  },
+  "sampleSpaces": "Each visitor gets an isolated cloud-backed sample space when deployed. Profile switching is restricted to the two generated sample identities. Sample access expires after 24 hours.",
+  "verificationStatus": "Local regression tests do not prove cloud provider configuration. A real two-account, two-device flow, private file access, OAuth callback, and email delivery must be checked against the configured deployment."
+}
