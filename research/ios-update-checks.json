@@ -1,0 +1,31 @@
+{
+  "date": "2026-11-15",
+  "scope": "Generated section artwork, sample-space retirement, and the first native iPhone companion",
+  "website": {
+    "tests": "106 application and server tests passed. The five PostgreSQL integration tests run separately in CI.",
+    "build": "Next.js production build and TypeScript passed.",
+    "browser": [
+      "Checked the iPhone page at desktop and 390px widths.",
+      "Checked Journal navigation at desktop and 390px widths.",
+      "Checked Activities and Settings at 320px; no horizontal overflow.",
+      "Confirmed generated section artwork loads and navigation labels remain visible.",
+      "Confirmed sign-in and Settings link to the iPhone development page.",
+      "Confirmed sample-space controls are absent."
+    ],
+    "sampleRetirement": "Old sample endpoints return 410 without issuing sessions. Existing sample sessions are rejected. Historical database records were not deleted."
+  },
+  "native": {
+    "build": "Unsigned arm64 simulator app compiled successfully with Xcode 27.1.",
+    "javascript": "Expo iOS export and TypeScript passed.",
+    "tests": "Ten tests passed: seven transport checks and three photo preparation checks covering HEIC conversion, input limits, output limits, and temporary-file cleanup.",
+    "runtimeLimit": "Device Hub launched but its computer-use accessibility interface repeatedly timed out. Interactive native flows, photo permissions, VoiceOver, and Google's return to the app were not verified on a simulator or physical device.",
+    "distribution": "Development source and simulator build only. No App Store or TestFlight submission.",
+    "details": "mobile/development.json"
+  },
+  "finding": {
+    "issue": "The Journal empty-state illustration was centered while its text remained left aligned.",
+    "fix": "Center the empty-state text with its illustration.",
+    "foundBy": "Assistant browser review"
+  },
+  "artwork": "research/section-artwork.json contains the generation tool, asset paths, and full prompts."
+}

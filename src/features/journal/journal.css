@@ -953,3 +953,7 @@
   color: var(--accent);
   background: var(--accent-soft);
 }
+
+.journal-empty {
+  text-align: center;
+}
