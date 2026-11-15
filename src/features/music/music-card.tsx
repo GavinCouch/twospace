@@ -90,7 +90,6 @@ export function SongCard({
         <div className="music-author">
           <PersonAvatar
             person={person}
-            seed={song.authorId}
             size={36}
             className="music-avatar"
           />
