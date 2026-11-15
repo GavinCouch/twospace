@@ -423,47 +423,148 @@
   align-items: center;
   gap: 8px;
 }
+.game-catalog-heading {
+  margin: 32px 0 18px;
+}
+.game-catalog-heading h2 {
+  font-size: 1.1rem;
+}
+.game-catalog-heading > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
 .game-options {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
   margin-bottom: 25px;
 }
 .game-option {
-  background: var(--surface);
-  border: 1px solid transparent;
-  padding: 24px;
-  border-radius: 18px;
   display: grid;
-  grid-template-columns: 56px 1fr;
-  align-items: start;
-  gap: 12px 17px;
-  transition:
-    border-color 180ms ease,
-    transform 180ms ease;
-}
-.game-option > svg {
-  color: var(--accent);
-  margin-top: 3px;
+  grid-template-columns: 98px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 20px;
+  border-radius: 14px;
 }
 .game-option h3 {
   margin: 0 0 6px;
+  font-size: 1rem;
 }
 .game-option p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.game-option .game-duration {
+  font-size: 0.7rem;
+  margin: 0 0 9px;
 }
 .game-option > button {
-  background: var(--raised);
-  border-color: transparent;
-}
-.game-option > button {
-  grid-column: 2;
+  grid-column: 2 / -1;
   justify-self: start;
+  font-size: 0.82rem;
+  min-height: 36px;
 }
 .game-option:focus-within {
-  border-color: var(--line);
+  border-color: var(--accent);
+}
+.game-option-copy {
+  grid-column: 2 / -1;
+}
+.game-preview {
+  width: 98px;
+  height: 98px;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  border-radius: 10px;
+}
+.preview-four {
+  display: grid;
+  grid-template-columns: repeat(5, 12px);
+  gap: 4px;
+  padding: 8px;
+  background: #373b4c;
+  border-radius: 5px;
+}
+.preview-four i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+.preview-four .rose {
+  background: #edb7c7;
+}
+.preview-four .blue {
+  background: #9dbce5;
+}
+.preview-tic {
+  display: grid;
+  grid-template-columns: repeat(3, 25px);
+}
+.preview-tic span {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid #5a525d;
+  border-bottom: 1px solid #5a525d;
+}
+.preview-tic span:nth-child(3n) {
+  border-right: 0;
+}
+.preview-tic span:nth-child(n + 7) {
+  border-bottom: 0;
+}
+.preview-tic svg {
+  width: 17px;
+  height: 17px;
+  color: #edb7c7;
+}
+.preview-rps {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  color: #b7c8a5;
+}
+.preview-rps svg {
+  width: 25px;
+  height: 25px;
+  stroke-width: 1.5;
+}
+.preview-rps svg:nth-child(2) {
+  transform: translateY(-13px);
+}
+.preview-clues {
+  width: 68px;
+  display: grid;
+  gap: 9px;
+}
+.preview-clues span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.65rem;
+  color: #cbb9e3;
+}
+.preview-clues i {
+  width: 43px;
+  height: 3px;
+  border-radius: 2px;
+  background: #6d607c;
+}
+.preview-clues span:nth-child(2) i {
+  width: 31px;
+}
+.games-empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 16px 0;
 }
 @media (hover: hover) and (pointer: fine) {
   .activity-tabs.tabs button:hover {
@@ -476,8 +577,7 @@
     transform: translateY(-2px);
   }
   .game-option:hover {
-    border-color: var(--line);
-    transform: translateY(-2px);
+    border-color: #655860;
   }
   .four-drop:enabled:hover svg {
     transform: translateY(3px);
@@ -536,6 +636,7 @@
   }
 }
 .games-grid > .panel {
+  scroll-margin-top: 24px;
   border-color: var(--line);
   border-radius: 18px;
 }
@@ -1146,7 +1247,7 @@
     gap: 5px;
     padding: 9px 3px;
     font-size: 0.78rem;
-    min-height: 58px;
+    min-height: 44px;
   }
   .activity-tabs button svg {
     width: 16px;
@@ -1189,5 +1290,193 @@
   .four-drop:enabled:is(:hover, :active),
   .four-drop:enabled:is(:hover, :focus-visible) svg {
     transform: none;
+  }
+}
+
+/* Boards keep the same player colors across rounds. */
+.tic-game > h3 {
+  margin: 0;
+}
+.tic-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.tic-players span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+.tic-players span:first-child {
+  color: #edb7c7;
+}
+.tic-players span:last-child {
+  color: #9dbce5;
+}
+.tic-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  max-width: 310px;
+  margin: 0 auto;
+}
+.tic-board button {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+.tic-board button:enabled:hover {
+  border-color: var(--accent);
+  background: var(--raised);
+}
+.tic-board button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.tic-board button svg {
+  width: 52%;
+  height: 52%;
+  stroke-width: 2;
+  animation: game-piece-enter 180ms ease-out;
+}
+.tic-board .tic-player-0 {
+  color: #edb7c7;
+}
+.tic-board .tic-player-1 {
+  color: #9dbce5;
+}
+.tic-board .tic-winning {
+  border-color: currentColor;
+  background: var(--accent-soft);
+}
+.play-again {
+  margin-top: 20px;
+}
+.rps-target {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.rps-score {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.rps-score > div {
+  padding: 14px;
+  text-align: center;
+}
+.rps-score > div + div {
+  border-left: 1px solid var(--line);
+}
+.rps-score span {
+  display: block;
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+.rps-score strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+  margin-top: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.rps-round-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 22px 0 10px;
+}
+.rps-choices {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.rps-choices button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+.rps-choices button svg {
+  width: 28px;
+  height: 28px;
+}
+.rps-choices button:enabled:hover,
+.rps-choices button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.rps-choices button[aria-pressed="true"] {
+  opacity: 1;
+}
+.rps-result {
+  margin-top: 22px;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.84rem;
+  animation: game-piece-enter 220ms ease-out;
+}
+.rps-result p {
+  color: var(--muted);
+  margin: 7px 0 0;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+@keyframes game-piece-enter {
+  from {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (max-width: 940px) {
+  .game-options {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .game-option {
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px;
+  }
+  .game-preview {
+    width: 78px;
+    height: 86px;
+  }
+  .preview-four {
+    transform: scale(0.85);
+  }
+  .preview-tic {
+    transform: scale(0.85);
+  }
+  .rps-choices {
+    gap: 5px;
+  }
+  .rps-choices button {
+    font-size: 0.75rem;
+    padding-inline: 2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tic-board button svg,
+  .rps-result {
+    animation: none;
   }
 }

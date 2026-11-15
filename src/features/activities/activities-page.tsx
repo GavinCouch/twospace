@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { SectionArt } from "@/components/section-art";
+
 import { useSpace } from "@/components/space-provider";
 import { ActivityLibrary } from "./activity-library";
 import { QuestionsPanel } from "./questions-panel";
@@ -10,21 +10,25 @@ import { DrawingsPanel } from "./drawings-panel";
 import "./activities.css";
 
 const tabs = [
-  { id: "ideas", label: "Ideas", art: "journal" },
-  { id: "questions", label: "Questions", art: "questions" },
-  { id: "games", label: "Games", art: "activities" },
-  { id: "drawing", label: "Drawing", art: "drawing" },
+  { id: "games", label: "Games" },
+  { id: "questions", label: "Questions" },
+  { id: "drawing", label: "Drawing" },
+  { id: "ideas", label: "Date ideas" },
 ] as const;
 type Tab = (typeof tabs)[number]["id"];
 
 export default function ActivitiesPage() {
   const query = useSpace();
-  const [tab, setTab] = useState<Tab>("ideas");
+  const [tab, setTab] = useState<Tab>("games");
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
   useEffect(() => {
     const readTab = () => {
       const requested = new URLSearchParams(window.location.search).get("tab");
-      if (tabs.some((item) => item.id === requested)) setTab(requested as Tab);
+      setTab(
+        tabs.some((item) => item.id === requested)
+          ? (requested as Tab)
+          : "games",
+      );
     };
     readTab();
     window.addEventListener("popstate", readTab);
@@ -46,7 +50,7 @@ export default function ActivitiesPage() {
         role="tablist"
         aria-label="Activities"
       >
-        {tabs.map(({ id, label, art }, index) => (
+        {tabs.map(({ id, label }, index) => (
           <button
             id={`activity-tab-${id}`}
             role="tab"
@@ -71,7 +75,6 @@ export default function ActivitiesPage() {
               buttons.current[next]?.focus();
             }}
           >
-            <SectionArt name={art} size={28} />
             {label}
           </button>
         ))}
