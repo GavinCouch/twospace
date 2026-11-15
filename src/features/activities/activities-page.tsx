@@ -10,7 +10,7 @@ import { DrawingsPanel } from "./drawings-panel";
 import "./activities.css";
 
 const tabs = [
-  { id: "ideas", label: "Choose something", Icon: Compass },
+  { id: "ideas", label: "Ideas", Icon: Compass },
   { id: "questions", label: "Questions", Icon: MessagesSquare },
   { id: "games", label: "Games", Icon: Gamepad2 },
   { id: "drawing", label: "Drawing", Icon: Pencil },
