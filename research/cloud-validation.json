@@ -1,0 +1,25 @@
+{
+  "recordedBy": "Coding assistant",
+  "finding": {
+    "id": "build-traced-runtime-directory",
+    "title": "The production build tried to trace the whole workspace",
+    "foundBy": "The first production build after adding the cloud adapter",
+    "symptom": "Turbopack warned that the dynamic runtime-data path caused the whole project to be traced into server output.",
+    "cause": "The development database path was resolved from an environment variable. Static build analysis could not determine which runtime files it needed.",
+    "fix": "Tell Turbopack not to trace the runtime-data path. Cloud deployments use managed storage, so local development data is not a build dependency.",
+    "relatedFiles": [
+      "src/server/database.ts"
+    ],
+    "verification": "A second npm run build succeeded without the tracing warning. No deployment or credential exposure was observed.",
+    "learningExercise": "Explain the difference between application assets that belong in a deployment and mutable data that belongs in a persistent storage service."
+  },
+  "verification": {
+    "commands": [
+      "npx vitest run tests/server",
+      "npx tsc --noEmit",
+      "npm run build"
+    ],
+    "result": "19 backend and deployment-configuration tests passed; TypeScript passed; the optimized production build passed without warnings.",
+    "scope": "Real local Better Auth sessions, SQLite transactions, image processing, isolation, hidden content, concurrency, and deployment configuration. PostgreSQL/Supabase Storage adapters, Google OAuth, verification emails, and password reset are implemented but require real environment configuration and a live deployment check. Cloud provider login and email delivery have not been verified."
+  }
+}
