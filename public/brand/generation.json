@@ -1,0 +1,21 @@
+{
+  "generator": "Built-in image_gen",
+  "createdAt": "2026-11-14",
+  "assets": [
+    {
+      "key": "twospace_cover",
+      "prompt": "Use case: illustration-story. Asset type: original wide illustration for the header of TwoSpace, a private app for long-distance couples. Create a sophisticated, beautifully composed gouache and cut-paper illustration of two different cozy rooms seen through two large arched windows, one in soft daytime and one at night, with a tiny flowing ribbon visually connecting the two separate spaces. Each room has a chair, a lamp, a plant, a book and a mug; the chairs remain in separate rooms. No people. The image should convey sharing everyday life across distance without suggesting future in-person reunion. Rich ink blue, persimmon orange, butter yellow, muted sky blue, warm white paper. Confident flat shapes, imperfect ink edges, delicate paper texture, exceptional editorial illustration craft. Wide 3:1 composition, the windows and objects occupy the right two-thirds, spacious pale warm-white negative space on the left for real UI controls. No words, letters, hearts, sparkles, gradients, watermark, UI, or fake text. This is final production artwork, not a website screenshot.",
+      "transparent_background": false
+    },
+    {
+      "key": "twospace_logo",
+      "prompt": "Use case: logo-brand. Asset type: transparent app brand symbol for TwoSpace. Design one exceptional compact logo mark: two rounded arch-shaped windows leaning toward one another, with a small shared negative-space opening between them. Friendly, distinctive, modern editorial identity, simple enough to read at 32 pixels. Solid deep ink blue #293b80 and persimmon orange #e2764f. Slightly organic curves but very clean crisp edges. Flat ink, no shading or 3D. Centered isolated symbol on a truly transparent background. No text, no wordmark, no hearts, no infinity symbol, no chain links, no frame, no shadow, no mockup. Generous transparent padding but the mark should occupy most of the square.",
+      "transparent_background": true
+    },
+    {
+      "key": "twospace_background",
+      "prompt": "Use case: stylized-concept. Asset type: subtle full-bleed website background texture for TwoSpace. A high quality warm-white handmade paper surface, almost ivory #faf8f3, with very subtle natural paper fibers and faint cool blue daylight near the far upper right edge and a trace of warm peach at the far lower left edge. Extremely restrained, bright and quiet, not a gradient design, not marble, not noise overlay, no objects, no shapes, no words, no borders or vignette. This image must support dark text and white content sheets. Wide landscape composition.",
+      "transparent_background": false
+    }
+  ]
+}
