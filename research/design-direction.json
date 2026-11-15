@@ -1,0 +1,94 @@
+{
+  "project": "TwoSpace",
+  "researchedOn": "2026-11-15",
+  "method": "Visually inspected publisher iPhone screenshots in the App Store and screenshots in official product help pages. App Store promotional framing was distinguished from the app interface. No third-party artwork, prompts, or branding was copied.",
+  "limitations": [
+    "Publisher screenshots demonstrate selected screens, not every state or the quality of the full app.",
+    "Visual judgments are design interpretations, not empirical proof of usability or authorship.",
+    "The sizing and color values below are TwoSpace implementation decisions, not measurements of other apps."
+  ],
+  "sources": [
+    {
+      "product": "Paired",
+      "url": "https://apps.apple.com/us/app/paired-couples-relationship/id1469609343",
+      "observed": "Question views prioritize a large prompt and an answer action; the purple promotional frames are separate from the app screens.",
+      "application": "Give the question chooser a distinct surface and readable prompt, then separate past responses below."
+    },
+    {
+      "product": "Between",
+      "url": "https://apps.apple.com/us/app/between-couples-love-tracker/id458035189",
+      "observed": "Home and memory screens give photographs most of the space, with small date labels and compact navigation.",
+      "application": "Let personal content take precedence over a decorative page banner."
+    },
+    {
+      "product": "Agape",
+      "url": "https://apps.apple.com/us/app/agap%C3%A9-feel-close-when-apart/id1507907556",
+      "observed": "Names, paired avatars, and response blocks distinguish people and their contributions.",
+      "application": "Make the author and response readable before showing secondary actions; preserve clear locked-answer states."
+    },
+    {
+      "product": "SumOne",
+      "url": "https://apps.apple.com/us/app/sumone-for-relationships/id1469506430",
+      "observed": "The shared character and room carry most of the visual personality, with a quieter surrounding interface.",
+      "application": "Keep expressive illustrations within activity content rather than scattering decoration across controls."
+    },
+    {
+      "product": "Oura",
+      "url": "https://support.ouraring.com/hc/en-us/articles/360058599753-How-to-Use-the-Oura-App",
+      "supportingUrl": "https://ouraring.com/blog/new-app-design/",
+      "observed": "A dark Today screen prioritizes one main item and places secondary information below it. The official redesign rationale also describes this focus.",
+      "application": "Use clear priority and a limited set of dark surfaces; TwoSpace does not adopt the source app's gradients or health scoring."
+    },
+    {
+      "product": "Spotify",
+      "url": "https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580",
+      "observed": "Dark neutral surfaces allow artwork, titles, and primary playback actions to carry the hierarchy; rows often need no enclosing border.",
+      "application": "Keep base surfaces neutral, reserve rose for interactive emphasis, and avoid unnecessary nested cards."
+    },
+    {
+      "product": "Darkroom",
+      "url": "https://darkroom.co/help/guide/interface-overview",
+      "observed": "The library grid and focused viewer serve different tasks. The official guide describes contextual controls and navigation adapted to each screen size.",
+      "application": "Separate browsing from editing and keep the drawing itself prominent. Do not imitate translucent native controls in the web app."
+    }
+  ],
+  "direction": {
+    "palette": {
+      "background": "#131315",
+      "surface": "#1e1e22",
+      "raised": "#28282d",
+      "text": "#f5f2f3",
+      "secondaryText": "#a6a3ad",
+      "border": "#343238",
+      "accent": "#edb7c7",
+      "accentSurface": "#34262e",
+      "onAccent": "#30212a"
+    },
+    "typography": "One system sans-serif, clear weight differences, readable body text, and no serif display titles or decorative uppercase labels.",
+    "layout": "Compact navigation; a distinct question focus; compact parallel activity choices; larger game boards; contextual drawing tools.",
+    "avoid": [
+      "Marketing slogans",
+      "Decorative gradients",
+      "Paper textures",
+      "Oversized illustrative headers",
+      "Borders around every nested element",
+      "Fake metrics",
+      "Streak pressure"
+    ],
+    "inclusion": "Remote shared experiences are meaningful without eventual in-person meetings. No relationship genders or reunion goals are assumed."
+  },
+  "activityImplementation": [
+    "Four compact tabs with a filled selected state; the first label is Ideas.",
+    "Two-column idea browsing on larger screens and one column on phones.",
+    "System-font question prompts with a subtle rose-tinted surface and separate answer blocks.",
+    "Dark game boards with two contrasting piece colors, initials, and a separate winning outline.",
+    "White drawing canvas and thumbnails preserve the appearance of existing stroke colors; controls remain dark.",
+    "Drawing swatches and tools use at least 44-pixel targets. Phone select controls retain 16-pixel text."
+  ],
+  "visualReview": {
+    "environment": "Fictional sample space in a separate Edge tab; desktop and 391 CSS-pixel phone layout. No personal entries were edited.",
+    "finding": "Browser inspection exposed a drawing-thumbnail sizing conflict: the shared button svg rule forced previews to 18 pixels high.",
+    "fix": "Explicit height:auto and an 8:5 aspect ratio restore the drawing thumbnail proportions. Phone drawing tools use four equal columns.",
+    "attribution": "Found and fixed by the assistant during visual review, not by the user."
+  }
+}

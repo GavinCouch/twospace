@@ -1,0 +1,72 @@
+{
+  "reviewedAt": "2026-11-14",
+  "method": "Official product pages, support documentation, developer-maintained store descriptions, and dated individual reviews. Documented behavior was not independently tested in each app. Reviews illustrate possible friction, not its prevalence.",
+  "productDirection": "A private space for everyday contributions, shared activities, and memories. Remote experiences are complete experiences; meeting in person is never assumed or required.",
+  "products": [
+    {
+      "name": "Paired",
+      "sources": [{"url": "https://www.paired.com/frequently-asked-questions", "publishedAt": null}, {"url": "https://support.paired.com/en/articles/164632-what-is-paired", "publishedAt": "2025-05-09"}],
+      "interactions": ["Both people answer before viewing the other response", "Questions and games", "Timeline and special dates"],
+      "access": "Free daily conversation; premium shared by both partners.",
+      "designDecision": "Offer independent answers, topic choice, and skipping without deadlines. Write original prompts."
+    },
+    {
+      "name": "Between",
+      "sources": [{"url": "https://between.us/?lang=en", "publishedAt": null}, {"url": "https://help.between.us/hc/en-us/articles/360016398694-I-want-to-learn-more-about-Notes", "publishedAt": null}, {"url": "https://help.between.us/hc/en-us/articles/115006800147-What-is-Between-Plus", "publishedAt": null}],
+      "interactions": ["Private media, notes, and shared dates", "Author-only and jointly editable notes"],
+      "access": "Bulk media and note export is documented as a premium feature.",
+      "designDecision": "Make note ownership clear, keep notes easy to find, and include a portable journal export."
+    },
+    {
+      "name": "Agape",
+      "sources": [{"url": "https://apps.apple.com/us/app/agap%C3%A9-feel-close-when-apart/id1507907556", "publishedAt": null}],
+      "interactions": ["Relationship-specific question categories", "Reveal after both answers", "Optional topics"],
+      "access": "Free questions with premium categories.",
+      "designDecision": "Provide playful and everyday choices as well as user-written questions. Do not infer relationship quality from answers.",
+      "reviewSignal": {"reviewDate": "2023-11-21", "developerReplyDate": "2023-11-30", "finding": "One reviewer reported repetitive or unsuitable prompts; the founder acknowledged different preferences for serious and playful content. This does not establish current prevalence."}
+    },
+    {
+      "name": "SumOne",
+      "sources": [{"url": "https://www.sumone.co/en/", "publishedAt": null}, {"url": "https://sumone.co/faq-en/", "publishedAt": null}],
+      "interactions": ["Daily questions", "Shared creature and room decoration", "Next question waits for both answers"],
+      "access": "Free use with advertising and premium limits/features.",
+      "designDecision": "Shared creation can be enjoyable without missed-day penalties. Store named time zones and handle daylight-saving transitions explicitly."
+    },
+    {
+      "name": "Locket",
+      "sources": [{"url": "https://apps.apple.com/us/app/locket-widget/id1600525061", "publishedAt": null}],
+      "interactions": ["Small photographs delivered to a widget", "Reactions without public counts", "Photo history and recaps"],
+      "access": "Free with in-app purchases; native widget behavior is not promised by this web prototype.",
+      "designDecision": "An ordinary photograph can be a complete interaction. Make it easy to post and revisit."
+    },
+    {
+      "name": "noteit",
+      "sources": [{"url": "https://apps.apple.com/us/app/noteit-bff-widget/id1570369625", "publishedAt": null}],
+      "interactions": ["Paired accounts", "Hand-drawn notes and photographs"],
+      "access": "Free with in-app purchases.",
+      "designDecision": "Support handmade contributions, undo, and dependable drafts. Do not place missed-day messages among memories.",
+      "reviewSignal": {"reviewDates": ["2023-04-17", "2023-05-12"], "finding": "Two historical individual reviews said streak notifications displaced enjoyment of drawings. These reports do not establish current behavior or prevalence."}
+    },
+    {
+      "name": "Couply",
+      "sources": [{"url": "https://www.couply.io/faqs", "publishedAt": null}, {"url": "https://apps.apple.com/us/app/couply-couples-relationship/id1484241314", "publishedAt": null}],
+      "interactions": ["Questions and quizzes", "Date suggestions and calendar planning", "Photo memories", "Long-distance mode"],
+      "access": "Free content with subscription; the product also advertises coaching features.",
+      "designDecision": "Connect activities to plans and saved memories rather than expanding into relationship diagnoses or automated advice."
+    },
+    {
+      "name": "Cupla",
+      "sources": [{"url": "https://cupla.app/help/en/articles/15162036-what-are-cupla-s-features", "publishedAt": "2026-09-17"}, {"url": "https://cupla.app/help/en/articles/16528291-how-do-i-change-my-timezone", "publishedAt": "2026-08-19"}, {"url": "https://cupla.app/help/en/articles/15171057-what-s-the-difference-between-cupla-on-ios-android-and-desktop", "publishedAt": null}],
+      "interactions": ["Side-by-side calendars", "Wishlists and date plans", "Availability privacy", "Both partners' local hours"],
+      "access": "Free and paid access; platform capabilities differ.",
+      "designDecision": "Show proposed times in both locations and allow counterproposals without requiring full calendar disclosure. Visits remain optional."
+    }
+  ],
+  "historicalReference": {
+    "name": "Official",
+    "status": "Discontinued in the second quarter of 2025, according to Bumble's filing.",
+    "source": "https://www.sec.gov/Archives/edgar/data/1830043/000162828025038861/bmbl-20250630.htm",
+    "designDecision": "Keep user-created memories exportable. The closure does not establish why individuals used or left the app."
+  },
+  "constraints": ["No copied question decks, artwork, or app copy", "No relationship scores or therapy claims", "No participation streaks or missed-day penalties", "No last-seen or read-receipt surveillance", "Both live and asynchronous participation", "No assumption that partners will meet in person"]
+}

@@ -1,0 +1,157 @@
+.journal-compose-form {
+  display: grid;
+  gap: 22px;
+}
+.journal-kind-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.journal-kind-picker label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 14px;
+  min-height: 42px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.journal-kind-picker label.is-selected {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.journal-kind-picker label:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.journal-kind-picker input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.journal-optional {
+  display: inline;
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 0.78rem;
+}
+.journal-field-error {
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+.journal-character-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.journal-schedule-fields {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: 17px 0;
+  display: grid;
+  gap: 16px;
+}
+.journal-check-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  min-height: 26px;
+}
+.journal-check-label input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent);
+}
+.journal-compose-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.journal-compose-footer > span {
+  font-size: 0.72rem;
+  line-height: 1.6;
+  max-width: 230px;
+}
+.journal-compose-footer button {
+  flex-shrink: 0;
+}
+.journal-compose-form .field {
+  gap: 8px;
+}
+.journal-compose-form .field textarea {
+  line-height: 1.7;
+}
+.journal-recorder {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--line);
+  padding: 18px;
+  border-radius: 7px;
+}
+.journal-record-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.journal-record-time {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.journal-record-time.is-recording {
+  color: var(--danger);
+}
+.journal-record-help {
+  font-size: 0.75rem;
+  margin: 0;
+  line-height: 1.6;
+}
+.journal-recorder audio {
+  width: 100%;
+}
+.journal-recorder .journal-upload-ready {
+  font-size: 0.75rem;
+  margin: 0;
+}
+.journal-audio-file {
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+  margin-top: 2px;
+}
+@media (max-width: 460px) {
+  .journal-compose-footer {
+    align-items: stretch;
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+  .journal-compose-footer > span {
+    max-width: none;
+    text-align: center;
+  }
+  .journal-kind-picker label {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 8px;
+  }
+}
+@media (max-width: 460px) {
+  .journal-kind-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .journal-kind-picker label {
+    min-height: 48px;
+  }
+}

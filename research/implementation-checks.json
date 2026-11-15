@@ -1,0 +1,84 @@
+{
+  "roleSource": "https://www.grassfed.dev/apply/software-engineer-intern-frontend",
+  "reviewedOn": "2026-11-15",
+  "mapping": [
+    {
+      "expectation": "Typed component work",
+      "evidence": [
+        "src/shared/types.ts",
+        "src/features/journal/entry-card.tsx",
+        "src/features/activities/four-board.tsx"
+      ]
+    },
+    {
+      "expectation": "Adaptive and accessible interfaces",
+      "evidence": [
+        "src/components/shell.css",
+        "src/features/journal/journal-dialog.tsx",
+        "src/features/plans/plans-page.tsx",
+        "src/features/activities/activities-page.tsx"
+      ],
+      "manualChecks": [
+        "390px and 320px mobile layouts",
+        "Keyboard stays inside plan dialog; Escape returns focus to its trigger",
+        "Native labels, status/error announcements and reduced-motion rules"
+      ]
+    },
+    {
+      "expectation": "API integration and separate client/server state",
+      "evidence": [
+        "src/components/space-provider.tsx",
+        "src/server/snapshot.ts",
+        "src/server/activities.ts"
+      ],
+      "implementation": "TanStack Query owns shared snapshots and invalidation. Component state owns filters, drafts and open dialogs. Server checks membership, revisions and legal game turns."
+    },
+    {
+      "expectation": "Forms and failure handling",
+      "evidence": [
+        "src/features/journal/use-media-upload.ts",
+        "src/features/plans/plan-form.tsx",
+        "src/features/auth/reset-password.tsx"
+      ],
+      "implementation": "React Hook Form and Zod validate input; date-time conversion rejects ambiguous or missing DST times. Uploads retain retryable errors and report progress."
+    },
+    {
+      "expectation": "Debugging and verification",
+      "evidence": [
+        "tests/server/api.test.ts",
+        "tests/server/postgres.test.ts",
+        "tests/domain/activities-ui.test.tsx",
+        "tests/auth",
+        "research/backend-findings.json",
+        "research/journal-findings.json",
+        "research/design-direction.json"
+      ]
+    },
+    {
+      "expectation": "Git workflow and review",
+      "implementation": "Separate backend and frontend bases with feature branches; incremental commits preserve the implementation and genuine corrections."
+    },
+    {
+      "expectation": "Responsible use of a coding assistant",
+      "implementation": "The research logs identify assistant-made changes and actual defects. The repository owner should reproduce fixes and explain the code before describing personal contributions in an interview."
+    }
+  ],
+  "verification": {
+    "localTestsPassed": 80,
+    "postgresTestsPassed": 5,
+    "typescript": "passed",
+    "productionBuild": "passed",
+    "npmAudit": "0 reported vulnerabilities after cloud dependency installation"
+  },
+  "pendingExternalChecks": [
+    "Supabase connection and private bucket using deployed credentials",
+    "Google consent screen and real OAuth callback",
+    "Verified email sender, email delivery and real password-reset round trip",
+    "Render deployment and chosen custom domain"
+  ],
+  "constraints": {
+    "appleSignIn": "deferred by user",
+    "readme": "not created",
+    "paidServices": "not activated"
+  }
+}
