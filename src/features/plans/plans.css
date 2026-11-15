@@ -104,6 +104,38 @@
 }
 .plan-checklist h3 {
   font-size: 0.88rem;
+  margin: 0;
+}
+.checklist-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.checklist-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+}
+.checklist-progress {
+  height: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: var(--raised);
+  border-radius: 4px;
+}
+.checklist-progress > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--accent);
+  border-radius: inherit;
+  transform-origin: left;
 }
 .checklist-item {
   display: flex;
@@ -116,11 +148,41 @@
   gap: 9px;
   align-items: center;
   line-height: 1.5;
+  cursor: pointer;
+}
+.checklist-control {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
 }
 .checklist-item input {
-  accent-color: var(--accent);
+  appearance: none;
   width: 17px;
   height: 17px;
+  margin: 0;
+  border: 1px solid var(--muted);
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+}
+.checklist-item input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.checklist-item input:disabled {
+  cursor: wait;
+}
+.checklist-tick {
+  position: absolute;
+  inset: 2px;
+  color: var(--on-accent);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.55);
+}
+.checklist-item input:checked + .checklist-tick {
+  opacity: 1;
+  transform: scale(1);
 }
 .checklist-item .completed {
   text-decoration: line-through;
@@ -374,4 +436,102 @@
 }
 .plan-notes {
   color: var(--muted);
+}
+
+.plan-card:focus-within {
+  box-shadow: 0 0 0 1px var(--line);
+}
+.plan-details-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .plan-card {
+    transition: box-shadow 180ms ease;
+  }
+  .plan-details-toggle svg {
+    transition: transform 200ms ease;
+  }
+  .plan-details,
+  .availability,
+  .plan-delete {
+    animation: plan-reveal 220ms ease-out;
+  }
+  .checklist-progress > span {
+    transition: transform 320ms ease-out;
+  }
+  .checklist-item input,
+  .checklist-item label > span:last-child {
+    transition:
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease;
+  }
+  .checklist-tick {
+    transition:
+      opacity 160ms ease,
+      transform 220ms cubic-bezier(0.2, 0.8, 0.3, 1.4);
+  }
+  .checklist-just-completed .checklist-count {
+    animation: checklist-ready 600ms ease-out;
+  }
+  .checklist-just-completed .checklist-progress {
+    animation: checklist-glow 900ms ease-out;
+  }
+  .hour-track span {
+    transition:
+      background-color 180ms ease,
+      transform 180ms ease;
+  }
+  .hour-track .chosen {
+    transform: translateY(-2px);
+  }
+  @media (hover: hover) {
+    .plan-card:hover {
+      box-shadow:
+        0 0 0 1px var(--line),
+        0 8px 24px #0002;
+    }
+  }
+}
+
+@keyframes plan-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes checklist-ready {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.06);
+  }
+}
+@keyframes checklist-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+  40% {
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+}
+
+@media (forced-colors: active) {
+  .checklist-item input:checked {
+    background: Highlight;
+    border-color: Highlight;
+    forced-color-adjust: none;
+  }
+  .checklist-tick {
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
 }
