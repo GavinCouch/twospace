@@ -1,0 +1,38 @@
+{
+  "recordedAt": "2026-11-15",
+  "purpose": "Default illustrated profile avatars for TwoSpace, designed for circular display at 34–62 pixels.",
+  "tool": "image_gen.imagegen",
+  "topLevelMode": "built-in tool",
+  "referencesInspected": [
+    "public/artwork/music.png",
+    "public/artwork/settings.png"
+  ],
+  "style": "A matching pair of six-petal matte clay flowers with inverse muted rose and warm ivory palettes. No people, photos, initials, or gender cues.",
+  "assets": [
+    {
+      "path": "public/artwork/avatar-rose.png",
+      "mode": "generation",
+      "prompt": "Use case: stylized-concept. Asset type: an illustrated default profile avatar for TwoSpace, a dark app for couples. Create a square 1024 by 1024 image, opaque edge to edge. Scene: flat muted dusty rose background, approximately #A87584, with extremely subtle matte paper grain. Subject: one small warm ivory flower made from soft matte clay, centered. The flower has six plump rounded teardrop petals evenly arranged around a small circular dusty rose center. View straight on, shallow rounded relief, calm gentle diffuse light, soft shading only within and directly behind the flower. The flower occupies about 58 percent of the canvas width and height, with generous equal padding on all sides so the image crops cleanly into a circle. Distinct simple silhouette readable at 36 pixels. Palette limited to dusty rose, warm ivory, and soft shadows in the same hues. Match warm ivory and dusty rose paper-and-clay navigation illustrations with softly rounded edges and a very fine handmade grain. No stem, leaves, other objects, face, person, gender cues, lettering, initials, logo, frame, border, watermark, glossy plastic, high contrast dramatic shadows, or transparent background.",
+      "originalOutput": "/Users/gavincouch/.codex/generated_images/01a1e070-fc80-7700-b9a9-392b728dda6a/exec-00b214fe-4fd1-4e16-8fb7-80a6b44348e7.png",
+      "master": "/Users/gavincouch/Documents/CodeX/twospace-artifacts/music-update/avatar-rose-1024.png",
+      "bytes": 83009,
+      "width": 256,
+      "height": 256,
+      "hasAlpha": false
+    },
+    {
+      "path": "public/artwork/avatar-ivory.png",
+      "mode": "image edit / companion color variant",
+      "prompt": "Use case: precise-object-edit. Asset type: the second illustrated default profile avatar for TwoSpace. Create a matching color-swapped companion to the reference avatar. Change only the colors: the entire square background becomes warm ivory, approximately #EFE3D1; all six flower petals become muted dusty rose, approximately #A87584; the circular flower center becomes warm ivory. Preserve exactly the reference flower's six-petal shape, shallow soft clay relief, centered composition, scale, ample equal padding, matte fine paper grain, gentle diffuse lighting, and subtle shadow. Keep the image opaque edge to edge and square. Deliver 1024 by 1024 pixels. This is a quiet neutral illustrated avatar, with no faces, people, gender cues, lettering, initials, logos, frame, border, watermark, or added objects. Do not change the form, add petals, or make it glossy.",
+      "inputReference": "/Users/gavincouch/.codex/generated_images/01a1e070-fc80-7700-b9a9-392b728dda6a/exec-00b214fe-4fd1-4e16-8fb7-80a6b44348e7.png",
+      "originalOutput": "/Users/gavincouch/.codex/generated_images/01a1e070-fc80-7700-b9a9-392b728dda6a/exec-71056283-c82b-4048-be44-4b71d76f91ae.png",
+      "master": "/Users/gavincouch/Documents/CodeX/twospace-artifacts/music-update/avatar-ivory-1024.png",
+      "bytes": 74286,
+      "width": 256,
+      "height": 256,
+      "hasAlpha": false
+    }
+  ],
+  "processing": "The built-in tool returned 1254×1254 originals, preserved in place. Sharp produced 1024×1024 masters and optimized 256×256 PNG website assets with compression level 9. No programmatic recoloring or background edits.",
+  "verification": "Both optimized assets were inspected for matching proportions, centered flower silhouettes, generous circular-crop padding, opaque backgrounds, and legibility."
+}
