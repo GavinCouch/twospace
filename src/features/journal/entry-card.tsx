@@ -47,7 +47,7 @@ export function EntryCard({
       id={`entry-${entry.id}`}
     >
       <header className="journal-entry-heading">
-        <PersonAvatar person={author} seed={entry.authorId} size={34} />
+        <PersonAvatar person={author} size={34} />
         <div className="journal-byline">
           <strong>{author?.name || "Member"}</strong>
           <span>

@@ -7,27 +7,15 @@ import "./person-avatar.css";
 
 type AvatarPerson = Pick<Person, "id" | "name" | "color" | "avatarMediaId">;
 
-export function avatarVariant(identity: string) {
-  let hash = 0;
-  for (const character of identity) {
-    hash = (hash * 31 + character.codePointAt(0)!) >>> 0;
-  }
-  return hash % 2 ? "rose" : "ivory";
-}
-
 export function PersonAvatar({
   person,
-  seed = "",
   size = 36,
   className = "",
 }: {
   person?: AvatarPerson;
-  seed?: string;
   size?: number;
   className?: string;
 }) {
-  const variant = avatarVariant(person?.id || seed);
-  const artwork = `/artwork/avatar-${variant}.png`;
   const customPhoto = person?.avatarMediaId
     ? `/api/media/${encodeURIComponent(person.avatarMediaId)}`
     : null;
@@ -35,20 +23,15 @@ export function PersonAvatar({
     () => new Set(),
   );
   const src =
-    customPhoto && !failedSources.has(customPhoto) ? customPhoto : artwork;
-  const isPhoto = src === customPhoto;
+    customPhoto && !failedSources.has(customPhoto) ? customPhoto : null;
   const accent =
     person?.color && /^#[0-9a-f]{6}$/i.test(person.color)
       ? person.color
-      : variant === "rose"
-        ? "#b78999"
-        : "#b9ac9a";
-  const fallback = person?.name.trim().slice(0, 1).toUpperCase() || "·";
+      : "#74797d";
   return (
     <span
       className={`person-avatar ${className}`.trim()}
-      data-variant={variant}
-      data-photo={isPhoto || undefined}
+      data-photo={src ? true : undefined}
       aria-hidden="true"
       style={
         {
@@ -57,20 +40,28 @@ export function PersonAvatar({
         } as CSSProperties
       }
     >
-      {failedSources.has(src) ? (
-        <span className="person-avatar-fallback">{fallback}</span>
-      ) : (
+      {src ? (
         <Image
           src={src}
           alt=""
           width={size}
           height={size}
           sizes={`${size}px`}
-          unoptimized={isPhoto}
+          unoptimized
           onError={() =>
             setFailedSources((previous) => new Set([...previous, src]))
           }
         />
+      ) : (
+        <svg
+          className="person-avatar-silhouette"
+          viewBox="0 0 64 64"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <ellipse cx="32" cy="23" rx="12" ry="13" />
+          <path d="M8 64v-8c0-10 8-18 18-18h12c10 0 18 8 18 18v8Z" />
+        </svg>
       )}
     </span>
   );
