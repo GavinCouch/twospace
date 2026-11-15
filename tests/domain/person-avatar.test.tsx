@@ -45,4 +45,33 @@ describe("default profile artwork", () => {
       view.container.querySelector(".person-avatar-fallback"),
     ).toHaveTextContent("A");
   });
+
+  it("loads protected photos directly and falls back to artwork before initials", () => {
+    const person = {
+      id: "alex",
+      name: "Alex",
+      color: "#293b80",
+      avatarMediaId: "first-photo",
+    };
+    const view = render(<PersonAvatar person={person} />);
+    expect(new URL(view.container.querySelector("img")!.src).pathname).toBe(
+      "/api/media/first-photo",
+    );
+    fireEvent.error(view.container.querySelector("img")!);
+    expect(view.container.querySelector("img")!.getAttribute("src")).toMatch(
+      /avatar-(rose|ivory)\.png/,
+    );
+    fireEvent.error(view.container.querySelector("img")!);
+    expect(
+      view.container.querySelector(".person-avatar-fallback"),
+    ).toHaveTextContent("A");
+    view.rerender(
+      <PersonAvatar
+        person={{ ...person, avatarMediaId: "replacement-photo" }}
+      />,
+    );
+    expect(new URL(view.container.querySelector("img")!.src).pathname).toBe(
+      "/api/media/replacement-photo",
+    );
+  });
 });

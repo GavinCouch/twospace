@@ -17,6 +17,9 @@
   height: 100%;
   object-fit: contain;
 }
+.person-avatar[data-photo="true"] > img {
+  object-fit: cover;
+}
 .person-avatar-fallback {
   color: var(--ink);
   font-size: calc(var(--avatar-size) * 0.35);
