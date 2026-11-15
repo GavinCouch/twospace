@@ -15,12 +15,17 @@ const links = [
 export function SpaceNavigation({
   path,
   mobile = false,
+  locked = false,
 }: {
   path: string;
   mobile?: boolean;
+  locked?: boolean;
 }) {
   const items = mobile ? links : links.slice(0, -1);
-  const active = items.findIndex((item) => path.startsWith(item.href));
+  const active = items.findIndex(
+    (item) =>
+      path.startsWith(item.href) && (!locked || item.href === "/settings"),
+  );
   return (
     <nav
       className={mobile ? "mobile-navigation" : "primary-navigation"}
@@ -33,20 +38,32 @@ export function SpaceNavigation({
         } as CSSProperties
       }
     >
-      {items.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={
-            path.startsWith(item.href) ? "nav-link active" : "nav-link"
-          }
-          aria-current={path.startsWith(item.href) ? "page" : undefined}
-        >
-          <SectionArt name={item.art} size={30} />
-          {item.name}
-          <NavigationPending />
-        </Link>
-      ))}
+      {items.map((item) =>
+        locked && item.href !== "/settings" ? (
+          <span
+            key={item.href}
+            className="nav-link nav-link-locked"
+            aria-disabled="true"
+            title="Available when your partner joins"
+          >
+            <SectionArt name={item.art} size={30} />
+            {item.name}
+          </span>
+        ) : (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={
+              path.startsWith(item.href) ? "nav-link active" : "nav-link"
+            }
+            aria-current={path.startsWith(item.href) ? "page" : undefined}
+          >
+            <SectionArt name={item.art} size={30} />
+            {item.name}
+            <NavigationPending />
+          </Link>
+        ),
+      )}
     </nav>
   );
 }

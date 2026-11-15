@@ -6,6 +6,7 @@ import { useSpace } from "@/components/space-provider";
 import { ProfileSettings } from "./profile-settings";
 import { SpaceSettings } from "./space-settings";
 import { AccountActions } from "./account-actions";
+import { PartnerSetup } from "@/components/partner-setup";
 import "./settings.css";
 
 export default function SettingsPage() {
@@ -29,6 +30,11 @@ export default function SettingsPage() {
       ) : query.data ? (
         <div className="settings-sections">
           <ProfileSettings key={query.data.me.id} person={query.data.me} />
+          {query.data.members.length < 2 && (
+            <section className="settings-section settings-partner-setup">
+              <PartnerSetup key={query.data.space.id} space={query.data} />
+            </section>
+          )}
           <SpaceSettings
             key={query.data.space.id}
             name={query.data.space.name}
