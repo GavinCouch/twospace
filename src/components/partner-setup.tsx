@@ -11,9 +11,11 @@ import "./partner-setup.css";
 export function PartnerSetup({
   space,
   onJoined = () => window.location.assign("/journal"),
+  inSettings = false,
 }: {
   space: SpaceSnapshot;
   onJoined?: () => void;
+  inSettings?: boolean;
 }) {
   const client = useQueryClient();
   const [invitation, setInvitation] = useState<{
@@ -25,6 +27,9 @@ export function PartnerSetup({
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState<"invite" | "join" | null>(null);
   const [error, setError] = useState("");
+  const Heading = inSettings ? "h2" : "h1";
+  const settingsHref = inSettings ? "#data-settings-title" : "/settings";
+  const settingsLabel = inSettings ? "View downloads" : "Open Settings";
 
   async function createInvitation() {
     if (busy) return;
@@ -69,11 +74,11 @@ export function PartnerSetup({
     <section className="partner-setup" aria-labelledby="partner-setup-title">
       <header className="partner-setup-heading">
         <span className="partner-space-name">{space.space.name}</span>
-        <h1 id="partner-setup-title">
+        <Heading id="partner-setup-title">
           {space.space.hasPairedBefore
             ? "Your partner has left this space"
             : "Invite your partner"}
-        </h1>
+        </Heading>
         <p>Journal, games, plans, and music open when you’re both here.</p>
       </header>
       {space.space.hasPairedBefore ? (
@@ -82,8 +87,8 @@ export function PartnerSetup({
             Your saved entries are kept here. You can export them in Settings
             before leaving this space.
           </p>
-          <Link className="secondary" href="/settings">
-            Open Settings <ArrowRight size={16} />
+          <Link className="secondary" href={settingsHref}>
+            {settingsLabel} <ArrowRight size={16} />
           </Link>
         </div>
       ) : (
@@ -204,8 +209,8 @@ export function PartnerSetup({
                   This space has saved content. Export it in Settings, then
                   leave this space to use your partner’s code.
                 </p>
-                <Link className="secondary" href="/settings">
-                  Open Settings <ArrowRight size={16} />
+                <Link className="secondary" href={settingsHref}>
+                  {settingsLabel} <ArrowRight size={16} />
                 </Link>
               </>
             )}

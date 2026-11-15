@@ -32,7 +32,11 @@ export default function SettingsPage() {
           <ProfileSettings key={query.data.me.id} person={query.data.me} />
           {query.data.members.length < 2 && (
             <section className="settings-section settings-partner-setup">
-              <PartnerSetup key={query.data.space.id} space={query.data} />
+              <PartnerSetup
+                key={query.data.space.id}
+                space={query.data}
+                inSettings
+              />
             </section>
           )}
           <SpaceSettings
