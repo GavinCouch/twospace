@@ -1,0 +1,32 @@
+name: Bug report
+description: Report something that is not working.
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we reproduce it?
+      placeholder: |
+        1. Open…
+        2. Select…
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser or app, device, and version
+      placeholder: Safari on iPhone, Chrome on Windows, or a local development build
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or error message
+      description: Optional. Use test content when showing a private space.
