@@ -8,7 +8,13 @@ import {
   resources,
   updateResource,
 } from "./database";
-import { context, found, HttpError, json, spaceTransaction } from "./http";
+import {
+  pairedContext,
+  found,
+  HttpError,
+  json,
+  spaceTransaction,
+} from "./http";
 import {
   getSpotifyTrack,
   limitSpotifyRequests,
@@ -40,16 +46,16 @@ export async function listMusicSongs(spaceId: string): Promise<DailySong[]> {
 }
 
 export async function getMusic(request: Request): Promise<MusicSnapshot> {
-  const ctx = await context(request);
-  return {
+  const ctx = await pairedContext(request);
+  return spaceTransaction(ctx, async () => ({
     songs: await listMusicSongs(ctx.spaceId),
     today: localDateInZone(now(), ctx.me.timeZone),
     searchAvailable: spotifySearchAvailable(),
-  };
+  }));
 }
 
 export async function saveTodaySong(request: Request): Promise<DailySong> {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   const input = await json(request, pickFields);
   function checkDay() {
     if (input.day !== localDateInZone(now(), ctx.me.timeZone))
@@ -109,7 +115,7 @@ export async function saveTodaySong(request: Request): Promise<DailySong> {
 }
 
 export async function deleteSong(request: Request, songId: string) {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   const input = await json(
     request,
     z.object({ revision: z.number().int().positive() }),

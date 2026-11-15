@@ -89,6 +89,11 @@ beforeAll(async () => {
     await spaces.createSpace(request(alex.cookie, { name: "Music pair" }))
   ).id;
   await spaces.createSpace(request(outsider.cookie, { name: "Other space" }));
+  const outsiderPartner = await identity("CaseyPartner");
+  const outsideInvitation = await spaces.invite(request(outsider.cookie, {}));
+  await spaces.acceptInvite(
+    request(outsiderPartner.cookie, { token: outsideInvitation.token }),
+  );
   const invite = await spaces.invite(request(alex.cookie, {}));
   await spaces.acceptInvite(request(jamie.cookie, { token: invite.token }));
 }, 30000);

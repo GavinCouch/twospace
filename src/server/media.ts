@@ -9,7 +9,7 @@ import {
   transaction,
 } from "./database";
 import { getObject, putObject, removeObject } from "./object-store";
-import { context, HttpError, type Context } from "./http";
+import { context, pairedContext, HttpError, type Context } from "./http";
 import type { Entry, PhotoPair } from "@/shared/types";
 import type { ProfilePhoto } from "./profile-photos";
 const LIMIT = 10 * 1024 * 1024;
@@ -97,6 +97,18 @@ async function writeMedia(
       ))
     )
       throw new HttpError(403, "You no longer belong to this space.");
+    const memberCount = Number(
+      (await row<{ count: number }>(
+        "SELECT count(*) count FROM memberships WHERE space_id=?",
+        spaceId,
+      ))!.count,
+    );
+    if (memberCount !== 2)
+      throw new HttpError(
+        409,
+        "Your partner needs to join before you can use this feature.",
+        "PARTNER_REQUIRED",
+      );
     const count = Number(
       (await row<{ count: number }>(
         "SELECT count(*) count FROM media WHERE space_id=?",
@@ -127,7 +139,7 @@ async function writeMedia(
   }, `space:${spaceId}`);
 }
 export async function uploadMedia(request: Request) {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   const count = (await row<{
     count: number;
   }>("SELECT count(*) count FROM media WHERE space_id=?", ctx.spaceId))!.count;
@@ -157,9 +169,64 @@ export async function uploadMedia(request: Request) {
   }
   return storeImage(ctx.spaceId, ctx.account.id, buffer);
 }
-export async function getMedia(request: Request, mediaId: string) {
+export type ExportFile = { id: string; name: string; url: string };
+const exportExtensions: Record<string, string> = {
+  "image/webp": "webp",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "audio/webm": "webm",
+  "audio/ogg": "ogg",
+  "audio/mp4": "m4a",
+};
+
+export async function exportFiles(ctx: Context): Promise<ExportFile[]> {
+  const labels = new Map<string, string>();
+  for (const entry of await resources<Entry>(ctx.spaceId, "entry")) {
+    const visible =
+      entry.authorId === ctx.account.id ||
+      !entry.revealAt ||
+      entry.revealAt <= now();
+    if (entry.mediaId && visible)
+      labels.set(
+        entry.mediaId,
+        entry.title || `${entry.kind}-${entry.createdAt.slice(0, 10)}`,
+      );
+  }
+  for (const pair of await resources<PhotoPair>(ctx.spaceId, "photoPair"))
+    for (const photo of pair.photos)
+      if (!labels.has(photo.mediaId))
+        labels.set(
+          photo.mediaId,
+          `${pair.prompt || "Photo pair"}-${pair.createdAt.slice(0, 10)}`,
+        );
+  const stored = await rows<Pick<Media, "id" | "mime">>(
+    "SELECT id,mime FROM media WHERE space_id=? ORDER BY created_at,id",
+    ctx.spaceId,
+  );
+  return stored
+    .filter((file) => labels.has(file.id))
+    .map((file) => {
+      const label =
+        labels
+          .get(file.id)!
+          .replace(/[^\p{L}\p{N} ._-]/gu, "")
+          .trim()
+          .slice(0, 80) || "TwoSpace file";
+      return {
+        id: file.id,
+        name: `${label}-${file.id.slice(0, 8)}.${exportExtensions[file.mime] || "bin"}`,
+        url: `/api/export/media/${encodeURIComponent(file.id)}`,
+      };
+    });
+}
+
+export async function getMedia(
+  request: Request,
+  mediaId: string,
+  allowExport = false,
+) {
   const ctx = await context(request);
-  async function permittedMedia() {
+  async function permittedMedia(): Promise<Media & { downloadName?: string }> {
     if (
       !(await row(
         "SELECT 1 FROM memberships WHERE user_id=? AND space_id=?",
@@ -174,6 +241,33 @@ export async function getMedia(request: Request, mediaId: string) {
       ctx.spaceId,
     );
     if (!media) throw new HttpError(404, "This file could not be found.");
+    if (allowExport) {
+      const file = (await exportFiles(ctx)).find((item) => item.id === mediaId);
+      if (!file) throw new HttpError(404, "This file could not be found.");
+      return { ...media, downloadName: file.name };
+    }
+    const profilePhoto = (
+      await resources<ProfilePhoto>(ctx.spaceId, "profilePhoto")
+    ).some(
+      (photo) => photo.mediaId === mediaId && photo.authorId === media.owner_id,
+    );
+    const memberCount = Number(
+      (await row<{ count: number }>(
+        "SELECT count(*) count FROM memberships WHERE space_id=?",
+        ctx.spaceId,
+      ))!.count,
+    );
+    // Account settings remain usable while waiting. Shared journal and voice
+    // attachments are unavailable even to their author until both have joined.
+    if (
+      memberCount !== 2 &&
+      !(profilePhoto && media.owner_id === ctx.account.id)
+    )
+      throw new HttpError(
+        409,
+        "Your partner needs to join before you can use this feature.",
+        "PARTNER_REQUIRED",
+      );
     if (media.owner_id === ctx.account.id) return media;
     const visibleEntry = (await resources<Entry>(ctx.spaceId, "entry")).some(
       (entry) =>
@@ -183,11 +277,6 @@ export async function getMedia(request: Request, mediaId: string) {
     const visiblePair = (
       await resources<PhotoPair>(ctx.spaceId, "photoPair")
     ).some((pair) => pair.photos.some((photo) => photo.mediaId === mediaId));
-    const profilePhoto = (
-      await resources<ProfilePhoto>(ctx.spaceId, "profilePhoto")
-    ).some(
-      (photo) => photo.mediaId === mediaId && photo.authorId === media.owner_id,
-    );
     const visibleProfile =
       profilePhoto &&
       Boolean(
@@ -211,7 +300,9 @@ export async function getMedia(request: Request, mediaId: string) {
       "Content-Length": String(buffer.length),
       "Cache-Control": "private, no-store",
       "X-Content-Type-Options": "nosniff",
-      "Content-Disposition": "inline",
+      "Content-Disposition": media.downloadName
+        ? `attachment; filename*=UTF-8''${encodeURIComponent(media.downloadName).replace(/['()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`)}`
+        : "inline",
     },
   });
 }

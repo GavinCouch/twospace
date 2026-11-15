@@ -9,7 +9,7 @@ import {
 } from "./database";
 import {
   spaceTransaction,
-  context,
+  pairedContext,
   found,
   HttpError,
   json,
@@ -46,7 +46,7 @@ const planFields = {
   checklist: checklist.default([]),
 } as const;
 export async function createPlan(request: Request) {
-  const ctx = await context(request),
+  const ctx = await pairedContext(request),
     input = await json(request, z.object(planFields));
   const plan: Plan = {
     ...input,
@@ -61,7 +61,7 @@ export async function createPlan(request: Request) {
   );
 }
 export async function editPlan(request: Request, planId: string) {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   // Create defaults must not run on PATCH: omitted fields retain their stored value.
   const input = await json(
     request,
@@ -148,7 +148,7 @@ export async function editPlan(request: Request, planId: string) {
   });
 }
 export async function deletePlan(request: Request, planId: string) {
-  const ctx = await context(request);
+  const ctx = await pairedContext(request);
   return spaceTransaction(ctx, async () => {
     const plan = found(await resource<Plan>(ctx.spaceId, "plan", planId));
     if (plan.proposedBy !== ctx.account.id)

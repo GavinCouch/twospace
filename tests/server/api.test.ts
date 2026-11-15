@@ -57,6 +57,11 @@ beforeAll(async () => {
   await spaces.createSpace(
     request(outsider.cookie, { name: "A different space" }),
   );
+  const outsiderPartner = await signUp("CaseyPartner");
+  const outsideInvitation = await spaces.invite(request(outsider.cookie, {}));
+  await spaces.acceptInvite(
+    request(outsiderPartner.cookie, { token: outsideInvitation.token }),
+  );
   const invitation = await spaces.invite(request(alex.cookie, {}));
   await spaces.acceptInvite(request(jamie.cookie, { token: invitation.token }));
 }, 30000);
@@ -431,6 +436,9 @@ describe("retired sample accounts", () => {
     const space = await spaces.createSpace(
       request(legacy.cookie, { name: "Old sample" }),
     );
+    const partner = await signUp("RetiredPartner");
+    const invite = await spaces.invite(request(legacy.cookie));
+    await spaces.acceptInvite(request(partner.cookie, { token: invite.token }));
     const entry = await entries.createEntry(
       request(legacy.cookie, { body: "Historical sample content" }),
     );

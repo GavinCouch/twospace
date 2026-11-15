@@ -35,6 +35,8 @@ let resolve: typeof import("@/app/api/music/resolve/route").GET;
 let history: typeof import("@/app/api/music/route").GET;
 let save: typeof import("@/app/api/music/today/route").PUT;
 let identity: { id: string; cookie: string };
+let paired: { id: string; cookie: string };
+let solo: { id: string; cookie: string };
 const ctx = { params: Promise.resolve({}) };
 const track = {
   id: "0Lr4kGOYn9l83EjuK6cZFQ",
@@ -45,7 +47,7 @@ const track = {
   durationMs: 180000,
   url: "https://open.spotify.com/track/0Lr4kGOYn9l83EjuK6cZFQ",
 };
-const request = (path: string, cookie = identity.cookie) =>
+const request = (path: string, cookie = paired.cookie) =>
   new Request(`http://127.0.0.1:3100${path}`, { headers: { cookie } });
 
 beforeAll(async () => {
@@ -61,6 +63,22 @@ beforeAll(async () => {
     { auth: auth.auth, execute: storage.execute },
     "Catalog",
   );
+  const spaces = await import("@/server/spaces");
+  const create = (name: string) =>
+    createTestIdentity({ auth: auth.auth, execute: storage.execute }, name);
+  paired = await create("PairedCatalog");
+  solo = await create("SoloCatalog");
+  const partner = await create("CatalogPartner");
+  const body = (user: typeof paired, input?: unknown) =>
+    new Request("http://127.0.0.1:3100/api/test", {
+      method: "POST",
+      headers: { cookie: user.cookie, "content-type": "application/json" },
+      body: JSON.stringify(input ?? {}),
+    });
+  await spaces.createSpace(body(paired, { name: "Pair" }));
+  await spaces.createSpace(body(solo, { name: "Solo" }));
+  const invitation = await spaces.invite(body(paired));
+  await spaces.acceptInvite(body(partner, { token: invitation.token }));
 }, 30000);
 beforeEach(() => {
   provider.search.mockReset().mockResolvedValue([track]);
@@ -73,6 +91,29 @@ afterAll(async () => {
 });
 
 describe("Spotify catalog access", () => {
+  it("requires a partner before either catalog endpoint contacts Spotify", async () => {
+    for (const user of [identity, solo]) {
+      const expected = user === identity ? 404 : 409;
+      expect(
+        (await search(request("/api/music/search?q=a+song", user.cookie), ctx))
+          .status,
+      ).toBe(expected);
+      expect(
+        (
+          await resolve(
+            request(
+              `/api/music/resolve?url=${encodeURIComponent(track.url)}`,
+              user.cookie,
+            ),
+            ctx,
+          )
+        ).status,
+      ).toBe(expected);
+    }
+    expect(provider.search).not.toHaveBeenCalled();
+    expect(provider.resolve).not.toHaveBeenCalled();
+    expect(provider.limit).not.toHaveBeenCalled();
+  });
   it("rejects signed-out catalog requests before contacting Spotify", async () => {
     expect(
       (await search(request("/api/music/search?q=a+song", ""), ctx)).status,
@@ -93,8 +134,10 @@ describe("Spotify catalog access", () => {
     expect(provider.limit).not.toHaveBeenCalled();
   });
 
-  it("allows a signed-in account to search and resolve public tracks before creating a space", async () => {
-    expect((await http.account(request("/api/account"))).spaceId).toBeNull();
+  it("allows paired members to search and resolve public tracks", async () => {
+    expect(
+      (await http.account(request("/api/account"))).spaceId,
+    ).not.toBeNull();
     const found = await search(
       request("/api/music/search?q=a+song+%26+artist"),
       ctx,
@@ -109,8 +152,10 @@ describe("Spotify catalog access", () => {
     expect(resolved.status).toBe(200);
     expect(await resolved.json()).toEqual(track);
     expect(provider.resolve).toHaveBeenCalledWith(track.url);
-    expect(provider.limit.mock.calls).toEqual([[identity.id], [identity.id]]);
-    expect((await http.account(request("/api/account"))).spaceId).toBeNull();
+    expect(provider.limit.mock.calls).toEqual([[paired.id], [paired.id]]);
+    expect(
+      (await http.account(request("/api/account"))).spaceId,
+    ).not.toBeNull();
   });
 
   it("keeps the per-account request limit on both catalog endpoints", async () => {
@@ -133,7 +178,7 @@ describe("Spotify catalog access", () => {
   });
 
   it("still requires a shared space to read history or save a daily song", async () => {
-    const response = await history(request("/api/music"), ctx);
+    const response = await history(request("/api/music", identity.cookie), ctx);
     expect(response.status).toBe(404);
     expect(await response.json()).toMatchObject({ code: "NO_SPACE" });
     const saved = await save(
