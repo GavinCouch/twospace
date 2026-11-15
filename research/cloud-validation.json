@@ -21,5 +21,36 @@
     ],
     "result": "19 backend and deployment-configuration tests passed; TypeScript passed; the optimized production build passed without warnings.",
     "scope": "Real local Better Auth sessions, SQLite transactions, image processing, isolation, hidden content, concurrency, and deployment configuration. PostgreSQL/Supabase Storage adapters, Google OAuth, verification emails, and password reset are implemented but require real environment configuration and a live deployment check. Cloud provider login and email delivery have not been verified."
+  },
+  "postgresValidation": {
+    "version": "PostgreSQL 17.11 (Homebrew)",
+    "command": "node scripts/test-postgres.mjs",
+    "result": "5 integration tests passed against a real isolated PostgreSQL cluster. The cluster listened only on loopback, then was stopped and removed. No global service or actual Supabase database was used.",
+    "coverage": [
+      "Application and Better Auth migrations in the private schema",
+      "Real authentication sessions and paired account access",
+      "Cross-space isolation and hidden answers",
+      "Concurrent game revision checks",
+      "Concurrent checklist additions and reset plan agreement",
+      "Migration lock held in a transaction and released after both success and error"
+    ],
+    "ci": {
+      "environment": "TWOSPACE_TEST_POSTGRES_URL points to the disposable twospace_test database on 127.0.0.1 or localhost",
+      "command": "npx vitest run tests/server/postgres.test.ts",
+      "default": "The five PostgreSQL tests are explicitly skipped when the test URL is absent."
+    },
+    "reviewFix": {
+      "title": "Keep the authentication migration lock inside a database transaction",
+      "discovery": "Code review identified that session advisory lock and unlock calls across separate statements do not safely pin the backend when a transaction pooler is involved.",
+      "change": "Use BEGIN, pg_advisory_xact_lock, COMMIT or ROLLBACK, and release the checked-out client in finally. Authentication migrations continue using their own database connection while the lock holder remains pinned.",
+      "evidence": "The integration test observes the lock holder as idle in transaction, forces a failure, and verifies that no advisory lock remains.",
+      "limit": "No transaction-pooler deployment was tested. The deployment contract continues to require a direct or session-pool connection."
+    },
+    "remainingExternalChecks": [
+      "Configured Supabase or S3 private object storage",
+      "Google OAuth callback with a real account",
+      "Email verification and password reset delivery",
+      "TLS and the actual hosted domain"
+    ]
   }
 }
