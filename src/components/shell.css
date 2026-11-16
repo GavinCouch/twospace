@@ -5,8 +5,8 @@
   position: sticky;
   top: 0;
   z-index: 30;
-  background: #131315f5;
-  backdrop-filter: blur(18px);
+  background: #110f14cc;
+  backdrop-filter: blur(18px) saturate(1.4);
   width: min(1184px, 100%);
   margin: auto;
   height: 88px;
@@ -25,6 +25,10 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  padding: 5px;
+  border-radius: 999px;
+  background: #1a172099;
+  border: 1px solid var(--line);
 }
 .nav-link {
   display: flex;
@@ -36,9 +40,9 @@
   font-weight: 600;
   color: var(--muted);
   white-space: nowrap;
-  min-height: 44px;
-  padding: 0 17px;
-  border-radius: 12px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
 }
 .nav-link.active {
   color: var(--ink);
@@ -66,9 +70,9 @@
   display: grid;
   place-items: center;
   color: var(--muted);
-  width: 40px;
+  width: 44px;
   height: 44px;
-  border-radius: 10px;
+  border-radius: 999px;
 }
 .header-icon:hover {
   color: var(--ink);
@@ -95,10 +99,10 @@
   grid-column: 1;
 }
 .space-cover h2 {
-  font-size: 1.35rem;
+  font-size: 1.5rem;
   overflow-wrap: anywhere;
-  font-weight: 600;
-  letter-spacing: -0.045em;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   margin: 0;
   grid-column: 1;
   line-height: 1.2;
@@ -261,15 +265,15 @@
     display: grid;
     grid-template-columns: repeat(var(--nav-count), minmax(0, 1fr));
     padding: 9px 8px max(12px, env(safe-area-inset-bottom));
-    background: #19191def;
-    backdrop-filter: blur(18px);
+    background: #15131aeb;
+    backdrop-filter: blur(18px) saturate(1.4);
     border-top: 1px solid var(--line);
   }
   .mobile-navigation .nav-link {
     flex-direction: column;
     gap: 6px;
     padding: 6px 3px;
-    border-radius: 10px;
+    border-radius: 14px;
     font-size: 0.65rem;
     min-height: 49px;
   }
@@ -342,14 +346,15 @@
   position: absolute;
   z-index: -1;
   pointer-events: none;
-  border-radius: 12px;
-  background: var(--raised);
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--raised-2), var(--raised));
+  box-shadow: 0 1px 0 #ffffff12 inset;
 }
 .primary-navigation::before {
-  inset-block: 0;
-  left: 0;
+  inset-block: 5px;
+  left: 5px;
   width: calc(
-    (100% - var(--nav-gap) * (var(--nav-count) - 1)) / var(--nav-count)
+    (100% - 10px - var(--nav-gap) * (var(--nav-count) - 1)) / var(--nav-count)
   );
   transform: translateX(calc(var(--active-index) * (100% + var(--nav-gap))));
 }
@@ -386,6 +391,7 @@
   width: calc((100% - 16px) / var(--nav-count));
   transform: translateX(calc(var(--active-index) * 100%));
   background: var(--accent-soft);
+  border-radius: 14px;
 }
 .partner-clock > .clock-dial {
   position: relative;
