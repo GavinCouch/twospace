@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { LockKeyhole, Check, MessageCircle } from "lucide-react";
+import { PersonAvatar } from "@/components/person-avatar";
 import { useAction } from "@/components/space-provider";
 import type { QuestionRound, SpaceSnapshot } from "@/shared/types";
 
@@ -78,8 +79,11 @@ export function QuestionCard({
               key={member.id}
             >
               <span className="answer-name">
-                {member.name}
-                {member.id === space.me.id ? " · you" : ""}
+                <PersonAvatar person={member} size={22} />
+                <span>
+                  {member.name}
+                  {member.id === space.me.id ? " · you" : ""}
+                </span>
               </span>
               {response?.body ? (
                 <p>{response.body}</p>

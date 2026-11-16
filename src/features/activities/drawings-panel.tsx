@@ -134,7 +134,9 @@ export function DrawingsPanel({ space }: { space: SpaceSnapshot }) {
                 <small>
                   {item.turnUserId === space.me.id
                     ? "Your turn"
-                    : "Partner’s turn"}
+                    : "Partner’s turn"}{" "}
+                  · {item.strokes.length}{" "}
+                  {item.strokes.length === 1 ? "stroke" : "strokes"}
                 </small>
               </button>
             ))}
@@ -145,6 +147,10 @@ export function DrawingsPanel({ space }: { space: SpaceSnapshot }) {
         <div className="empty">
           <SectionArt name="drawing" size={72} />
           <h3>No drawings yet</h3>
+          <p>
+            Start from a blank canvas or pick an idea, then take turns adding
+            strokes until it’s ready to save to your journal.
+          </p>
           <button className="button" onClick={() => setCreating(true)}>
             Start a drawing
           </button>
