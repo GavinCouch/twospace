@@ -43,7 +43,10 @@ export default function ActivitiesPage() {
   return (
     <div className="activities-page">
       <div className="page-title">
-        <h1>Activities</h1>
+        <div>
+          <h1>Activities</h1>
+          <p>Games, questions, and doodles for the two of you.</p>
+        </div>
       </div>
       <div
         className="tabs activity-tabs"

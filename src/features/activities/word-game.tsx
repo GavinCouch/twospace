@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Check, LockKeyhole } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { LockKeyhole, Sparkles } from "lucide-react";
 import { useAction } from "@/components/space-provider";
 import type { Game, SpaceSnapshot, WordState } from "@/shared/types";
+import { GameFrame, StatusBanner, playSound } from "./game-kit";
+
+const ratings = [
+  "Solved on the first clue. Mind reader.",
+  "Solved with two clues. Sharp.",
+  "Solved with all three clues. Got there!",
+];
 
 export function WordGame({
   game,
@@ -14,11 +21,64 @@ export function WordGame({
 }) {
   const action = useAction();
   const [guess, setGuess] = useState("");
+  const guessForm = useRef<HTMLFormElement>(null);
   const state = game.state as WordState;
   const isAuthor = state.authorId === space.me.id;
   const author =
     space.members.find((member) => member.id === state.authorId)?.name ||
     "Your partner";
+  const guesser =
+    space.members.find((member) => member.id !== state.authorId)?.name ||
+    "Your partner";
+  const misses = state.solved
+    ? Math.max(0, state.guesses.length - 1)
+    : state.guesses.length;
+  // A new clue opens after each wrong guess. The author always sees all three.
+  const unlocked =
+    isAuthor || state.solved
+      ? state.clues.length
+      : Math.min(state.clues.length, misses + 1);
+  const seen = useRef({
+    id: game.id,
+    guesses: state.guesses.length,
+    solved: state.solved,
+  });
+  const [celebrate, setCelebrate] = useState<"win" | null>(null);
+  useEffect(() => {
+    const before = seen.current;
+    seen.current = {
+      id: game.id,
+      guesses: state.guesses.length,
+      solved: state.solved,
+    };
+    if (before.id !== game.id) return;
+    if (!before.solved && state.solved) {
+      playSound("win");
+      setCelebrate("win");
+      const timer = setTimeout(() => setCelebrate(null), 3200);
+      return () => clearTimeout(timer);
+    }
+    if (state.guesses.length > before.guesses && !state.solved) {
+      playSound(isAuthor ? "tap" : "wrong");
+      if (
+        !isAuthor &&
+        !window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches
+      ) {
+        const animation = guessForm.current?.animate?.(
+          [
+            { transform: "translateX(0)" },
+            { transform: "translateX(-7px)", offset: 0.2 },
+            { transform: "translateX(7px)", offset: 0.4 },
+            { transform: "translateX(-7px)", offset: 0.6 },
+            { transform: "translateX(7px)", offset: 0.8 },
+            { transform: "translateX(0)" },
+          ],
+          { duration: 420, easing: "ease" },
+        );
+        return () => animation?.cancel();
+      }
+    }
+  }, [game.id, state.guesses.length, state.solved, isAuthor]);
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!guess.trim()) return;
@@ -32,35 +92,60 @@ export function WordGame({
       /* The draft remains available on conflict or network failure. */
     }
   }
+  const usedClues = Math.min(3, Math.max(1, state.guesses.length));
   return (
-    <article
-      className="panel word-game"
-      id={`game-${game.id}`}
-      tabIndex={-1}
-      aria-labelledby={`game-heading-${game.id}`}
+    <GameFrame
+      game={game}
+      title={
+        state.solved
+          ? isAuthor
+            ? `${guesser} cracked it`
+            : "You cracked it"
+          : isAuthor
+            ? "Your puzzle"
+            : `A puzzle from ${author}`
+      }
+      kicker="Three clues"
+      className={`word-game${state.solved ? " word-solved" : ""}`}
+      celebrate={celebrate}
+      badge={
+        <span className={`game-badge${state.solved ? " badge-gold" : ""}`}>
+          {state.solved ? (
+            <>
+              <Sparkles size={15} aria-hidden="true" /> Solved
+            </>
+          ) : (
+            <>
+              <LockKeyhole size={14} aria-hidden="true" /> {unlocked}/3 clues
+            </>
+          )}
+        </span>
+      }
     >
-      <div className="activity-heading">
-        <div>
-          <span className="activity-eyebrow">Three clues</span>
-          <h3 id={`game-heading-${game.id}`}>
-            {state.solved
-              ? "You found it"
-              : `A puzzle from ${isAuthor ? "you" : author}`}
-          </h3>
-        </div>
-        {state.solved ? (
-          <Check size={25} aria-hidden="true" />
-        ) : (
-          <LockKeyhole size={21} aria-hidden="true" />
-        )}
-      </div>
       <ol className="word-clues">
-        {state.clues.map((clue, index) => (
-          <li key={index}>
-            <span aria-hidden="true">{index + 1}</span>
-            <p>{clue}</p>
-          </li>
-        ))}
+        {state.clues.map((clue, index) => {
+          const open = index < unlocked;
+          return (
+            <li
+              key={index}
+              className={open ? "is-open" : "is-locked"}
+              style={{ animationDelay: `${index * 60}ms` }}
+            >
+              <span className="word-clue-number" aria-hidden="true">
+                {index + 1}
+              </span>
+              {open ? (
+                <p>{clue}</p>
+              ) : (
+                <p className="word-clue-locked">
+                  <LockKeyhole size={14} aria-hidden="true" />
+                  Opens after{" "}
+                  {index === 1 ? "a wrong guess" : "another wrong guess"}
+                </p>
+              )}
+            </li>
+          );
+        })}
       </ol>
       {(isAuthor || state.solved) && (
         <p className="word-answer">
@@ -69,7 +154,7 @@ export function WordGame({
         </p>
       )}
       {!isAuthor && !state.solved && (
-        <form onSubmit={submit} className="word-guess">
+        <form onSubmit={submit} className="word-guess" ref={guessForm}>
           <label className="field">
             Your guess
             <input
@@ -82,39 +167,49 @@ export function WordGame({
             />
           </label>
           <button className="button" disabled={action.pending || !guess.trim()}>
-            {action.pending ? "Checking…" : "Try this"}
+            {action.pending ? "Checking…" : "Guess"}
           </button>
         </form>
       )}
-      <div role="status">
-        {state.solved ? (
-          <p className="muted">Puzzle solved.</p>
-        ) : isAuthor ? (
-          <p className="muted">Your partner can guess whenever they like.</p>
-        ) : state.guesses.length > 0 ? (
-          <p className="muted">Not quite. Have another look at the clues.</p>
-        ) : (
-          <p className="muted small-copy">
-            Capital letters do not matter. Take as many guesses as you like.
-          </p>
-        )}
-      </div>
+      <StatusBanner tone={state.solved ? "win" : isAuthor ? "theirs" : "mine"}>
+        {state.solved
+          ? ratings[usedClues - 1]
+          : isAuthor
+            ? state.guesses.length
+              ? `${guesser} has made ${state.guesses.length} ${state.guesses.length === 1 ? "guess" : "guesses"} so far.`
+              : `Waiting for ${guesser} to make a first guess.`
+            : state.guesses.length > 0
+              ? unlocked < 3
+                ? "Not quite. A new clue just opened."
+                : "Not quite. Keep guessing: you have all three clues."
+              : "Capital letters don’t matter. Guess as often as you like."}
+      </StatusBanner>
       {state.guesses.length > 0 && (
-        <details className="game-rules">
-          <summary>Recent guesses ({state.guesses.length})</summary>
-          <p className="muted small-copy">The latest 50 guesses are kept.</p>
+        <div className="word-guesses">
+          <span className="word-guesses-label">
+            {state.solved ? "The road there" : "Guesses so far"}
+          </span>
           <ul className="guess-list">
             {state.guesses.map((value, index) => (
-              <li key={index}>{value}</li>
+              <li
+                key={index}
+                className={
+                  state.solved && index === state.guesses.length - 1
+                    ? "is-right"
+                    : ""
+                }
+              >
+                {value}
+              </li>
             ))}
           </ul>
-        </details>
+        </div>
       )}
       {action.error && (
         <p className="form-error" role="alert">
           {action.error}
         </p>
       )}
-    </article>
+    </GameFrame>
   );
 }

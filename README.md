@@ -28,7 +28,7 @@
 | Section        | What you can do                                                                                                                                                               |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Journal**    | Write notes, share photos and voice messages, leave replies and hearts, pin entries, and organize collections. Schedule a letter to open later or answer a photo-pair prompt. |
-| **Games**      | Play Four-in-a-row, tic-tac-toe, rock/paper/scissors, or Three clues. Turns, scores, hidden choices, and rematches are shared between both accounts.                          |
+| **Games**      | Play Four-in-a-row, tic-tac-toe, rock/paper/scissors, or Three clues. Turns, hidden choices, rematches, and a running win record are shared; sound effects and win celebrations are optional and respect reduced motion. |
 | **Activities** | Answer questions separately before revealing both replies, take turns on a drawing, or save a date idea.                                                                      |
 | **Music**      | Pick a Spotify song for the day, attach a note, listen through its official embed, or open it in Spotify.                                                                     |
 | **Plans**      | Propose a call, date, or optional visit. See the time in both time zones, compare free hours, and share a checklist.                                                          |

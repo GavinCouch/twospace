@@ -1,40 +1,45 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowUpRight, Circle, Hand, Scissors, X } from "lucide-react";
+import { ArrowRight, Hand, HandFist, Scissors } from "lucide-react";
 import { useAction } from "@/components/space-provider";
 import { isGameFinished } from "@/shared/games";
 import type { Game, SpaceSnapshot } from "@/shared/types";
 import { FourBoard } from "./four-board";
 import { WordCreate } from "./word-create";
 import { WordGame } from "./word-game";
-import { TicBoard } from "./tic-board";
+import { TicBoard, TicMark } from "./tic-board";
 import { RpsGame } from "./rps-game";
+import { SoundToggle } from "./game-kit";
 
 const catalog = [
   {
     kind: "four",
     title: "Four-in-a-row",
-    description: "Connect four pieces before your partner does.",
-    detail: "Take turns · 5–10 min",
+    description: "Drop pieces, block their lines, connect four first.",
+    detail: "Turn-based",
+    time: "5–10 min",
   },
   {
     kind: "tic",
     title: "Tic-tac-toe",
-    description: "Three in a line. A quick round, or a rematch.",
-    detail: "Take turns · 1–2 min",
+    description: "The classic quick one. Perfect for settling small debates.",
+    detail: "Turn-based",
+    time: "1–2 min",
   },
   {
     kind: "rps",
     title: "Rock, paper, scissors",
-    description: "Choose in secret. First to three wins.",
-    detail: "Choose together · 2–5 min",
+    description: "Pick in secret, reveal together. First to three wins.",
+    detail: "Simultaneous",
+    time: "2–5 min",
   },
   {
     kind: "word",
     title: "Three clues",
-    description: "Write a puzzle for your partner to solve.",
-    detail: "Set a puzzle · Play anytime",
+    description: "Hide a word behind three clues. They unlock one per miss.",
+    detail: "Puzzle",
+    time: "Anytime",
   },
 ] as const;
 
@@ -51,7 +56,9 @@ function GamePreview({ kind }: { kind: Game["kind"] }) {
                   ? "rose"
                   : [11, 12, 18, 19].includes(index)
                     ? "blue"
-                    : ""
+                    : index === 3
+                      ? "rose falling"
+                      : ""
               }
             />
           ))}
@@ -61,29 +68,29 @@ function GamePreview({ kind }: { kind: Game["kind"] }) {
           {Array.from({ length: 9 }, (_, index) => (
             <span key={index}>
               {[0, 4, 8].includes(index) ? (
-                <X />
+                <TicMark player={0} />
               ) : [2, 3].includes(index) ? (
-                <Circle />
+                <TicMark player={1} />
               ) : null}
             </span>
           ))}
         </div>
       ) : kind === "rps" ? (
         <div className="preview-rps">
-          <Circle />
+          <HandFist />
           <Hand />
           <Scissors />
         </div>
       ) : (
         <div className="preview-clues">
           <span>
-            01 <i />
+            <b>1</b> <i />
           </span>
-          <span>
-            02 <i />
+          <span className="locked">
+            <b>2</b> <i />
           </span>
-          <span>
-            03 <i />
+          <span className="locked">
+            <b>3</b> <i />
           </span>
         </div>
       )}
@@ -130,8 +137,28 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
       /* Keep the catalog available to retry. */
     }
   }
+  const waiting = active.filter((game) =>
+    game.kind === "four" || game.kind === "tic"
+      ? (game.state as { turn: string }).turn === space.me.id
+      : game.kind === "rps"
+        ? !Object.hasOwn(
+            (game.state as { choices: Record<string, unknown> }).choices,
+            space.me.id,
+          )
+        : (game.state as { authorId: string }).authorId !== space.me.id,
+  ).length;
   return (
     <div className="games-panel">
+      <div className="games-toolbar">
+        <p className="games-summary">
+          {active.length === 0
+            ? "Nothing in play. Pick a game below to challenge your partner."
+            : waiting > 0
+              ? `${waiting} ${waiting === 1 ? "game is" : "games are"} waiting on your move.`
+              : `${active.length} ${active.length === 1 ? "game" : "games"} in play. Waiting on your partner.`}
+        </p>
+        <SoundToggle />
+      </div>
       {games.length > 0 && (
         <>
           <div className="activity-heading games-list-heading">
@@ -189,8 +216,8 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
         </>
       )}
       <div className="activity-heading game-catalog-heading">
-        <h2>Start a game</h2>
-        <span>2 players</span>
+        <h2>Game library</h2>
+        <span>For two players</span>
       </div>
       <div className="game-options">
         {catalog.map((item) => {
@@ -198,15 +225,21 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
             item.kind !== "word" &&
             active.find((game) => game.kind === item.kind);
           return (
-            <article className="game-option" key={item.kind}>
+            <article
+              className={`game-option game-option-${item.kind}`}
+              key={item.kind}
+            >
               <GamePreview kind={item.kind} />
               <div className="game-option-copy">
-                <p className="game-duration">{item.detail}</p>
+                <p className="game-duration">
+                  <span>{item.detail}</span>
+                  <span>{item.time}</span>
+                </p>
                 <h3>{item.title}</h3>
                 <p>{item.description}</p>
               </div>
               <button
-                className="secondary"
+                className={inProgress ? "secondary" : "button"}
                 disabled={action.pending || space.members.length !== 2}
                 aria-label={
                   inProgress
@@ -229,7 +262,7 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
                   : item.kind === "word"
                     ? "Write clues"
                     : "Play"}
-                <ArrowUpRight size={16} aria-hidden="true" />
+                <ArrowRight size={16} aria-hidden="true" />
               </button>
             </article>
           );

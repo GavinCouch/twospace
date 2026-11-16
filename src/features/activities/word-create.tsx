@@ -49,7 +49,7 @@ export function WordCreate({
       <div className="activity-heading">
         <div>
           <span className="activity-eyebrow">Three clues</span>
-          <h3>Something for your partner to guess</h3>
+          <h3>Write a puzzle for your partner</h3>
         </div>
         <button type="button" className="quiet" onClick={onClose}>
           Cancel
@@ -67,8 +67,9 @@ export function WordCreate({
         />
       </label>
       <p className="muted small-copy">
-        Your partner sees the clues. Your answer stays hidden until they guess
-        it.
+        Your partner starts with clue 1. Each wrong guess opens the next one, so
+        begin vague and get more generous. The answer stays secret until they
+        solve it.
       </p>
       {errors.answer && (
         <p className="form-error" role="alert">
@@ -78,16 +79,22 @@ export function WordCreate({
       {(["clue1", "clue2", "clue3"] as const).map((name, index) => (
         <div key={name}>
           <label className="field">
-            Clue {index + 1}
+            {
+              [
+                "Clue 1 · the tricky one",
+                "Clue 2 · a nudge",
+                "Clue 3 · the giveaway",
+              ][index]
+            }
             <input
               {...register(name)}
               maxLength={160}
               aria-invalid={!!errors[name]}
               placeholder={
                 [
-                  "Start a little vague",
-                  "Narrow it down",
-                  "Give them something to work with",
+                  "Shown first. Keep it cryptic",
+                  "Opens after one wrong guess",
+                  "Opens after two. Make it fair",
                 ][index]
               }
             />
@@ -105,7 +112,7 @@ export function WordCreate({
         </p>
       )}
       <button className="button" disabled={action.pending}>
-        {action.pending ? "Saving…" : "Leave these clues"}
+        {action.pending ? "Sending…" : "Send the puzzle"}
       </button>
     </form>
   );

@@ -1,4 +1,5 @@
 "use client";
+import { SectionArt } from "@/components/section-art";
 
 import { useMemo, useRef, useState } from "react";
 import { Pin, Plus, Search, SlidersHorizontal, X } from "lucide-react";
@@ -223,11 +224,14 @@ export default function JournalPage() {
             </p>
             {!entries.length && (
               <div className="journal-empty">
-                <h2>{hasFilters ? "No matching entries" : "No entries yet"}</h2>
+                {!hasFilters && <SectionArt name="journal" size={84} />}
+                <h2>
+                  {hasFilters ? "No matching entries" : "A blank first page"}
+                </h2>
                 <p>
                   {hasFilters
                     ? "Try another search or clear your filters."
-                    : "Add a note, photo, link, or voice message."}
+                    : "Start your story here. A note about your day, a photo of what you’re looking at, or a voice message they can play later."}
                 </p>
                 {hasFilters ? (
                   <button
@@ -239,11 +243,11 @@ export default function JournalPage() {
                   </button>
                 ) : (
                   <button
-                    className="secondary"
+                    className="button"
                     type="button"
                     onClick={() => setComposing(true)}
                   >
-                    Write a note
+                    Write the first note
                   </button>
                 )}
               </div>
