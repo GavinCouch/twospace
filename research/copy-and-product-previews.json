@@ -1,0 +1,96 @@
+{
+  "reviewedAt": "2026-11-16",
+  "purpose": "Revise TwoSpace copy for clarity and replace invented interface mockups with actual product screenshots.",
+  "scope": "Homepage, game instructions and status text, empty states, and page titles.",
+  "findings": [
+    "Instruction-tuned models can use dense grammar and sentimental language in contexts where people use less of it. The useful response is to edit for the audience and task.",
+    "Overrepresented words and stylistic habits are population-level signals. No word, punctuation mark, or short passage proves AI authorship.",
+    "Web readers need important information first, concise explanations, and a clear next action.",
+    "Repeated slogans, vague benefits, and metaphors can hide what a feature actually does. Warmth can come from credible example notes rather than product promises."
+  ],
+  "editorialRules": [
+    "Name the feature and describe what the reader can do.",
+    "Remove copy that repeats a heading or adds a second sales pitch.",
+    "Use interface terms consistently: entry, reply, collection, invite code, and plan.",
+    "Use ordinary verbs and natural sentence lengths; do not add mistakes or slang to imitate a human.",
+    "Explain empty states and the next step without praise or sentimental commentary.",
+    "Do not assume couples can meet, will live together, or are online at the same time.",
+    "Do not make blanket privacy or relationship-outcome promises."
+  ],
+  "examples": [
+    {
+      "before": "Close, even when you’re far apart.",
+      "after": "A shared space for long-distance couples."
+    },
+    {
+      "before": "Start your story here.",
+      "after": "Add a note, photo, link, or voice message for your partner."
+    },
+    {
+      "before": "A soundtrack of your time apart",
+      "after": "Past picks stay in your space."
+    },
+    {
+      "before": "Plans that make sense on both clocks",
+      "after": "Plans in both time zones"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Do LLMs write like humans? Variation in grammatical and rhetorical styles",
+      "publisher": "PNAS",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11874169/",
+      "use": "Genre mismatch, grammatical density, and sentimental vocabulary; limits on generalizing across models and genres."
+    },
+    {
+      "title": "Why Does ChatGPT Delve So Much? Exploring the Sources of Lexical Overrepresentation in Large Language Models",
+      "publisher": "COLING 2025",
+      "url": "https://aclanthology.org/2025.coling-main.426/",
+      "use": "Lexical overrepresentation; instruction-tuning explanation is evidence-informed rather than a universal proven cause."
+    },
+    {
+      "title": "Delving into LLM-assisted writing in biomedical publications through excess vocabulary",
+      "publisher": "Science Advances",
+      "url": "https://arxiv.org/abs/2406.07016",
+      "use": "Aggregate excess-vocabulary evidence; not individual-text authorship detection."
+    },
+    {
+      "title": "The shrinking landscape of linguistic diversity in the age of large language models",
+      "publisher": "Research paper",
+      "url": "https://arxiv.org/abs/2502.11266",
+      "use": "Reduced variation in LLM rewriting; preserve useful natural variation without changing interface terminology."
+    },
+    {
+      "title": "Product-Specific GenAI Needs to Write for the Web",
+      "publisher": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/genai-write-for-the-web/",
+      "use": "Primary usability findings on excessive detail, sales-like responses, scannability, and plain language."
+    },
+    {
+      "title": "Top 10 tips for Microsoft style and voice",
+      "publisher": "Microsoft",
+      "url": "https://learn.microsoft.com/en-us/style-guide/top-10-tips-style-voice",
+      "use": "Everyday wording, front-loading, obvious next steps, and removing excess words."
+    },
+    {
+      "title": "Designing Empty States in Complex Applications",
+      "publisher": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/empty-state-interface-design/",
+      "use": "Describe the current state and provide a relevant next action."
+    },
+    {
+      "title": "Identify user needs",
+      "publisher": "GOV.UK",
+      "url": "https://guidance.publishing.service.gov.uk/writing-to-gov-uk-standards/plan-manage-content/identify-user-needs/",
+      "use": "Content should support recognizable tasks, not justify a feature with invented needs."
+    }
+  ],
+  "screenshots": {
+    "source": "Running TwoSpace application in an isolated local database",
+    "accounts": "Fictional Maya and Theo; existing generated portraits, no customer data",
+    "views": ["Journal", "Activities", "Music", "Plans"],
+    "formats": "Desktop and mobile captures with responsive image selection",
+    "music": "Track metadata resolved through Spotify oEmbed; ordinary app player shown",
+    "disclosure": "Screenshots from TwoSpace with fictional accounts."
+  }
+}

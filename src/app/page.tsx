@@ -5,7 +5,7 @@ import HomePage from "@/features/home/home-page";
 import { hasWebSession } from "@/server/web-session";
 
 export const metadata: Metadata = {
-  title: "TwoSpace",
+  title: { absolute: "TwoSpace" },
   description:
     "A shared space for long-distance couples. Share notes, photos, and daily songs, play games, and make plans across time zones.",
 };

@@ -232,7 +232,7 @@ export function FourBoard({
         <HowToPlay>
           Take turns dropping a piece into any column. It falls to the lowest
           open space. Line up four of your color across, down, or diagonally to
-          win. No rush: the board waits between turns.
+          win. You can leave and return to take your next turn.
         </HowToPlay>
       </div>
     </GameFrame>

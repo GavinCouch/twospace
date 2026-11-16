@@ -150,7 +150,7 @@ export function MusicContent({
         ) : (
           <div className="music-history-empty">
             <Music2 size={20} aria-hidden="true" />
-            <p>Songs you both pick will collect here, day by day.</p>
+            <p>Your previous song picks will appear here.</p>
           </div>
         )}
       </section>

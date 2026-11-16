@@ -45,7 +45,6 @@ export default function ActivitiesPage() {
       <div className="page-title">
         <div>
           <h1>Activities</h1>
-          <p>Games, questions, and doodles for the two of you.</p>
         </div>
       </div>
       <div

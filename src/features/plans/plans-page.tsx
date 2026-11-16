@@ -94,7 +94,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
               <p>
                 {filter === "done"
                   ? "Mark a plan done when you’ve finished."
-                  : "Suggest a call, a movie night, or a visit. You’ll both see it in your own time zone."}
+                  : "Suggest a time for a call or another activity. Each of you will see it in your own time zone."}
               </p>
               {filter === "upcoming" && (
                 <button className="secondary" onClick={() => setForm(true)}>

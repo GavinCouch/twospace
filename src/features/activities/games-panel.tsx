@@ -16,28 +16,29 @@ const catalog = [
   {
     kind: "four",
     title: "Four-in-a-row",
-    description: "Drop pieces, block their lines, connect four first.",
+    description: "Connect four pieces across, down, or diagonally.",
     detail: "Turn-based",
     time: "5–10 min",
   },
   {
     kind: "tic",
     title: "Tic-tac-toe",
-    description: "The classic quick one. Perfect for settling small debates.",
+    description: "Get three of your marks in a row.",
     detail: "Turn-based",
     time: "1–2 min",
   },
   {
     kind: "rps",
     title: "Rock, paper, scissors",
-    description: "Pick in secret, reveal together. First to three wins.",
-    detail: "Simultaneous",
+    description:
+      "Choose without seeing your partner’s pick. Win three rounds to take the match.",
+    detail: "Hidden choices",
     time: "2–5 min",
   },
   {
     kind: "word",
     title: "Three clues",
-    description: "Hide a word behind three clues. They unlock one per miss.",
+    description: "Give your partner three clues to guess a word.",
     detail: "Puzzle",
     time: "Anytime",
   },
@@ -125,7 +126,7 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
       behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
         ? "auto"
         : "smooth",
-      block: "center",
+      block: "start",
     });
     setFocusGameId(null);
   }, [focusGameId, space.games]);
@@ -152,10 +153,10 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
       <div className="games-toolbar">
         <p className="games-summary">
           {active.length === 0
-            ? "Nothing in play. Pick a game below to challenge your partner."
+            ? "Choose a game to start."
             : waiting > 0
-              ? `${waiting} ${waiting === 1 ? "game is" : "games are"} waiting on your move.`
-              : `${active.length} ${active.length === 1 ? "game" : "games"} in play. Waiting on your partner.`}
+              ? `Your turn in ${waiting} ${waiting === 1 ? "game" : "games"}.`
+              : `Waiting for your partner in ${active.length} ${active.length === 1 ? "game" : "games"}.`}
         </p>
         <SoundToggle />
       </div>
@@ -216,7 +217,7 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
         </>
       )}
       <div className="activity-heading game-catalog-heading">
-        <h2>Game library</h2>
+        <h2>Choose a game</h2>
         <span>For two players</span>
       </div>
       <div className="game-options">
