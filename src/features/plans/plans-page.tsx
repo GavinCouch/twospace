@@ -29,6 +29,7 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
     )
     .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
   const duration = Number(params.get("duration") || 30);
+  const savedIdeas = space.ideas.filter((idea) => idea.savedBy.length).slice(0, 5);
   function close() {
     setForm(false);
     setEditing(undefined);
@@ -40,6 +41,9 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
       <header className="page-title">
         <div>
           <h1>Plans</h1>
+          <p>
+            Times are shown in both of your time zones.
+          </p>
         </div>
         <button
           className="button"
@@ -129,12 +133,10 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
               }}
             />
           )}
-          <section className="plans-saved">
+          <section className="panel plans-saved">
             <h2>Saved ideas</h2>
-            {space.ideas
-              .filter((idea) => idea.savedBy.length)
-              .slice(0, 5)
-              .map((idea) => (
+            {savedIdeas.length ? (
+              savedIdeas.map((idea) => (
                 <a
                   key={idea.id}
                   href={`/plans?title=${encodeURIComponent(idea.title)}&duration=${idea.duration}`}
@@ -150,8 +152,13 @@ function PlansContent({ space }: { space: SpaceSnapshot }) {
                   {idea.title}
                   <span>{idea.duration} min</span>
                 </a>
-              ))}
-            <a className="quiet" href="/activities">
+              ))
+            ) : (
+              <p className="muted small">
+                Bookmark activity ideas to keep them ready to schedule here.
+              </p>
+            )}
+            <a className="quiet" href="/activities?tab=ideas">
               Browse activities
             </a>
           </section>

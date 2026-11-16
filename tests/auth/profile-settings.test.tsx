@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom/vitest";
@@ -24,7 +30,11 @@ beforeEach(() => {
   request.mockReset();
   request.mockResolvedValue({ ok: true });
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 function renderProfile(profile: Person = person) {
   const client = new QueryClient();
   const view = render(
@@ -44,6 +54,23 @@ function renderProfile(profile: Person = person) {
 }
 
 describe("profile and space settings", () => {
+  it("keeps the selected zone's current time fresh across a minute and a hidden tab", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-15T17:59:50Z"));
+    renderProfile();
+    expect(screen.getByText("Sun, 11:59 AM CST")).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(10_000));
+    expect(screen.getByText("Sun, 12:00 PM CST")).toBeInTheDocument();
+
+    const hidden = vi.spyOn(document, "hidden", "get");
+    hidden.mockReturnValue(true);
+    fireEvent(document, new Event("visibilitychange"));
+    vi.setSystemTime(new Date("2026-11-15T18:10:00Z"));
+    hidden.mockReturnValue(false);
+    fireEvent(document, new Event("visibilitychange"));
+    expect(screen.getByText("Sun, 12:10 PM CST")).toBeInTheDocument();
+  });
+
   it("previews an accent immediately and keeps it while the saved snapshot catches up", async () => {
     const user = userEvent.setup();
     const view = renderProfile();

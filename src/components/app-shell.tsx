@@ -12,6 +12,7 @@ import { SectionArt } from "./section-art";
 import { SpaceNavigation } from "./space-navigation";
 import { SpaceClock } from "./space-clock";
 import { PartnerSetup } from "./partner-setup";
+import { partnerTimeOffset } from "@/shared/time";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { data, isPending, error, refetch } = useSpace();
@@ -87,6 +88,25 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {data.members.map((person) => (
                   <SpaceClock key={person.id} person={person} />
                 ))}
+                {(() => {
+                  const partner = data.members.find((m) => m.id !== data.me.id);
+                  const offset =
+                    clock && partner
+                      ? partnerTimeOffset(
+                          data.me.timeZone,
+                          partner.timeZone,
+                          clock,
+                        )
+                      : null;
+                  return offset ? (
+                    <span
+                      className="partner-clock-offset"
+                      aria-label={`Time difference: ${offset}`}
+                    >
+                      {offset}
+                    </span>
+                  ) : null;
+                })()}
               </div>
             </div>
           </section>
