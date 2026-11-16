@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ResetPassword from "@/features/auth/reset-password";
 
 export const metadata: Metadata = {
-  title: "New password · TwoSpace",
+  title: "New password",
   robots: { index: false, follow: false },
   referrer: "no-referrer",
 };

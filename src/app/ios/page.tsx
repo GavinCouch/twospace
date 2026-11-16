@@ -7,7 +7,7 @@ import { SectionArt } from "@/components/section-art";
 import "./ios.css";
 
 export const metadata: Metadata = {
-  title: "TwoSpace for iPhone",
+  title: "iPhone app",
   description:
     "The TwoSpace iPhone app is in development and will be available soon.",
 };

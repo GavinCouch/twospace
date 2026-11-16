@@ -7,7 +7,7 @@ import { Providers } from "@/components/space-provider";
 export const metadata: Metadata = {
   title: { default: "TwoSpace", template: "%s · TwoSpace" },
   description:
-    "A shared journal, games, daily songs, and plans for two people in different places.",
+    "Share notes, photos, songs, games, and plans with your long-distance partner.",
 };
 
 export const viewport: Viewport = {
