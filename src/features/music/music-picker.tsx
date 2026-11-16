@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+  type PointerEvent,
+} from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Check, Link2, Music2, Search, X } from "lucide-react";
 import { api, useAction } from "@/components/space-provider";
@@ -10,6 +17,17 @@ import {
   type MusicSearch,
   type SpotifyTrack,
 } from "@/shared/music";
+
+function isOutsideDialog(event: PointerEvent<HTMLDialogElement>) {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  return (
+    event.target === event.currentTarget &&
+    (event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom)
+  );
+}
 
 export function MusicPicker({
   initial,
@@ -23,6 +41,7 @@ export function MusicPicker({
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const backdropPointer = useRef<number | null>(null);
   const resolveRequest = useRef<AbortController | null>(null);
   const titleId = useId();
   const noteId = useId();
@@ -141,6 +160,29 @@ export function MusicPicker({
       ref={dialog}
       className="music-picker"
       aria-labelledby={titleId}
+      onPointerDown={(event) => {
+        backdropPointer.current =
+          !action.pending &&
+          !resolving &&
+          event.button === 0 &&
+          isOutsideDialog(event)
+            ? event.pointerId
+            : null;
+      }}
+      onPointerUp={(event) => {
+        const startedOutside = backdropPointer.current === event.pointerId;
+        backdropPointer.current = null;
+        if (
+          !action.pending &&
+          !resolving &&
+          startedOutside &&
+          isOutsideDialog(event)
+        )
+          onClose();
+      }}
+      onPointerCancel={() => {
+        backdropPointer.current = null;
+      }}
       onCancel={(event) => {
         event.preventDefault();
         if (!action.pending) onClose();

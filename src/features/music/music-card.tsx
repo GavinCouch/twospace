@@ -3,7 +3,9 @@
 import { useState } from "react";
 import {
   ArrowUpRight,
+  Check,
   ChevronDown,
+  Copy,
   Music2,
   Pencil,
   Trash2,
@@ -66,6 +68,7 @@ export function SongCard({
   onEdit?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [removeRevision, setRemoveRevision] = useState<number | null>(null);
   const action = useAction();
   const name = person?.name || "Member";
@@ -172,6 +175,22 @@ export function SongCard({
       )}
       <footer className="music-card-footer">
         <SpotifyLink track={song.track} />
+        <button
+          type="button"
+          className="quiet music-copy-link"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(song.track.url);
+              setCopied(true);
+              window.setTimeout(() => setCopied(false), 1800);
+            } catch {
+              /* Ignore clipboard unavailability. */
+            }
+          }}
+        >
+          {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+          {copied ? "Copied" : "Copy link"}
+        </button>
       </footer>
       {removeRevision !== null && (
         <div className="music-remove-confirm">

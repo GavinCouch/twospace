@@ -28,9 +28,10 @@
   align-items: start;
 }
 .music-card {
-  background: var(--surface);
+  background: linear-gradient(180deg, #1d1a24, var(--surface));
   border: 1px solid var(--line);
   border-radius: 20px;
+  box-shadow: var(--shadow-card);
   min-width: 0;
   overflow: hidden;
 }
@@ -106,7 +107,17 @@
   overflow-wrap: anywhere;
 }
 .music-card-footer {
-  padding: 20px 24px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 18px 24px 20px;
+}
+.music-copy-link {
+  font-size: 0.74rem;
+  min-height: 36px;
+  padding: 6px 10px;
 }
 .music-spotify-link {
   display: inline-flex;
@@ -156,12 +167,38 @@
   border-top: 1px solid var(--line);
   padding-top: 28px;
 }
+.music-history-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.music-history-controls > span {
+  font-size: 0.77rem;
+  color: var(--muted);
+}
+.music-history-search input {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--bg-deep);
+  color: var(--ink);
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  min-width: 190px;
+}
 .music-history-empty {
   display: flex;
   gap: 12px;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   color: var(--muted);
-  padding: 15px 0;
+  padding: 32px 24px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 20px;
+  background:
+    radial-gradient(28rem 12rem at 50% 0%, #f2b4c809, transparent 70%),
+    linear-gradient(180deg, #16131c, #131018);
 }
 .music-history-empty p {
   margin: 0;
@@ -241,18 +278,21 @@
 }
 .music-picker {
   color: var(--ink);
-  background: var(--bg);
+  background: linear-gradient(180deg, #1d1a24, var(--surface));
   padding: 26px;
   width: min(560px, calc(100% - 32px));
   max-height: min(760px, calc(100dvh - 40px));
   overflow-y: auto;
-  border: 1px solid var(--line);
+  overscroll-behavior: contain;
+  border: 1px solid var(--line-strong);
   border-radius: 22px;
-  box-shadow: 0 24px 100px #0007;
+  box-shadow:
+    0 1px 0 #ffffff0d inset,
+    0 24px 100px #0009;
 }
 .music-picker::backdrop {
-  background: #050508c9;
-  backdrop-filter: blur(6px);
+  background: #060508b3;
+  backdrop-filter: blur(8px);
 }
 .music-picker-heading {
   display: flex;
