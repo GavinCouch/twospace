@@ -14,14 +14,32 @@ import "./photo-pairs.css";
 
 const promptSchema = z.object({ prompt: z.string().trim().min(1, "Choose a subject for your photos.").max(160, "Keep the prompt under 160 characters.") });
 const captionSchema = z.object({ caption: z.string().max(1000, "Keep the caption under 1,000 characters.") });
+const PAIR_PROMPTS = [
+  "The sky where you are",
+  "Your morning mug",
+  "Outside your window",
+  "Tonight’s view",
+];
 
 function NewPhotoPair({ onClose }: { onClose: () => void }) {
   const action = useAction();
   const id = useId();
-  const { register, handleSubmit, formState: { errors } } = useForm<z.infer<typeof promptSchema>>({ resolver: zodResolver(promptSchema), defaultValues: { prompt: "" } });
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<z.infer<typeof promptSchema>>({ resolver: zodResolver(promptSchema), defaultValues: { prompt: "" } });
   return <JournalDialog title="Start a photo pair" onClose={onClose} busy={action.pending}>
     <form className="journal-compose-form" onSubmit={handleSubmit(async values => { try { await action.run("/api/photo-pairs", values); onClose(); } catch { /* Preserve the prompt for retry. */ } })} noValidate>
-      <label className="field" htmlFor={id}>What will you photograph?<input id={id} maxLength={160} placeholder="The sky where you are" {...register("prompt")} aria-invalid={Boolean(errors.prompt)} />{errors.prompt && <span className="journal-field-error">{errors.prompt.message}</span>}<small>You each add a photo, whenever you like. Photos appear as soon as they’re added.</small></label>
+      <label className="field" htmlFor={id}>What will you photograph?<input id={id} maxLength={160} placeholder="The sky where you are" data-initial-focus {...register("prompt")} aria-invalid={Boolean(errors.prompt)} />{errors.prompt && <span className="journal-field-error">{errors.prompt.message}</span>}<small>You each add a photo, whenever you like. Photos appear as soon as they’re added.</small></label>
+      <div className="journal-pair-prompts" aria-label="Prompt suggestions">
+        {PAIR_PROMPTS.map((suggestion) => (
+          <button
+            key={suggestion}
+            type="button"
+            className="journal-pair-prompt-chip"
+            onClick={() => setValue("prompt", suggestion, { shouldDirty: true })}
+          >
+            {suggestion}
+          </button>
+        ))}
+      </div>
       {action.error && <p className="form-error" role="alert">{action.error}</p>}
       <div className="journal-edit-footer"><button className="secondary" type="button" disabled={action.pending} onClick={onClose}>Cancel</button><button className="button" type="submit" disabled={action.pending}>{action.pending ? "Creating…" : "Create photo pair"}</button></div>
     </form>
@@ -66,8 +84,15 @@ export function PhotoPairs({ pairs, members, me }: { pairs: PhotoPair[]; members
 
   return <section className="journal-photo-pairs" aria-labelledby="journal-pairs-title">
     <div className="journal-pairs-heading"><h2 id="journal-pairs-title">Photo pairs</h2><button type="button" className="quiet" onClick={() => setCreating(true)}><Plus size={16} /> Start a pair</button></div>
-    {pairs.length === 0 ? <p className="journal-pairs-empty">Choose a subject and add one photo from each place.</p> : <div className="journal-pairs-list">{(showAll ? sorted : sorted.slice(0, 3)).map(pair => <article className="journal-pair" key={pair.id}>
-      <h3>{pair.prompt}</h3>
+    {pairs.length === 0 ? <p className="journal-pairs-empty">Choose a subject and add one photo from each place.</p> : <div className="journal-pairs-list">{(showAll ? sorted : sorted.slice(0, 3)).map(pair => {
+      const bothAdded = pair.photos.length >= 2;
+      const mineAdded = pair.photos.some(photo => photo.userId === me.id);
+      const badge = bothAdded ? "Both added" : mineAdded ? "Waiting for partner" : "Your turn";
+      return <article className="journal-pair" key={pair.id}>
+        <div className="journal-pair-header">
+          <h3>{pair.prompt}</h3>
+          <span className={`journal-pair-status${bothAdded ? " is-complete" : ""}`}>{badge}</span>
+        </div>
       <div className="journal-pair-photos">{slots.map((person, index) => {
         const photo = pair.photos.find(item => item.userId === person?.id);
         const mine = person?.id === me.id;
@@ -77,7 +102,7 @@ export function PhotoPairs({ pairs, members, me }: { pairs: PhotoPair[]; members
         </figure>;
       })}</div>
       {pair.photos.some(photo => photo.userId === me.id) && <button type="button" className="quiet journal-pair-edit" onClick={() => setContributionId(pair.id)}>Edit your photo</button>}
-    </article>)}</div>}
+    </article>; })}</div>}
     {sorted.length > 3 && <button type="button" className="quiet" onClick={() => setShowAll(value => !value)}>{showAll ? "Show fewer pairs" : `Show all ${sorted.length} pairs`}</button>}
     {creating && <NewPhotoPair onClose={() => setCreating(false)} />}
     {contribution && <PhotoContribution pair={contribution} me={me} onClose={() => setContributionId(null)} />}

@@ -111,6 +111,66 @@ function DialogExample() {
 }
 
 describe("journal dialog review", () => {
+  it("only dismisses a pointer gesture that begins and ends on the backdrop", async () => {
+    const user = userEvent.setup();
+    render(<DialogExample />);
+    const opener = screen.getByRole("button", { name: "New entry" });
+    await user.click(opener);
+    const dialog = screen.getByRole("dialog");
+    vi.spyOn(dialog, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(100, 100, 300, 300),
+    );
+
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: dialog,
+      coords: { clientX: 110, clientY: 110 },
+    });
+    expect(dialog).toBeInTheDocument();
+
+    await user.pointer([
+      {
+        keys: "[MouseLeft>]",
+        target: dialog,
+        coords: { clientX: 110, clientY: 110 },
+      },
+      {
+        keys: "[/MouseLeft]",
+        target: dialog,
+        coords: { clientX: 50, clientY: 50 },
+      },
+    ]);
+    expect(dialog).toBeInTheDocument();
+
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: dialog,
+      coords: { clientX: 50, clientY: 50 },
+    });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+  });
+
+  it("keeps the dialog open for backdrop gestures while busy", async () => {
+    const user = userEvent.setup();
+    const close = vi.fn();
+    render(
+      <JournalDialog title="Saving" onClose={close} busy>
+        Saving…
+      </JournalDialog>,
+    );
+    const dialog = screen.getByRole("dialog");
+    vi.spyOn(dialog, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(100, 100, 300, 300),
+    );
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: dialog,
+      coords: { clientX: 50, clientY: 50 },
+    });
+    expect(close).not.toHaveBeenCalled();
+  });
+
   it("focuses the designated field and returns focus to its opener on Escape", async () => {
     const user = userEvent.setup();
     render(<DialogExample />);

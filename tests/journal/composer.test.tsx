@@ -10,6 +10,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/vitest";
+import { Temporal } from "@js-temporal/polyfill";
 import { EntryComposer } from "../../src/features/journal/entry-composer";
 
 const request = vi.hoisted(() => vi.fn());
@@ -54,7 +55,10 @@ beforeEach(() => {
     this.open = false;
   };
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 describe("journal composing", () => {
   it("prevents edits and closing while saving, then unlocks the same draft after failure", async () => {
@@ -169,5 +173,50 @@ describe("journal composing", () => {
       await screen.findByText("Enter a full http or https link."),
     ).toBeInTheDocument();
     expect(request).not.toHaveBeenCalled();
+  });
+
+  it("seeds a future opening time and applies quick presets when scheduling a letter", async () => {
+    const user = userEvent.setup();
+    render(
+      <EntryComposer
+        me={me}
+        spaceId="space"
+        collections={[]}
+        onClose={vi.fn()}
+      />,
+    );
+    await user.click(screen.getByRole("checkbox", { name: "Open later" }));
+    const openingInput = screen.getByLabelText(/^Opening time/, {
+      selector: "input",
+    });
+    expect(openingInput).toHaveValue();
+    const initial = (openingInput as HTMLInputElement).value;
+    await user.click(screen.getByRole("button", { name: "Next month" }));
+    expect((openingInput as HTMLInputElement).value).not.toBe(initial);
+  });
+
+  it("labels the following Saturday accurately and uses the profile time zone", async () => {
+    vi.spyOn(Temporal.Now, "zonedDateTimeISO").mockImplementation((zone) =>
+      Temporal.Instant.from("2026-11-15T03:00:00Z").toZonedDateTimeISO(
+        zone ?? "UTC",
+      ),
+    );
+    const user = userEvent.setup();
+    render(
+      <EntryComposer
+        me={me}
+        spaceId="space"
+        collections={[]}
+        onClose={vi.fn()}
+      />,
+    );
+    await user.click(screen.getByRole("checkbox", { name: "Open later" }));
+    const openingInput = screen.getByLabelText(/^Opening time/, {
+      selector: "input",
+    });
+    // It is still Saturday in Chicago, even though the UTC date is Sunday.
+    expect(openingInput).toHaveValue("2026-11-15T09:00");
+    await user.click(screen.getByRole("button", { name: "Next Saturday" }));
+    expect(openingInput).toHaveValue("2026-11-21T10:00");
   });
 });

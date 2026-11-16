@@ -30,12 +30,52 @@
   border-bottom: 1px solid var(--line);
   padding-bottom: 24px;
 }
+.journal-pair-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 12px;
+}
 .journal-pair h3 {
-  font-size: 0.85rem;
-  font-weight: 500;
-  margin: 0 0 12px;
-  line-height: 1.5;
+  font-size: 0.9rem;
+  font-weight: 550;
+  margin: 0;
+  line-height: 1.45;
   overflow-wrap: anywhere;
+}
+.journal-pair-status {
+  flex-shrink: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  color: var(--muted);
+  background: var(--surface);
+}
+.journal-pair-status.is-complete {
+  color: var(--mint);
+  border-color: #2f5742;
+  background: #1a2d23;
+}
+.journal-pair-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.journal-pair-prompt-chip {
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--bg-deep);
+  color: var(--muted);
+  padding: 6px 12px;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+.journal-pair-prompt-chip:hover {
+  color: var(--ink);
+  border-color: var(--accent);
 }
 .journal-pair-photos {
   display: grid;

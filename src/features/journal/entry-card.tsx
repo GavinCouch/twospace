@@ -23,6 +23,7 @@ export function EntryCard({
   collections = [],
   timeOnly = false,
   arriving = false,
+  onSelectCollection,
 }: {
   entry: Entry;
   members: Person[];
@@ -30,6 +31,7 @@ export function EntryCard({
   collections?: string[];
   timeOnly?: boolean;
   arriving?: boolean;
+  onSelectCollection?: (collection: string) => void;
 }) {
   const author = members.find((person) => person.id === entry.authorId);
   const [photoOpen, setPhotoOpen] = useState(false);
@@ -184,9 +186,20 @@ export function EntryCard({
               </span>
             </a>
           )}
-          {entry.collection && (
-            <span className="journal-collection-label">{entry.collection}</span>
-          )}
+          {entry.collection &&
+            (onSelectCollection ? (
+              <button
+                type="button"
+                className="journal-collection-label journal-collection-chip"
+                onClick={() => onSelectCollection(entry.collection)}
+              >
+                {entry.collection}
+              </button>
+            ) : (
+              <span className="journal-collection-label">
+                {entry.collection}
+              </span>
+            ))}
           <EntryConversation entry={entry} members={members} me={me} />
         </>
       )}

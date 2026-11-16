@@ -103,12 +103,18 @@ export type NoteValues = z.infer<typeof noteSchema>;
 
 export function filterEntries(
   entries: Entry[],
-  options: { query: string; collection: string; pinned: boolean },
+  options: {
+    query: string;
+    collection: string;
+    pinned: boolean;
+    kind?: EntryKind | "";
+  },
 ): Entry[] {
   const query = options.query.trim().toLocaleLowerCase();
   return entries
     .filter((entry) => {
       if (options.pinned && !entry.pinned) return false;
+      if (options.kind && entry.kind !== options.kind) return false;
       if (options.collection && entry.collection !== options.collection)
         return false;
       if (!query) return true;

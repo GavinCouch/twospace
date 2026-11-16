@@ -1,7 +1,24 @@
 "use client";
 
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { X } from "lucide-react";
+
+function isOutsideDialog(event: PointerEvent<HTMLDialogElement>) {
+  const bounds = event.currentTarget.getBoundingClientRect();
+  return (
+    event.target === event.currentTarget &&
+    (event.clientX < bounds.left ||
+      event.clientX > bounds.right ||
+      event.clientY < bounds.top ||
+      event.clientY > bounds.bottom)
+  );
+}
 
 export function JournalDialog({
   title,
@@ -17,6 +34,7 @@ export function JournalDialog({
   wide?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const backdropPointer = useRef<number | null>(null);
   const titleId = useId();
   useEffect(() => {
     const active =
@@ -39,6 +57,20 @@ export function JournalDialog({
       ref={dialog}
       className={`journal-dialog${wide ? " journal-dialog-wide" : ""}`}
       aria-labelledby={titleId}
+      onPointerDown={(event) => {
+        backdropPointer.current =
+          !busy && event.button === 0 && isOutsideDialog(event)
+            ? event.pointerId
+            : null;
+      }}
+      onPointerUp={(event) => {
+        const startedOutside = backdropPointer.current === event.pointerId;
+        backdropPointer.current = null;
+        if (!busy && startedOutside && isOutsideDialog(event)) onClose();
+      }}
+      onPointerCancel={() => {
+        backdropPointer.current = null;
+      }}
       onCancel={(event) => {
         event.preventDefault();
         if (!busy) onClose();
