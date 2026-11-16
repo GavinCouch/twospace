@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ImagePlus, Link as LinkIcon, Mic, PenLine } from "lucide-react";
+import { Temporal } from "@js-temporal/polyfill";
 import { useAction } from "@/components/space-provider";
 import type { Person } from "@/shared/types";
 import { formatInZone, localToInstant } from "@/shared/time";
@@ -44,6 +45,25 @@ const defaults: ComposerValues = {
   collection: "",
   revealLocal: "",
 };
+
+function presetRevealLocal(
+  timeZone: string,
+  preset: "tomorrow" | "weekend" | "nextMonth",
+): string {
+  const today = Temporal.Now.zonedDateTimeISO(timeZone).toPlainDate();
+  if (preset === "weekend") {
+    const daysUntilSaturday = (6 - today.dayOfWeek + 7) % 7 || 7;
+    return today
+      .add({ days: daysUntilSaturday })
+      .toPlainDateTime({ hour: 10, minute: 0 })
+      .toString({ smallestUnit: "minute" });
+  }
+  const target =
+    preset === "nextMonth" ? today.add({ months: 1 }) : today.add({ days: 1 });
+  return target
+    .toPlainDateTime({ hour: 9, minute: 0 })
+    .toString({ smallestUnit: "minute" });
+}
 
 export function EntryComposer({
   me,
@@ -343,33 +363,66 @@ export function EntryComposer({
                 type="checkbox"
                 checked={scheduled}
                 onChange={(event) => {
-                  setScheduled(event.target.checked);
-                  if (!event.target.checked) setValue("revealLocal", "");
+                  const checked = event.target.checked;
+                  setScheduled(checked);
+                  if (!checked) {
+                    setValue("revealLocal", "");
+                  } else if (!revealLocal) {
+                    setValue(
+                      "revealLocal",
+                      presetRevealLocal(me.timeZone, "tomorrow"),
+                    );
+                  }
                 }}
               />{" "}
               Open later
             </label>
             {scheduled && (
-              <label className="field" htmlFor={`${fieldId}-reveal`}>
-                Opening time
-                <input
-                  id={`${fieldId}-reveal`}
-                  type="datetime-local"
-                  {...register("revealLocal")}
-                  aria-invalid={Boolean(errors.revealLocal)}
-                  aria-describedby={`${fieldId}-reveal-help`}
-                />
-                <small id={`${fieldId}-reveal-help`}>
-                  In your time zone: {me.timeZone.replaceAll("_", " ")}. Only
-                  you can see the contents before this time.
-                </small>
-                {errors.revealLocal && (
-                  <span className="journal-field-error" role="alert">
-                    {errors.revealLocal.message}
-                  </span>
-                )}
-                {scheduledPreview && <small>Opens {scheduledPreview}</small>}
-              </label>
+              <>
+                <div
+                  className="journal-schedule-presets"
+                  role="group"
+                  aria-label="Opening time suggestions"
+                >
+                  {[
+                    { id: "tomorrow" as const, label: "Tomorrow 9 AM" },
+                    { id: "weekend" as const, label: "Next Saturday" },
+                    { id: "nextMonth" as const, label: "Next month" },
+                  ].map((preset) => {
+                    const value = presetRevealLocal(me.timeZone, preset.id);
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        className={`journal-schedule-preset${revealLocal === value ? " is-selected" : ""}`}
+                        onClick={() => setValue("revealLocal", value)}
+                      >
+                        {preset.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <label className="field" htmlFor={`${fieldId}-reveal`}>
+                  Opening time
+                  <input
+                    id={`${fieldId}-reveal`}
+                    type="datetime-local"
+                    {...register("revealLocal")}
+                    aria-invalid={Boolean(errors.revealLocal)}
+                    aria-describedby={`${fieldId}-reveal-help`}
+                  />
+                  <small id={`${fieldId}-reveal-help`}>
+                    In your time zone: {me.timeZone.replaceAll("_", " ")}. Only
+                    you can see the contents before this time.
+                  </small>
+                  {errors.revealLocal && (
+                    <span className="journal-field-error" role="alert">
+                      {errors.revealLocal.message}
+                    </span>
+                  )}
+                  {scheduledPreview && <small>Opens {scheduledPreview}</small>}
+                </label>
+              </>
             )}
           </div>
           {(action.error || localError) && (

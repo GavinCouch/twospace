@@ -78,15 +78,17 @@
   margin: 0;
 }
 .settings-color-swatch {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  border: 3px solid var(--paper, var(--bg));
+  border: 3px solid var(--bg);
   display: inline-block;
+  transition: transform 140ms ease;
 }
 .settings-color-option input:checked + .settings-color-swatch {
-  outline: 1.5px solid var(--primary, var(--accent));
-  outline-offset: 1px;
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  transform: scale(1.06);
 }
 .settings-color-option input:focus-visible + .settings-color-swatch {
   outline: 3px solid var(--focus, var(--primary, var(--accent)));
@@ -115,10 +117,10 @@
 .settings-time-zone > input {
   width: 100%;
   min-width: 0;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 11px 12px;
-  background: var(--card, var(--surface));
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 11px 13px;
+  background: var(--bg-deep);
   color: var(--ink);
   font: inherit;
   font-size: 0.94rem;
@@ -139,13 +141,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 15px;
-}
-.settings-page .button {
-  background: var(--primary, var(--accent));
-  color: var(--primary-ink, #fff);
-}
-.settings-page .button:hover:not(:disabled) {
-  filter: brightness(0.93);
 }
 .settings-page .button:disabled {
   cursor: default;
@@ -296,7 +291,12 @@
 .settings-iphone {
   display: flex;
   gap: 22px;
-  align-items: flex-start;
+  align-items: center;
+  margin-top: 8px;
+  padding: 24px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #1d1a24, var(--surface));
 }
 .settings-iphone > img {
   flex-shrink: 0;

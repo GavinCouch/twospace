@@ -8,6 +8,7 @@ import { z } from "zod";
 import { Check } from "lucide-react";
 import { useAction } from "@/components/space-provider";
 import { PersonAvatar } from "@/components/person-avatar";
+import { useMinuteClock } from "@/components/use-minute-clock";
 import { ProfilePhotoEditor } from "./profile-photo-editor";
 import type { Person } from "@/shared/types";
 
@@ -39,7 +40,28 @@ export function ProfileSettings({ person }: { person: Person }) {
   const { errors, isDirty } = form.formState;
   const serverValues = JSON.stringify(valuesFor(person));
   const previousServerValues = useRef(serverValues);
-  const [name, color, from, to] = form.watch(["name", "color", "availableFrom", "availableTo"]);
+  const [name, color, timeZone, from, to] = form.watch([
+    "name",
+    "color",
+    "timeZone",
+    "availableFrom",
+    "availableTo",
+  ]);
+  const now = useMinuteClock();
+  const liveZoneTime = useMemo(() => {
+    if (!now || !timeZone || !validTimeZone(timeZone)) return null;
+    try {
+      return new Intl.DateTimeFormat("en", {
+        weekday: "short",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone,
+        timeZoneName: "short",
+      }).format(now);
+    } catch {
+      return null;
+    }
+  }, [timeZone, now]);
   const zones = useMemo(() => {
     try { return Intl.supportedValuesOf("timeZone"); } catch { return ["America/Chicago", "America/New_York", "America/Los_Angeles", "Europe/London", "Europe/Paris", "Asia/Tokyo", "Australia/Sydney", "UTC"]; }
   }, []);
@@ -72,7 +94,7 @@ export function ProfileSettings({ person }: { person: Person }) {
         <div className="settings-profile-top"><PersonAvatar person={{ ...person, name, color }} size={62} className="settings-avatar" /><div className="settings-name-field"><label className="field" htmlFor="settings-name">Name<input id="settings-name" autoComplete="given-name" {...form.register("name")} maxLength={160} aria-invalid={!!errors.name} aria-describedby={errors.name ? "settings-name-error" : undefined} /></label>{errors.name && <p id="settings-name-error" className="settings-field-error" role="alert">{errors.name.message}</p>}</div></div>
         <ProfilePhotoEditor person={person} disabled={action.pending} />
         <div><fieldset className="settings-colors" aria-describedby="avatar-accent-hint"><legend>Avatar accent</legend>{colors.map(option => <label key={option.value} className="settings-color-option"><input type="radio" {...form.register("color")} value={option.value} /><span className="settings-color-swatch" style={{ backgroundColor: option.value }} /><span>{option.name}</span></label>)}</fieldset><p id="avatar-accent-hint" className="settings-hint">Colors your default avatar or the border around your photo. Save your profile to keep it.</p></div>
-        <div className="settings-time-zone"><div className="settings-label-row"><label htmlFor="settings-time-zone">Time zone</label><button type="button" className="settings-text-button" onClick={useDeviceZone}>Use device time zone</button></div><input id="settings-time-zone" list="settings-time-zones" {...form.register("timeZone")} autoComplete="off" spellCheck={false} aria-invalid={!!errors.timeZone} aria-describedby={errors.timeZone ? "settings-time-zone-error" : "settings-time-zone-hint"} /><datalist id="settings-time-zones">{zones.map(zone => <option key={zone} value={zone} />)}</datalist><p id="settings-time-zone-hint" className="settings-hint">Used for your shared clock and plans. For example, America/Chicago.</p>{errors.timeZone && <p id="settings-time-zone-error" className="settings-field-error" role="alert">{errors.timeZone.message}</p>}{deviceError && <p className="settings-field-error" role="alert">{deviceError}</p>}</div>
+        <div className="settings-time-zone"><div className="settings-label-row"><label htmlFor="settings-time-zone">Time zone</label><button type="button" className="settings-text-button" onClick={useDeviceZone}>Use device time zone</button></div><input id="settings-time-zone" list="settings-time-zones" {...form.register("timeZone")} autoComplete="off" spellCheck={false} aria-invalid={!!errors.timeZone} aria-describedby={errors.timeZone ? "settings-time-zone-error" : "settings-time-zone-hint"} /><datalist id="settings-time-zones">{zones.map(zone => <option key={zone} value={zone} />)}</datalist><p id="settings-time-zone-hint" className="settings-hint">Used for your shared clock and plans. For example, America/Chicago.{liveZoneTime ? <> Currently <strong>{liveZoneTime}</strong>.</> : null}</p>{errors.timeZone && <p id="settings-time-zone-error" className="settings-field-error" role="alert">{errors.timeZone.message}</p>}{deviceError && <p className="settings-field-error" role="alert">{deviceError}</p>}</div>
         <fieldset className="settings-availability"><legend>Usual free hours</legend><div className="settings-hours"><label className="field" htmlFor="available-from">From<select id="available-from" {...form.register("availableFrom", { valueAsNumber: true })}>{Array.from({ length: 24 }, (_, hour) => <option key={hour} value={hour}>{hourLabel(hour)}</option>)}</select></label><label className="field" htmlFor="available-to">Until<select id="available-to" {...form.register("availableTo", { valueAsNumber: true })}>{Array.from({ length: 24 }, (_, hour) => <option key={hour} value={hour}>{hourLabel(hour)}</option>)}</select></label></div><p className="settings-hint" aria-live="polite">{from === to ? "Matching times means no usual free hours are highlighted." : to < from ? "Ends the following day. These hours use your selected time zone." : "These hours use your selected time zone."}</p></fieldset>
       </fieldset>
       {action.error && <p className="form-error" role="alert">{action.error}</p>}

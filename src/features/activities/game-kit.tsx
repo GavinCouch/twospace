@@ -295,13 +295,19 @@ export function useGameCues(
 
 /* ---------------------------------------------------------------- series */
 
-export function useSeries(space: SpaceSnapshot, kind: Game["kind"]) {
+export function useSeries(space: SpaceSnapshot, kind?: Game["kind"]) {
   return useMemo(() => {
     const wins: Record<string, number> = {};
     let draws = 0;
     let played = 0;
     for (const game of space.games) {
-      if (game.kind !== kind || !isGameFinished(game)) continue;
+      // Solving a clue puzzle is not a win or draw between the two players.
+      if (
+        game.kind === "word" ||
+        (kind && game.kind !== kind) ||
+        !isGameFinished(game)
+      )
+        continue;
       played++;
       const winner = winnerOf(game);
       if (winner) wins[winner] = (wins[winner] ?? 0) + 1;

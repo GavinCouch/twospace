@@ -16,12 +16,12 @@
   position: absolute;
   right: 0;
   top: 44px;
-  min-width: 190px;
+  min-width: 196px;
   background: var(--raised);
-  border: 1px solid var(--line);
-  box-shadow: 0 6px 20px #232c4314;
-  border-radius: 8px;
-  padding: 5px;
+  border: 1px solid var(--line-strong);
+  box-shadow: 0 14px 34px #00000080;
+  border-radius: 12px;
+  padding: 6px;
   z-index: 5;
 }
 .journal-menu-items button {
@@ -30,19 +30,22 @@
   align-items: center;
   border: 0;
   background: transparent;
-  padding: 12px;
-  border-radius: 5px;
-  font-size: 0.8rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
   color: var(--ink);
   width: 100%;
   text-align: left;
   cursor: pointer;
 }
 .journal-menu-items button:hover {
-  background: var(--raised);
+  background: var(--raised-2);
 }
 .journal-menu-items button.danger {
   color: var(--danger);
+}
+.journal-menu-items button.danger:hover {
+  background: #3d2427;
 }
 .journal-option-error {
   position: absolute;
@@ -63,9 +66,12 @@
 }
 .journal-delete-button {
   background: var(--danger);
+  color: var(--danger-ink);
+  box-shadow: none;
 }
-.journal-delete-button:hover {
-  background: #802f29;
+.journal-delete-button:hover:not(:disabled) {
+  background: #9f332c;
+  color: #fff4f4;
 }
 .journal-conversation {
   margin-top: 20px;
@@ -96,21 +102,26 @@
   padding-left: 20px;
 }
 .journal-reply-list {
-  margin: 0 0 20px;
+  margin: 0 0 18px;
   padding: 0;
   list-style: none;
   max-height: 450px;
   overflow-y: auto;
+  display: grid;
+  gap: 12px;
 }
-.journal-reply-list li + li {
-  margin-top: 20px;
+.journal-reply-list li {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: #17141d;
 }
 .journal-reply-byline {
   display: flex;
-  gap: 12px;
-  align-items: baseline;
+  gap: 8px;
+  align-items: center;
   flex-wrap: wrap;
-  font-size: 0.78rem;
+  font-size: 0.8rem;
 }
 .journal-reply-byline time {
   color: var(--muted);

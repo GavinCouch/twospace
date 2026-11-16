@@ -7,7 +7,12 @@ import { useSpace } from "@/components/space-provider";
 import { EntryCard } from "./entry-card";
 import { EntryComposer } from "./entry-composer";
 import { PhotoPairs } from "./photo-pairs";
-import { filterEntries, groupJournalDays } from "./journal-utils";
+import {
+  entryKindLabels,
+  filterEntries,
+  groupJournalDays,
+} from "./journal-utils";
+import type { EntryKind } from "@/shared/types";
 import { useEntryArrivals } from "./use-entry-arrivals";
 import { useRevealClock } from "./use-reveal-clock";
 import "./journal.css";
@@ -23,6 +28,7 @@ export default function JournalPage() {
   const [view, setView] = useState<View>("entries");
   const [query, setQuery] = useState("");
   const [collection, setCollection] = useState("");
+  const [kind, setKind] = useState<EntryKind | "">("");
   const [pinned, setPinned] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [composing, setComposing] = useState(false);
@@ -45,10 +51,11 @@ export default function JournalPage() {
     [data?.entries],
   );
   const entries = useMemo(
-    () => filterEntries(data?.entries || [], { query, collection, pinned }),
-    [data?.entries, query, collection, pinned],
+    () =>
+      filterEntries(data?.entries || [], { query, collection, kind, pinned }),
+    [data?.entries, query, collection, kind, pinned],
   );
-  const hasFilters = Boolean(query || collection || pinned);
+  const hasFilters = Boolean(query || collection || kind || pinned);
   const forLater = entries.filter(
     (entry) =>
       entry.locked ||
@@ -63,13 +70,16 @@ export default function JournalPage() {
   function clearFilters() {
     setQuery("");
     setCollection("");
+    setKind("");
     setPinned(false);
   }
 
   if (isPending)
     return (
-      <div className="journal-loading" role="status">
-        Loading your journal…
+      <div className="panel" role="status" aria-label="Loading your journal">
+        <div className="loading-line" />
+        <div className="loading-line" />
+        <div className="loading-line" />
       </div>
     );
   if (error || !data)
@@ -86,7 +96,9 @@ export default function JournalPage() {
   return (
     <div className="journal-page">
       <header className="journal-page-heading">
-        <h1>Journal</h1>
+        <div>
+          <h1>Journal</h1>
+        </div>
         <button
           type="button"
           className="button"
@@ -198,6 +210,26 @@ export default function JournalPage() {
                     ))}
                   </select>
                 </label>
+                <label className="journal-collection-select">
+                  <span className="journal-visually-hidden">
+                    Filter by type
+                  </span>
+                  <select
+                    value={kind}
+                    onChange={(event) =>
+                      setKind(event.target.value as EntryKind | "")
+                    }
+                  >
+                    <option value="">All types</option>
+                    {(Object.entries(entryKindLabels) as [EntryKind, string][]).map(
+                      ([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                </label>
                 <button
                   className={`quiet journal-filter-button${pinned ? " is-selected" : ""}`}
                   type="button"
@@ -273,6 +305,10 @@ export default function JournalPage() {
                         me={data.me}
                         collections={collections}
                         timeOnly
+                        onSelectCollection={(value) => {
+                          setCollection(value);
+                          setFiltersOpen(true);
+                        }}
                         arriving={arrivingEntries.has(entry.id)}
                       />
                     ))}
@@ -293,6 +329,10 @@ export default function JournalPage() {
                       members={data.members}
                       me={data.me}
                       collections={collections}
+                      onSelectCollection={(value) => {
+                        setCollection(value);
+                        setFiltersOpen(true);
+                      }}
                       arriving={arrivingEntries.has(entry.id)}
                     />
                   ))}

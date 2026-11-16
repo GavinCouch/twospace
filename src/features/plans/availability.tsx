@@ -28,15 +28,21 @@ export function Availability({
     }
   };
   const instant = instantAt(hour);
-  function available(member: Person, instant: string | null) {
-    if (!instant) return false;
-    const localHour = Number(
-      dateTimeInZone(instant, member.timeZone).slice(11, 13),
-    );
+  function available(member: Person, at: string | null) {
+    if (!at) return false;
+    const localHour = Number(dateTimeInZone(at, member.timeZone).slice(11, 13));
     return member.availableFrom <= member.availableTo
       ? localHour >= member.availableFrom && localHour < member.availableTo
       : localHour >= member.availableFrom || localHour < member.availableTo;
   }
+  const sharedHours = Array.from({ length: 24 }, (_, h) => h).filter((h) => {
+    const at = instantAt(h);
+    return (
+      members.length === 2 && members.every((member) => available(member, at))
+    );
+  });
+  const nextSharedHour =
+    sharedHours.find((h) => h > hour) ?? sharedHours[0] ?? null;
   return (
     <section className="availability panel">
       <div className="row spread wrap">
@@ -67,13 +73,25 @@ export function Availability({
                 : "Choose another hour"}
             </span>
           </div>
-          <div className="hour-track" aria-hidden="true">
-            {Array.from({ length: 24 }, (_, h) => (
-              <span
-                key={h}
-                className={`${available(member, instantAt(h)) ? "available" : ""} ${hour === h ? "chosen" : ""}`}
-              />
-            ))}
+          <div className="hour-track">
+            {Array.from({ length: 24 }, (_, h) => {
+              const at = instantAt(h);
+              const free = available(member, at);
+              const label = at
+                ? `${formatInZone(at, member.timeZone)}: ${free ? "free" : "busy"}`
+                : "unavailable time";
+              return (
+                <button
+                  key={h}
+                  type="button"
+                  aria-label={`${member.name}: ${label}`}
+                  aria-pressed={hour === h}
+                  disabled={!at}
+                  className={`hour-slot${free ? " available" : ""}${hour === h ? " chosen" : ""}`}
+                  onClick={() => setHour(h)}
+                />
+              );
+            })}
           </div>
         </div>
       ))}
@@ -103,13 +121,24 @@ export function Availability({
             ? "Inside both of your usual free hours"
             : "You can still suggest this time"}
         </span>
-        <button
-          className="secondary"
-          disabled={!instant}
-          onClick={() => instant && onChoose(instant)}
-        >
-          Use this time
-        </button>
+        <div className="row wrap">
+          {nextSharedHour !== null && (
+            <button
+              type="button"
+              className="quiet"
+              onClick={() => setHour(nextSharedHour)}
+            >
+              Next shared hour
+            </button>
+          )}
+          <button
+            className="secondary"
+            disabled={!instant}
+            onClick={() => instant && onChoose(instant)}
+          >
+            Use this time
+          </button>
+        </div>
       </div>
     </section>
   );

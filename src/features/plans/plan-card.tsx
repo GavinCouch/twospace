@@ -9,10 +9,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { useAction } from "@/components/space-provider";
+import { useMinuteClock } from "@/components/use-minute-clock";
 import { formatInZone } from "@/shared/time";
 import type { Person, Plan } from "@/shared/types";
 import { PlanChecklist } from "./plan-checklist";
 import { downloadCalendar } from "./calendar";
+import { planCountdown } from "./countdown";
 
 export function PlanCard({
   plan,
@@ -39,6 +41,11 @@ export function PlanCard({
     month: "short",
   }).format(new Date(plan.startsAt));
   const mine = plan.acceptedBy.includes(me.id);
+  const now = useMinuteClock();
+  const countdown =
+    plan.status !== "done" && now
+      ? planCountdown(plan.startsAt, me.timeZone, now)
+      : null;
   async function update(body: unknown) {
     try {
       await action.run(`/api/plans/${plan.id}`, body, "PATCH");
@@ -77,18 +84,21 @@ export function PlanCard({
                 : "Remote activity"}{" "}
             · {plan.duration} min
           </span>
-          <span className={`plan-status ${plan.status}`}>
-            {plan.status === "accepted" ? (
-              <>
-                <Check size={13} />
-                Agreed
-              </>
-            ) : plan.status === "done" ? (
-              "Done"
-            ) : (
-              "Suggested"
-            )}
-          </span>
+          <div className="plan-badges">
+            {countdown && <span className="plan-countdown">{countdown}</span>}
+            <span className={`plan-status ${plan.status}`}>
+              {plan.status === "accepted" ? (
+                <>
+                  <Check size={13} />
+                  Agreed
+                </>
+              ) : plan.status === "done" ? (
+                "Done"
+              ) : (
+                "Suggested"
+              )}
+            </span>
+          </div>
         </div>
         <h2>{plan.title}</h2>
         <div className="plan-times">

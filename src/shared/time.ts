@@ -27,3 +27,32 @@ export function formatInZone(instant: string, timeZone: string): string {
 export function localDateInZone(instant: string, timeZone: string): string {
   return Temporal.Instant.from(instant).toZonedDateTimeISO(timeZone).toPlainDate().toString();
 }
+
+/**
+ * Human-readable offset comparison between two members at a given instant,
+ * such as "Same time zone", "Same time", or "6h ahead".
+ */
+export function partnerTimeOffset(
+  myTimeZone: string,
+  partnerTimeZone: string,
+  at: Date = new Date(),
+): string | null {
+  try {
+    const instant = Temporal.Instant.fromEpochMilliseconds(at.getTime());
+    const myOffset = instant.toZonedDateTimeISO(myTimeZone).offsetNanoseconds;
+    const partnerOffset =
+      instant.toZonedDateTimeISO(partnerTimeZone).offsetNanoseconds;
+    const diffMinutes = Math.round((partnerOffset - myOffset) / 60_000_000_000);
+    if (diffMinutes === 0) {
+      return myTimeZone === partnerTimeZone ? "Same time zone" : "Same time";
+    }
+    const ahead = diffMinutes > 0;
+    const abs = Math.abs(diffMinutes);
+    const hours = Math.floor(abs / 60);
+    const minutes = abs % 60;
+    const amount = minutes ? `${hours}h ${minutes}m` : `${hours}h`;
+    return `${amount} ${ahead ? "ahead" : "behind"}`;
+  } catch {
+    return null;
+  }
+}

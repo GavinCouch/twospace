@@ -332,4 +332,20 @@ describe("journal feed", () => {
     unmount();
     expect(vi.getTimerCount()).toBe(0);
   });
+  it("filters entries by entry type and by clicking a collection pill", async () => {
+    const user = userEvent.setup();
+    render(<JournalPage />);
+    await user.click(screen.getByRole("button", { name: "Weekends" }));
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(
+      screen.getByRole("combobox", { name: "Filter by collection" }),
+    ).toHaveValue("Weekends");
+    await user.click(screen.getByRole("button", { name: "Clear filters" }));
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "Filter by type" }),
+      "photo",
+    );
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(screen.getByText("Outside the bakery")).toBeInTheDocument();
+  });
 });

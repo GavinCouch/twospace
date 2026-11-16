@@ -27,14 +27,27 @@ type OpenTab = (tab: "questions" | "games" | "drawing") => void;
 function IdeaCard({
   idea,
   meId,
+  members,
   onOpen,
 }: {
   idea: Idea;
   meId: string;
+  members: SpaceSnapshot["members"];
   onOpen: OpenTab;
 }) {
   const action = useAction();
   const saved = idea.savedBy.includes(meId);
+  const savedLabel =
+    idea.savedBy.length >= 2
+      ? "Saved by both of you"
+      : idea.savedBy.length === 1
+        ? `Saved by ${
+            idea.savedBy[0] === meId
+              ? "you"
+              : members.find((m) => m.id === idea.savedBy[0])?.name ||
+                "your partner"
+          }`
+        : null;
   const art = icons[idea.category as keyof typeof icons] || "journal";
   const target =
     idea.id === "drawing-relay"
@@ -80,6 +93,7 @@ function IdeaCard({
         <span>
           {idea.mode === "live" ? "Together now" : "At your own pace"}
         </span>
+        {savedLabel && <span className="idea-saved-label">{savedLabel}</span>}
       </div>
       <details className="idea-materials">
         <summary>What you need</summary>
@@ -224,6 +238,7 @@ export function ActivityLibrary({
               key={idea.id}
               idea={idea}
               meId={space.me.id}
+              members={space.members}
               onOpen={onOpen}
             />
           ))}

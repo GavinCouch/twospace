@@ -71,6 +71,10 @@ export function SpaceClock({ person }: { person: Person }) {
           } as CSSProperties
         }
       >
+        <i className="clock-tick clock-tick-12" />
+        <i className="clock-tick clock-tick-3" />
+        <i className="clock-tick clock-tick-6" />
+        <i className="clock-tick clock-tick-9" />
         <i className="clock-hand clock-hour" />
         <i className="clock-hand clock-minute" />
         <i className="clock-hand clock-second" />

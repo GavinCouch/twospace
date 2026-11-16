@@ -160,6 +160,38 @@ describe("Three clues", () => {
 });
 
 describe("game feel", () => {
+  it("counts actual match draws without treating solved clue puzzles as draws", () => {
+    const solved = word({
+      answer: "Lighthouse",
+      guesses: ["lighthouse"],
+      solved: true,
+    });
+    const view = render(<GamesPanel space={{ ...space, games: [solved] }} />);
+    expect(
+      screen.queryByRole("group", { name: "Overall game record" }),
+    ).not.toBeInTheDocument();
+
+    let draw = initialTic(["a", "b"]);
+    for (const [index, cell] of [0, 1, 2, 4, 3, 5, 7, 6, 8].entries()) {
+      draw = playTic(draw, index % 2 === 0 ? "a" : "b", cell);
+    }
+    expect(draw.draw).toBe(true);
+    const drawnMatch: Game = {
+      id: "drawn-match",
+      kind: "tic",
+      revision: 9,
+      createdAt: "2026-11-16T00:00:00Z",
+      state: draw,
+    };
+    view.rerender(
+      <GamesPanel space={{ ...space, games: [solved, drawnMatch] }} />,
+    );
+    const record = screen.getByRole("group", { name: "Overall game record" });
+    expect(within(record).getByText("Draws").parentElement).toHaveTextContent(
+      /^Draws1$/,
+    );
+  });
+
   it("only plays the reveal cue for new rounds, not when opening old games", () => {
     const sound = vi.spyOn(gameKit, "playSound").mockImplementation(() => {});
     let state = initialRps(["a", "b"]);

@@ -5,12 +5,13 @@ import { ArrowRight, Hand, HandFist, Scissors } from "lucide-react";
 import { useAction } from "@/components/space-provider";
 import { isGameFinished } from "@/shared/games";
 import type { Game, SpaceSnapshot } from "@/shared/types";
+import { PersonAvatar } from "@/components/person-avatar";
 import { FourBoard } from "./four-board";
 import { WordCreate } from "./word-create";
 import { WordGame } from "./word-game";
 import { TicBoard, TicMark } from "./tic-board";
 import { RpsGame } from "./rps-game";
-import { SoundToggle } from "./game-kit";
+import { SoundToggle, useSeries } from "./game-kit";
 
 const catalog = [
   {
@@ -104,6 +105,7 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
   const [creatingWord, setCreatingWord] = useState(false);
   const [history, setHistory] = useState(false);
   const [focusGameId, setFocusGameId] = useState<string | null>(null);
+  const overallSeries = useSeries(space);
   const games = [...space.games].sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt),
   );
@@ -151,13 +153,36 @@ export function GamesPanel({ space }: { space: SpaceSnapshot }) {
   return (
     <div className="games-panel">
       <div className="games-toolbar">
-        <p className="games-summary">
-          {active.length === 0
-            ? "Choose a game to start."
-            : waiting > 0
-              ? `Your turn in ${waiting} ${waiting === 1 ? "game" : "games"}.`
-              : `Waiting for your partner in ${active.length} ${active.length === 1 ? "game" : "games"}.`}
-        </p>
+        <div className="games-toolbar-copy">
+          <p className="games-summary">
+            {active.length === 0
+              ? "Choose a game to start."
+              : waiting > 0
+                ? `Your turn in ${waiting} ${waiting === 1 ? "game" : "games"}.`
+                : `Waiting for your partner in ${active.length} ${active.length === 1 ? "game" : "games"}.`}
+          </p>
+          {overallSeries.played > 0 && (
+            <div
+              className="games-scoreboard"
+              role="group"
+              aria-label="Overall game record"
+            >
+              {space.members.map((member) => (
+                <span key={member.id} className="games-score-chip">
+                  <PersonAvatar person={member} size={18} />
+                  <span>{member.name}</span>
+                  <strong>{overallSeries.wins[member.id] ?? 0}</strong>
+                </span>
+              ))}
+              {overallSeries.draws > 0 && (
+                <span className="games-score-chip games-score-draws">
+                  <span>Draws</span>
+                  <strong>{overallSeries.draws}</strong>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
         <SoundToggle />
       </div>
       {games.length > 0 && (

@@ -113,6 +113,110 @@ afterEach(() => {
 });
 
 describe("daily music", () => {
+  it("keeps the draft on padding clicks or drag-out gestures and only closes from the backdrop when idle", async () => {
+    const user = userEvent.setup();
+    const close = vi.fn();
+    const props = {
+      initial: song,
+      day: song.day,
+      searchAvailable: true,
+      onClose: close,
+    };
+    const view = render(<MusicPicker {...props} />, { wrapper });
+    const dialog = screen.getByRole("dialog", { name: "Your daily pick" });
+    vi.spyOn(dialog, "getBoundingClientRect").mockReturnValue(
+      new DOMRect(100, 100, 400, 500),
+    );
+    const note = screen.getByRole("textbox", { name: "Your note" });
+    fireEvent.change(note, { target: { value: "Keep this draft" } });
+
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: dialog,
+      coords: { clientX: 110, clientY: 110 },
+    });
+    expect(close).not.toHaveBeenCalled();
+    expect(note).toHaveValue("Keep this draft");
+
+    await user.pointer([
+      {
+        keys: "[MouseLeft>]",
+        target: note,
+        coords: { clientX: 200, clientY: 300 },
+      },
+      {
+        keys: "[/MouseLeft]",
+        target: dialog,
+        coords: { clientX: 99, clientY: 150 },
+      },
+    ]);
+    expect(close).not.toHaveBeenCalled();
+    expect(note).toHaveValue("Keep this draft");
+
+    action.pending = true;
+    view.rerender(<MusicPicker {...props} />);
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: dialog,
+      coords: { clientX: 99, clientY: 150 },
+    });
+    expect(close).not.toHaveBeenCalled();
+
+    action.pending = false;
+    view.rerender(<MusicPicker {...props} />);
+    await user.pointer({
+      keys: "[MouseLeft]",
+      target: dialog,
+      coords: { clientX: 99, clientY: 150 },
+    });
+    expect(close).toHaveBeenCalledOnce();
+  });
+
+  it("lets a user clear a history filter after a deletion drops the list below four songs", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-15T18:00:00Z"));
+    const pastSongs = [
+      "2026-11-10",
+      "2026-11-11",
+      "2026-11-12",
+      "2026-11-13",
+    ].map((day, index) => ({
+      ...song,
+      id: `past-${index}`,
+      day,
+      note: index === 2 ? "Rainy walk" : `Note ${index}`,
+    }));
+    const data = {
+      songs: pastSongs,
+      today: "2026-11-15",
+      searchAvailable: false,
+    };
+    const view = render(<MusicContent space={space} data={data} />, {
+      wrapper,
+    });
+    fireEvent.change(
+      screen.getByRole("searchbox", { name: "Filter past picks" }),
+      {
+        target: { value: "Rainy" },
+      },
+    );
+    expect(screen.getByText("Rainy walk")).toBeVisible();
+
+    view.rerender(
+      <MusicContent
+        space={space}
+        data={{ ...data, songs: pastSongs.filter((_, index) => index !== 2) }}
+      />,
+    );
+    const filter = screen.getByRole("searchbox", { name: "Filter past picks" });
+    expect(filter).toHaveValue("Rainy");
+    expect(screen.getByText("No past picks match “Rainy”.")).toBeVisible();
+    fireEvent.change(filter, { target: { value: "" } });
+    expect(screen.getByText("Note 0")).toBeVisible();
+    expect(screen.getByText("Note 1")).toBeVisible();
+    expect(screen.getByText("Note 3")).toBeVisible();
+  });
+
   it("opens the song-link tab by keyboard and resolves Spotify short links", async () => {
     const user = userEvent.setup();
     requests.api.mockResolvedValue(track);
@@ -408,5 +512,39 @@ describe("daily music", () => {
       { revision: 1 },
       "DELETE",
     );
+  });
+
+  it("filters past picks when several songs exist and supports copying a song link", async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText },
+    });
+    const pastSongs = [
+      "2026-11-10",
+      "2026-11-11",
+      "2026-11-12",
+      "2026-11-13",
+    ].map((day, index) => ({
+      ...song,
+      id: `past-${index}`,
+      day,
+      note: index === 2 ? "Rainy walk track" : `Note ${index}`,
+      track: { ...track, title: `Song ${index}` },
+    }));
+    render(
+      <MusicContent
+        space={space}
+        data={{ songs: pastSongs, today: "2026-11-15", searchAvailable: false }}
+      />,
+      { wrapper },
+    );
+    const filter = screen.getByRole("searchbox", { name: "Filter past picks" });
+    await user.type(filter, "Rainy");
+    expect(screen.getByText("Rainy walk track")).toBeVisible();
+    expect(screen.queryByText("Note 0")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Copy link" }));
+    expect(writeText).toHaveBeenCalledWith(track.url);
   });
 });

@@ -92,7 +92,6 @@
   display: grid;
   gap: 17px;
   margin: 0 0 24px;
-  max-width: 800px;
 }
 .activity-form > .button,
 .custom-question-form > .button {
@@ -165,10 +164,11 @@
   gap: 16px;
 }
 .idea-card {
-  background: var(--surface);
-  border: 1px solid transparent;
-  border-radius: 18px;
+  background: linear-gradient(180deg, #1d1a24, var(--surface));
+  border: 1px solid var(--line);
+  border-radius: 20px;
   padding: 24px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -178,7 +178,7 @@
     transform 180ms ease;
 }
 .idea-card:focus-within {
-  border-color: var(--line);
+  border-color: var(--line-strong);
 }
 .idea-card-top {
   display: flex;
@@ -392,7 +392,9 @@
   border-color: transparent;
 }
 .answer-name {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.84rem;
   font-weight: 600;
   margin-bottom: 11px;
@@ -922,12 +924,46 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 4px 0 8px;
+  margin: 8px 0 12px;
+}
+.games-toolbar-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+.games-scoreboard {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.games-score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 6px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.games-score-chip strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.games-score-draws {
+  padding-left: 10px;
 }
 .games-summary {
   margin: 0;
   color: var(--muted);
   font-size: 0.92rem;
+}
+.idea-saved-label {
+  color: var(--accent);
+  font-weight: 550;
 }
 .sound-toggle {
   font-size: 0.82rem;

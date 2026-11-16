@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Heart, MessageCircle, Send } from "lucide-react";
+import { PersonAvatar } from "@/components/person-avatar";
 import { useAction } from "@/components/space-provider";
 import type { Entry, Person } from "@/shared/types";
 import { entryDate } from "./journal-utils";
@@ -45,10 +46,17 @@ export function EntryConversation({ entry, members, me }: { entry: Entry; member
     </div>
     {reaction.error && <p className="form-error" role="alert">{reaction.error}</p>}
     <div id={`${id}-replies`} hidden={!expanded} className="journal-replies">
-      {entry.replies.length > 0 && <ol className="journal-reply-list">{entry.replies.map(item => <li key={item.id}>
-        <div className="journal-reply-byline"><strong>{members.find(person => person.id === item.authorId)?.name || "Member"}</strong><time dateTime={item.createdAt}>{entryDate(item.createdAt, me.timeZone)}</time></div>
-        <p>{item.body}</p>
-      </li>)}</ol>}
+      {entry.replies.length > 0 && <ol className="journal-reply-list">{entry.replies.map(item => {
+        const replyAuthor = members.find(person => person.id === item.authorId);
+        return <li key={item.id}>
+          <div className="journal-reply-byline">
+            <PersonAvatar person={replyAuthor} size={22} />
+            <strong>{replyAuthor?.name || "Member"}</strong>
+            <time dateTime={item.createdAt}>{entryDate(item.createdAt, me.timeZone)}</time>
+          </div>
+          <p>{item.body}</p>
+        </li>;
+      })}</ol>}
       {entry.replies.length < 100 ? <form className="journal-reply-form" onSubmit={handleSubmit(addReply)} aria-busy={reply.pending} noValidate>
         <label className="field" htmlFor={`${id}-reply`}>Your reply<textarea id={`${id}-reply`} rows={2} maxLength={2000} placeholder="Write a reply…" {...register("body")} readOnly={reply.pending} aria-invalid={Boolean(errors.body)} aria-describedby={errors.body ? `${id}-reply-error` : undefined} /></label>
         {errors.body && <p className="journal-field-error" id={`${id}-reply-error`}>{errors.body.message}</p>}

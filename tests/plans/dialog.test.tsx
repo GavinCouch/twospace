@@ -86,6 +86,7 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  vi.useRealTimers();
   for (const [name, descriptor] of [
     ["showModal", originalShow],
     ["close", originalClose],
@@ -253,5 +254,58 @@ describe("plan dialog", () => {
       }),
       "PATCH",
     );
+  });
+
+  it("shows relative countdown badges on upcoming plans and jumps to shared free hours in Availability", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-15T18:00:00Z"));
+    const user = userEvent.setup();
+    const tomorrow = "2026-11-16T18:00:00Z";
+    const partner = {
+      ...me,
+      id: "sam",
+      name: "Sam",
+      timeZone: "Europe/London",
+      availableFrom: 23,
+      availableTo: 4,
+    };
+    mocks.useSpace.mockReturnValue({
+      data: {
+        ...space,
+        members: [me, partner],
+        plans: [
+          {
+            id: "soon",
+            title: "Morning catch-up",
+            startsAt: tomorrow,
+            timeZone: me.timeZone,
+            duration: 30,
+            kind: "call",
+            status: "accepted",
+            proposedBy: me.id,
+            acceptedBy: [me.id, partner.id],
+            notes: "",
+            link: "",
+            checklist: [],
+          },
+        ],
+      },
+    });
+    render(<PlansPage />);
+    expect(screen.getByText("Tomorrow")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Find a time" }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "Sam: Sun, Nov 15, 4:00 PM GMT: busy",
+      }),
+    );
+    expect(screen.getByRole("slider")).toHaveValue("10");
+    await user.click(screen.getByRole("button", { name: "Next shared hour" }));
+    expect(screen.getByRole("slider")).toHaveValue("17");
+    expect(
+      screen.getByRole("button", {
+        name: "Sam: Sun, Nov 15, 11:00 PM GMT: free",
+      }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
 });

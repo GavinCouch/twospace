@@ -30,10 +30,17 @@ export default function MusicPage() {
   if (!music.data)
     return (
       <div className="music-page">
-        <h1>Music</h1>
-        <p className="muted" role="status">
-          Loading your songs…
-        </p>
+        <header className="page-title music-page-heading">
+          <div>
+            <h1>Music</h1>
+            <p>One track each, every day, in your own time zone.</p>
+          </div>
+        </header>
+        <div className="panel" role="status" aria-label="Loading your songs">
+          <div className="loading-line" />
+          <div className="loading-line" />
+          <div className="loading-line" />
+        </div>
       </div>
     );
   return (
@@ -57,6 +64,7 @@ export function MusicContent({
     initial?: DailySong;
     day: string;
   } | null>(null);
+  const [historyFilter, setHistoryFilter] = useState("");
   const [historyLimit, setHistoryLimit] = useState(12);
   const today = space.members.map((person) => ({
     person,
@@ -69,6 +77,14 @@ export function MusicContent({
   const mine = today.find((item) => item.person.id === space.me.id)?.song;
   const todayIds = new Set(today.map((item) => item.song?.id));
   const history = data.songs.filter((song) => !todayIds.has(song.id));
+  const q = historyFilter.trim().toLocaleLowerCase();
+  const filteredHistory = q
+    ? history.filter((song) =>
+        [song.track.title, ...song.track.artists, song.note].some((text) =>
+          text.toLocaleLowerCase().includes(q),
+        ),
+      )
+    : history;
   const choose = () => {
     const day = localDateInZone(new Date().toISOString(), space.me.timeZone);
     const initial = data.songs.find(
@@ -79,7 +95,10 @@ export function MusicContent({
   return (
     <div className="music-page">
       <header className="page-title music-page-heading">
-        <h1>Music</h1>
+        <div>
+          <h1>Music</h1>
+          <p>Share one Spotify song a day with a personal note.</p>
+        </div>
         <button className="button" onClick={choose}>
           <Plus size={17} aria-hidden="true" />
           {mine ? "Change your pick" : "Pick today’s song"}
@@ -117,40 +136,63 @@ export function MusicContent({
       >
         <div className="music-section-heading">
           <h2 id="music-history-heading">Past picks</h2>
-          {history.length > 0 && (
-            <span>
-              {history.length} {history.length === 1 ? "song" : "songs"}
-            </span>
-          )}
+          <div className="music-history-controls">
+            {(history.length >= 4 || historyFilter !== "") && (
+              <label className="music-history-search">
+                <span className="sr-only">Filter past picks</span>
+                <input
+                  type="search"
+                  placeholder="Filter past picks…"
+                  value={historyFilter}
+                  onChange={(event) => setHistoryFilter(event.target.value)}
+                />
+              </label>
+            )}
+            {history.length > 0 && (
+              <span>
+                {filteredHistory.length}{" "}
+                {filteredHistory.length === 1 ? "song" : "songs"}
+              </span>
+            )}
+          </div>
         </div>
         {history.length ? (
-          <>
-            <div className="music-history-grid">
-              {history.slice(0, historyLimit).map((song) => (
-                <SongCard
-                  key={song.id}
-                  song={song}
-                  person={space.members.find(
-                    (member) => member.id === song.authorId,
-                  )}
-                  mine={song.authorId === space.me.id}
-                  history
-                />
-              ))}
+          filteredHistory.length ? (
+            <>
+              <div className="music-history-grid">
+                {filteredHistory.slice(0, historyLimit).map((song) => (
+                  <SongCard
+                    key={song.id}
+                    song={song}
+                    person={space.members.find(
+                      (member) => member.id === song.authorId,
+                    )}
+                    mine={song.authorId === space.me.id}
+                    history
+                  />
+                ))}
+              </div>
+              {filteredHistory.length > historyLimit && (
+                <button
+                  className="secondary music-show-more"
+                  onClick={() => setHistoryLimit((limit) => limit + 12)}
+                >
+                  Show older songs
+                </button>
+              )}
+            </>
+          ) : (
+            <div className="music-history-empty">
+              <Music2 size={20} aria-hidden="true" />
+              <p>No past picks match “{historyFilter}”.</p>
             </div>
-            {history.length > historyLimit && (
-              <button
-                className="secondary music-show-more"
-                onClick={() => setHistoryLimit((limit) => limit + 12)}
-              >
-                Show older songs
-              </button>
-            )}
-          </>
+          )
         ) : (
           <div className="music-history-empty">
             <Music2 size={20} aria-hidden="true" />
-            <p>Your previous song picks will appear here.</p>
+            <p>
+              Your previous song picks will appear here once a new day starts.
+            </p>
           </div>
         )}
       </section>
