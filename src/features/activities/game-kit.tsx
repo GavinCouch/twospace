@@ -359,7 +359,7 @@ export function PlayerBar({
                   : active
                     ? id === space.me.id
                       ? "Your move"
-                      : "Thinking…"
+                      : "Their turn"
                     : series.played
                       ? `${series.wins[id] ?? 0} ${(series.wins[id] ?? 0) === 1 ? "win" : "wins"}`
                       : "Ready"}

@@ -124,7 +124,7 @@ describe("Three clues", () => {
     expect(screen.getByText("Lives by the sea")).toBeInTheDocument();
     expect(screen.queryByText("Ships love it")).not.toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent(
-      "A new clue just opened",
+      "Try again with the next clue.",
     );
 
     view.rerender(
@@ -289,9 +289,7 @@ describe("game feel", () => {
         }}
       />,
     );
-    expect(
-      screen.getByText("1 game is waiting on your move."),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Your turn in 1 game.")).toBeInTheDocument();
     const board = screen.getByRole("article", { name: "Tic-tac-toe" });
     expect(within(board).getByText("Your move")).toBeInTheDocument();
     expect(within(board).getByText("1 win")).toBeInTheDocument();

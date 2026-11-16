@@ -223,7 +223,7 @@ export function RpsGame({
                   </span>
                 )}
               </span>
-              <small>{partnerReady ? "Locked in" : "Choosing…"}</small>
+              <small>{partnerReady ? "Locked in" : "No choice yet"}</small>
             </div>
           </div>
           <p className="rps-round-label">
@@ -272,9 +272,9 @@ export function RpsGame({
         <PlayAgain kind="rps" space={space} onStarted={onStarted} />
       )}
       <HowToPlay>
-        Rock crushes scissors, scissors cut paper, paper covers rock. Your pick
-        locks the moment you tap it and stays secret until you’ve both chosen.
-        Draws don’t count. First to three takes the match.
+        Rock beats scissors, scissors beat paper, and paper beats rock. Once
+        submitted, your choice stays hidden until you’ve both picked. The first
+        to win three rounds wins the match. Draws don’t count.
       </HowToPlay>
     </GameFrame>
   );

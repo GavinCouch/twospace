@@ -225,13 +225,11 @@ export default function JournalPage() {
             {!entries.length && (
               <div className="journal-empty">
                 {!hasFilters && <SectionArt name="journal" size={84} />}
-                <h2>
-                  {hasFilters ? "No matching entries" : "A blank first page"}
-                </h2>
+                <h2>{hasFilters ? "No matching entries" : "No entries yet"}</h2>
                 <p>
                   {hasFilters
                     ? "Try another search or clear your filters."
-                    : "Start your story here. A note about your day, a photo of what you’re looking at, or a voice message they can play later."}
+                    : "Add a note, photo, link, or voice message for your partner."}
                 </p>
                 {hasFilters ? (
                   <button
@@ -247,7 +245,7 @@ export default function JournalPage() {
                     type="button"
                     onClick={() => setComposing(true)}
                   >
-                    Write the first note
+                    Write a note
                   </button>
                 )}
               </div>

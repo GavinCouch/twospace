@@ -106,7 +106,7 @@ describe("activity interactions", () => {
     expect(board).toHaveFocus();
     expect(board.scrollIntoView).toHaveBeenCalledWith({
       behavior: "auto",
-      block: "center",
+      block: "start",
     });
     view.rerender(
       <GamesPanel space={{ ...space, games: [structuredClone(game)] }} />,

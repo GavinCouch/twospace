@@ -53,7 +53,7 @@ export function TicBoard({
   const status = state.winner
     ? `${name(state.winner)} wins.`
     : state.draw
-      ? "Cat’s game. Nobody wins this one."
+      ? "It’s a draw."
       : mine
         ? "Your move. Pick a square."
         : `Waiting for ${name(state.turn)}…`;

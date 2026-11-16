@@ -14,7 +14,7 @@ const schema = z.object({
     .max(80),
   clue1: z.string().trim().min(3, "Add your first clue.").max(160),
   clue2: z.string().trim().min(3, "Add a second clue.").max(160),
-  clue3: z.string().trim().min(3, "Add one more clue.").max(160),
+  clue3: z.string().trim().min(3, "Add a third clue.").max(160),
 });
 type Values = z.infer<typeof schema>;
 
@@ -67,9 +67,9 @@ export function WordCreate({
         />
       </label>
       <p className="muted small-copy">
-        Your partner starts with clue 1. Each wrong guess opens the next one, so
-        begin vague and get more generous. The answer stays secret until they
-        solve it.
+        Your partner sees the first clue, then another after each wrong guess.
+        Make each clue more specific. The answer stays hidden until they solve
+        it.
       </p>
       {errors.answer && (
         <p className="form-error" role="alert">
@@ -79,22 +79,16 @@ export function WordCreate({
       {(["clue1", "clue2", "clue3"] as const).map((name, index) => (
         <div key={name}>
           <label className="field">
-            {
-              [
-                "Clue 1 · the tricky one",
-                "Clue 2 · a nudge",
-                "Clue 3 · the giveaway",
-              ][index]
-            }
+            {["Clue 1", "Clue 2", "Clue 3"][index]}
             <input
               {...register(name)}
               maxLength={160}
               aria-invalid={!!errors[name]}
               placeholder={
                 [
-                  "Shown first. Keep it cryptic",
-                  "Opens after one wrong guess",
-                  "Opens after two. Make it fair",
+                  "Shown first",
+                  "Shown after one wrong guess",
+                  "Shown after two wrong guesses",
                 ][index]
               }
             />

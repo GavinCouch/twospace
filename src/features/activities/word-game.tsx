@@ -7,9 +7,9 @@ import type { Game, SpaceSnapshot, WordState } from "@/shared/types";
 import { GameFrame, StatusBanner, playSound } from "./game-kit";
 
 const ratings = [
-  "Solved on the first clue. Mind reader.",
-  "Solved with two clues. Sharp.",
-  "Solved with all three clues. Got there!",
+  "Solved on the first clue.",
+  "Solved with two clues.",
+  "Solved with all three clues.",
 ];
 
 export function WordGame({
@@ -99,8 +99,8 @@ export function WordGame({
       title={
         state.solved
           ? isAuthor
-            ? `${guesser} cracked it`
-            : "You cracked it"
+            ? `${guesser} solved it`
+            : "You solved it"
           : isAuthor
             ? "Your puzzle"
             : `A puzzle from ${author}`
@@ -139,8 +139,8 @@ export function WordGame({
               ) : (
                 <p className="word-clue-locked">
                   <LockKeyhole size={14} aria-hidden="true" />
-                  Opens after{" "}
-                  {index === 1 ? "a wrong guess" : "another wrong guess"}
+                  Shown after{" "}
+                  {index === 1 ? "one wrong guess" : "two wrong guesses"}
                 </p>
               )}
             </li>
@@ -163,7 +163,7 @@ export function WordGame({
               onChange={(event) => setGuess(event.target.value)}
               maxLength={80}
               required
-              placeholder="What could it be?"
+              placeholder="Enter a word or phrase"
             />
           </label>
           <button className="button" disabled={action.pending || !guess.trim()}>
@@ -180,15 +180,13 @@ export function WordGame({
               : `Waiting for ${guesser} to make a first guess.`
             : state.guesses.length > 0
               ? unlocked < 3
-                ? "Not quite. A new clue just opened."
-                : "Not quite. Keep guessing: you have all three clues."
+                ? "Try again with the next clue."
+                : "Try again. All three clues are now shown."
               : "Capital letters don’t matter. Guess as often as you like."}
       </StatusBanner>
       {state.guesses.length > 0 && (
         <div className="word-guesses">
-          <span className="word-guesses-label">
-            {state.solved ? "The road there" : "Guesses so far"}
-          </span>
+          <span className="word-guesses-label">Guesses</span>
           <ul className="guess-list">
             {state.guesses.map((value, index) => (
               <li
