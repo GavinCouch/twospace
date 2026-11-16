@@ -41,15 +41,22 @@ export default function HomePage() {
       </header>
       <main id="home-main">
         <section className="home-hero" aria-labelledby="home-heading">
-          <h1 id="home-heading">A shared space for long-distance couples.</h1>
+          <div className="home-hero-lead">
+            <h1 id="home-heading">A shared space for long-distance couples.</h1>
+          </div>
           <div className="home-hero-copy">
             <p>
               Leave a note, share today’s song, or play a round together. Keep
               your plans in both time zones.
             </p>
-            <Link className="button" href="/sign-up">
-              Create an account <ArrowUpRight size={18} aria-hidden="true" />
-            </Link>
+            <div className="home-hero-actions">
+              <Link className="button" href="/sign-up">
+                Create an account <ArrowUpRight size={18} aria-hidden="true" />
+              </Link>
+              <Link className="secondary" href="/sign-in">
+                Sign in
+              </Link>
+            </div>
             <p className="home-pairing-note">
               Connect with your partner using an invite code.
             </p>
@@ -61,29 +68,29 @@ export default function HomePage() {
         <section className="home-more" aria-labelledby="home-more-heading">
           <h2 id="home-more-heading">Questions, drawings, and letters</h2>
           <div className="home-more-grid">
-            <div>
+            <article className="home-feature-card">
               <SectionArt name="questions" size={40} />
               <h3>Answer the same question</h3>
               <p>
                 Write your answers separately. Read them once you’ve both
                 replied.
               </p>
-            </div>
-            <div>
+            </article>
+            <article className="home-feature-card">
               <SectionArt name="drawing" size={40} />
               <h3>Draw together</h3>
               <p>
                 Take turns on a shared canvas, then save the drawing to your
                 journal.
               </p>
-            </div>
-            <div>
+            </article>
+            <article className="home-feature-card">
               <SectionArt name="journal" size={40} />
               <h3>Schedule a letter</h3>
               <p>
                 Write something now and choose when your partner can open it.
               </p>
-            </div>
+            </article>
           </div>
         </section>
 
@@ -94,7 +101,9 @@ export default function HomePage() {
         >
           <div className="home-start-heading">
             <h2 id="home-start-heading">Set up your space</h2>
-            <p>The shared features become available once you’re both in.</p>
+            <p>
+              The shared features become available once you’re both in.
+            </p>
           </div>
           <ol>
             <li>
@@ -120,8 +129,8 @@ export default function HomePage() {
               <div>
                 <h3>Add your first entry</h3>
                 <p>
-                  You can both post in the journal and use the games, music, and
-                  plans.
+                  Post in the journal, pick today’s song, start a game, or
+                  suggest a time for your next call.
                 </p>
               </div>
             </li>

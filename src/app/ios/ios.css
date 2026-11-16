@@ -24,9 +24,12 @@
   height: 144px;
   display: grid;
   place-items: center;
-  border-radius: 32px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  border-radius: 34px;
+  background: radial-gradient(circle at 30% 20%, #2a222c, var(--surface));
+  border: 1px solid var(--line-strong);
+  box-shadow:
+    0 1px 0 #ffffff12 inset,
+    0 20px 50px -24px #f2b4c845;
   margin: 0 auto 28px;
 }
 .ios-status {
@@ -61,10 +64,11 @@
   border-top: 1px solid var(--line);
 }
 .ios-features article {
-  padding: 22px;
-  background: var(--surface);
+  padding: 24px;
+  background: linear-gradient(180deg, #1d1a24, var(--surface));
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
 }
 .ios-features h2 {
   margin: 18px 0 10px;
@@ -74,24 +78,25 @@
   color: var(--muted);
   margin: 0;
   font-size: 0.9rem;
+  line-height: 1.55;
 }
 .ios-footer {
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   padding-top: 24px;
 }
 @media (prefers-reduced-motion: no-preference) {
   .ios-intro {
-    animation: page-arrive 500ms var(--ease-out) both;
+    animation: page-arrive 320ms var(--ease-out) both;
   }
   .ios-features article {
-    animation: page-arrive 500ms var(--ease-out) both;
+    animation: page-arrive 320ms var(--ease-out) both;
   }
   .ios-features article:nth-child(2) {
-    animation-delay: 80ms;
+    animation-delay: 35ms;
   }
   .ios-features article:nth-child(3) {
-    animation-delay: 160ms;
+    animation-delay: 70ms;
   }
   .ios-features .section-art,
   .ios-app-mark {
