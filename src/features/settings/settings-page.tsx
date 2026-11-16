@@ -15,10 +15,16 @@ export default function SettingsPage() {
   return (
     <div className="settings-page">
       <div className="page-title">
-        <h1>Settings</h1>
+        <div>
+          <h1>Settings</h1>
+        </div>
       </div>
       {query.isPending ? (
-        <p role="status">Loading settings…</p>
+        <div className="panel" role="status" aria-label="Loading settings">
+          <div className="loading-line" />
+          <div className="loading-line" />
+          <div className="loading-line" />
+        </div>
       ) : query.error ? (
         <div>
           <p className="form-error" role="alert">

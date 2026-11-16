@@ -80,6 +80,19 @@ button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
+.button:disabled {
+  background: var(--raised);
+  color: var(--muted);
+  border-color: var(--line-strong);
+  box-shadow: none;
+  opacity: 0.72;
+}
+.secondary:disabled {
+  background: var(--surface);
+  color: var(--muted);
+  border-color: var(--line);
+  opacity: 0.65;
+}
 a {
   color: inherit;
   text-underline-offset: 3px;
@@ -234,15 +247,22 @@ select.field {
   box-shadow: var(--shadow-card);
 }
 .empty {
-  padding: 44px 24px;
+  padding: 46px 24px;
   text-align: center;
-  border: 1px dashed var(--line);
-  border-radius: 12px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 20px;
+  background:
+    radial-gradient(30rem 14rem at 50% 0%, #f2b4c809, transparent 70%),
+    linear-gradient(180deg, #16131c, #131018);
   color: var(--muted);
 }
 .empty h2,
 .empty h3 {
   color: var(--ink);
+}
+.empty p {
+  max-width: 44ch;
+  margin-inline: auto;
 }
 .page-title {
   display: flex;
